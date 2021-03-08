@@ -16,6 +16,14 @@ CERVER_HANDLER_TYPE_NONE = 0
 CERVER_HANDLER_TYPE_POLL = 1
 CERVER_HANDLER_TYPE_THREADS = 2
 
+# global
+cerver_init = lib.cerver_init
+cerver_end = lib.cerver_end
+
+# stats
+cerver_stats_print = lib.cerver_stats_print
+cerver_stats_print.argtypes = [c_void_p, c_bool, c_bool]
+
 # main
 cerver_create_web = lib.cerver_create_web
 cerver_create_web.argtypes = [c_char_p, c_uint16, c_uint16]
@@ -38,3 +46,12 @@ cerver_set_reusable_address_flags.argtypes = [c_void_p, c_bool]
 cerver_start = lib.cerver_start
 cerver_start.argtypes = [c_void_p]
 cerver_start.restype = c_uint8
+
+# end
+cerver_shutdown = lib.cerver_shutdown
+cerver_shutdown.argtypes = [c_void_p]
+cerver_shutdown.restype = c_uint8
+
+cerver_teardown = lib.cerver_teardown
+cerver_teardown.argtypes = [c_void_p]
+cerver_teardown.restype = c_uint8
