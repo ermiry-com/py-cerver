@@ -1,3 +1,3 @@
 import ctypes
 
-lib = ctypes.CDLL ("./libs/libcerver.so")
+lib = ctypes.CDLL ("/usr/local/lib/libcerver.so")
