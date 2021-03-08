@@ -6,6 +6,9 @@ from .content import ContentType
 from .headers import HttpHeader
 from .status import http_status
 
+http_response_delete = lib.http_response_delete
+http_response_delete.argtypes = [c_void_p]
+
 # get a new HTTP response ready to be used
 http_response_get = lib.http_response_get
 http_response_get.restype = c_void_p
@@ -71,7 +74,42 @@ http_response_compile.restype = c_uint8
 http_response_print = lib.http_response_print
 http_response_print.argtypes = [c_void_p]
 
+# send
+# sends a response to the connection's socket
+# returns 0 on success, 1 on error
+http_response_send = lib.http_response_send
+http_response_send.argtypes = [c_void_p, c_void_p]
+http_response_send.restype = c_uint8
+
+# expects a response with an already created header and data
+# as this method will send both parts withput the need of a continuos response buffer
+# use this for maximun efficiency
+# returns 0 on success, 1 on error
+http_response_send_split = lib.http_response_send_split
+http_response_send_split.argtypes = [c_void_p, c_void_p]
+http_response_send_split.restype = c_uint8
+
+# creates & sends a response to the connection's socket
+# returns 0 on success, 1 on error
+http_response_create_and_send = lib.http_response_create_and_send
+http_response_create_and_send.argtypes = [c_uint, c_void_p, c_size_t, c_void_p]
+http_response_create_and_send.restype = c_uint8
+
 # render
+# sends the selected text back to the user
+# this methods takes care of generating a repsonse with text/html content type
+# returns 0 on success, 1 on error
+http_response_render_text = lib.http_response_render_text
+http_response_render_text.argtypes = [c_void_p, c_char_p, c_size_t]
+http_response_render_text.restype = c_uint8
+
+# sends the selected json back to the user
+# this methods takes care of generating a repsonse with application/json content type
+# returns 0 on success, 1 on error
+http_response_render_json = lib.http_response_render_json
+http_response_render_json.argtypes = [c_void_p, c_char_p, c_size_t]
+http_response_render_json.restype = c_uint8
+
 # opens the selected file and sends it back to the user
 # this method takes care of generating the header based on the file values
 # returns 0 on success, 1 on error
@@ -80,6 +118,34 @@ http_response_render_file.argtypes = [c_void_p, c_char_p]
 http_response_render_file.restype = c_uint8
 
 # json
+http_response_create_json = lib.http_response_create_json
+http_response_create_json.argtypes = [http_status, c_char_p, c_size_t]
+http_response_create_json.restype = c_void_p
+
+http_response_create_json_key_value = lib.http_response_create_json_key_value
+http_response_create_json_key_value.argtypes = [http_status, c_char_p, c_char_p]
+http_response_create_json_key_value.restype = c_void_p
+
+http_response_json_msg = lib.http_response_json_msg
+http_response_json_msg.argtypes = [http_status, c_char_p]
+http_response_json_msg.restype = c_void_p
+
 http_response_json_msg_send = lib.http_response_json_msg_send
 http_response_json_msg_send.argtypes = [c_void_p, c_uint, c_char_p]
 http_response_json_msg_send.restype = c_uint8
+
+http_response_json_error = lib.http_response_json_error
+http_response_json_error.argtypes = [http_status, c_char_p]
+http_response_json_error.restype = c_void_p
+
+http_response_json_error_send = lib.http_response_json_error_send
+http_response_json_error_send.argtypes = [c_void_p, c_uint, c_char_p]
+http_response_json_error_send.restype = c_uint8
+
+http_response_json_key_value = lib.http_response_json_key_value
+http_response_json_key_value.argtypes = [http_status, c_char_p, c_char_p]
+http_response_json_key_value.restype = c_void_p
+
+http_response_json_key_value_send = lib.http_response_json_key_value_send
+http_response_json_key_value_send.argtypes = [c_void_p, c_uint, c_char_p, c_char_p]
+http_response_json_key_value_send.restype = c_uint8
