@@ -3,6 +3,7 @@ from .cerver import *
 from .version import *
 
 # HTTP
+from .alg import *
 from .content import *
 from .headers import *
 from .http import *
