@@ -26,7 +26,7 @@ def test_handler (http_receive, request):
 
 # POST /upload
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def text_handler (http_receive, request):
+def upload_handler (http_receive, request):
 	pass
 
 def start ():
