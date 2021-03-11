@@ -27,7 +27,18 @@ def test_handler (http_receive, request):
 # POST /upload
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def upload_handler (http_receive, request):
-	pass
+	cerver.http_request_multi_parts_print (request)
+
+	value = cerver.http_request_multi_parts_get_value (
+		request, "value".encode ('utf-8')
+	)
+
+	if value:
+		print (value.contents.str)
+
+	cerver.http_response_json_msg_send (
+		http_receive, 200, "Upload works!".encode ('utf-8')
+	)
 
 def start ():
 	global web_cerver
@@ -45,7 +56,7 @@ def start ():
 	# HTTP configuration
 	http_cerver = cerver.http_cerver_get (web_cerver)
 
-	cerver.http_cerver_static_path_add (http_cerver, "./examples/public".encode ('utf-8'))
+	cerver.http_cerver_set_uploads_path (http_cerver, "uploads".encode ('utf-8'))
 
 	# GET /test
 	test_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "test".encode ('utf-8'), test_handler)

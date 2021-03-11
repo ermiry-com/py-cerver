@@ -1,4 +1,4 @@
-from ctypes import Structure, c_void_p, c_int, c_uint, POINTER, CFUNCTYPE
+from ctypes import Structure, c_void_p, py_object, c_int, c_uint, POINTER, CFUNCTYPE
 
 from ..lib import lib
 
@@ -55,7 +55,7 @@ job_handler_return = lib.job_handler_return
 job_handler_return.argtypes = [c_void_p, c_void_p]
 
 job_handler_wait = lib.job_handler_wait
-job_handler_wait.argtypes = [c_void_p, c_void_p, c_void_p]
+job_handler_wait.argtypes = [c_void_p, py_object, c_void_p]
 
 # JobQueue
 JobQueueType = c_int
@@ -64,7 +64,7 @@ JOB_QUEUE_TYPE_NONE = 0
 JOB_QUEUE_TYPE_JOBS = 1
 JOB_QUEUE_TYPE_HANDLERS = 2
 
-JobQueueHandler = CFUNCTYPE (None, c_void_p)
+JobQueueHandler = CFUNCTYPE (None, py_object)
 
 job_queue_new = lib.job_queue_new
 job_queue_new.restype = c_void_p
