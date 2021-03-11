@@ -8,6 +8,11 @@ import cerver.threads
 web_cerver = None
 job_queue = None
 
+class Data ():
+	def __init__ (self, value):
+		self.value = value
+		self.result = None
+
 # end
 def end (signum, frame):
 	# cerver.cerver_stats_print (web_cerver, False, False)
@@ -16,9 +21,11 @@ def end (signum, frame):
 	cerver.cerver_end ()
 	sys.exit ("Done!")
 
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p)
-def custom_handler_method (job_handler):
+@ctypes.CFUNCTYPE (None, ctypes.py_object)
+def custom_handler_method (data):
 	print ("custom_handler_method ()")
+	print (data.value.contents.str)
+	data.result = "Hello there!"
 	time.sleep (1)
 
 # GET /
@@ -32,10 +39,17 @@ def main_handler (http_receive, request):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def jobs_handler (http_receive, request):
 	global job_queue
-	cerver.threads.job_handler_wait (job_queue, None, None)
+
+	value = cerver.http_request_multi_parts_get_value (
+		request, "value".encode ('utf-8')
+	)
+
+	data = Data (value)
+
+	cerver.threads.job_handler_wait (job_queue, data, None)
 
 	cerver.http_response_json_msg_send (
-		http_receive, 200, "Jobs route works!".encode ('utf-8')
+		http_receive, 200, data.result.encode ('utf-8')
 	)
 
 def start ():
@@ -60,8 +74,9 @@ def start ():
 	main_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "/".encode ('utf-8'), main_handler)
 	cerver.http_cerver_route_register (http_cerver, main_route)
 
-	# GET /jobs
-	jobs_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "jobs".encode ('utf-8'), jobs_handler)
+	# POST /jobs
+	jobs_route = cerver.http_route_create (cerver.REQUEST_METHOD_POST, "jobs".encode ('utf-8'), jobs_handler)
+	cerver.http_route_set_modifier (jobs_route, cerver.HTTP_ROUTE_MODIFIER_MULTI_PART)
 	cerver.http_cerver_route_register (http_cerver, jobs_route)
 
 	# job queue
