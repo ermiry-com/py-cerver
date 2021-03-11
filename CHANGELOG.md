@@ -1,17 +1,14 @@
 ## General
-- Updated package configuration with new imports
-- Added RSA-256 keys generation documentation
+- Added string type in dedicated module
 
 ## Threads
-- Added base threads module configuration
-- Added base bsem methods bindings
-- Added base job queue methods & definitions
+- Using python object instead of void ptr for job queue
+- Removed old main threads methods import
 
 ## HTTP
-- Added base JWT algorithms definitions
-- Added base HTTP auth methods bindings
-- Added more HTTP routes methods bindings
+- Added HTTP uploads methods bindings
+- Added more HTTP request methods bindings
 
 ## Examples
-- Added base REST api example
-- Added base job queue methods example
+- Handling mutli-part requests in upload example
+- Using custom pyobject in job queue example
