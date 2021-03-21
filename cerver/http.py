@@ -1,4 +1,4 @@
-from ctypes import c_uint8, c_void_p, c_char_p, c_bool, c_int, CFUNCTYPE
+from ctypes import c_uint8, c_void_p, c_char_p, c_bool, c_int, c_size_t, CFUNCTYPE
 
 from .lib import lib
 
@@ -60,6 +60,22 @@ http_cerver_set_uploads_delete_when_done = lib.http_cerver_set_uploads_delete_wh
 http_cerver_set_uploads_delete_when_done.argtypes = [c_void_p, c_bool]
 
 # auth
+http_jwt_get_bearer = lib.http_jwt_get_bearer
+http_jwt_get_bearer.argtypes = [c_void_p]
+http_jwt_get_bearer.restype = c_char_p
+
+http_jwt_get_bearer_len = lib.http_jwt_get_bearer_len
+http_jwt_get_bearer_len.argtypes = [c_void_p]
+http_jwt_get_bearer_len.restype = c_size_t
+
+http_jwt_get_json = lib.http_jwt_get_json
+http_jwt_get_json.argtypes = [c_void_p]
+http_jwt_get_json.restype = c_char_p
+
+http_jwt_get_json_len = lib.http_jwt_get_json_len
+http_jwt_get_json_len.argtypes = [c_void_p]
+http_jwt_get_json_len.restype = c_size_t
+
 # sets the jwt algorithm used for encoding & decoding jwt tokens
 # the default value is JWT_ALG_HS256
 http_cerver_auth_set_jwt_algorithm = lib.http_cerver_auth_set_jwt_algorithm
