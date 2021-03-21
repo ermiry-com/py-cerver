@@ -134,12 +134,12 @@ def start ():
 	# HTTP configuration
 	http_cerver = cerver.http_cerver_get (api_cerver)
 
-	cerver.http_cerver_auth_set_jwt_algorithm (http_cerver, JWT_ALG_RS256)
+	cerver.http_cerver_auth_set_jwt_algorithm (http_cerver, cerver.JWT_ALG_RS256)
 	cerver.http_cerver_auth_set_jwt_priv_key_filename (http_cerver, "keys/key.key".encode ('utf-8'))
 	cerver.http_cerver_auth_set_jwt_pub_key_filename (http_cerver, "keys/key.key.pub".encode ('utf-8'))
 
 	# GET /api/users
-	users_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "/api/users".encode ('utf-8'), main_users_handler)
+	users_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "api/users".encode ('utf-8'), main_users_handler)
 	cerver.http_cerver_route_register (http_cerver, users_route)
 
 	# POST api/users/register
@@ -151,10 +151,10 @@ def start ():
 	cerver.http_route_child_add (users_route, users_login_route)
 
 	# GET api/users/profile
-	users_profile_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "profile".encode ('utf-8'), users_profile_handler)
-	cerver.http_route_set_auth (users_profile_route, cerver.HTTP_ROUTE_AUTH_TYPE_BEARER);
-	cerver.http_route_set_decode_data_into_json (users_profile_route);
-	cerver.http_route_child_add (users_route, users_profile_route);
+	# users_profile_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "profile".encode ('utf-8'), users_profile_handler)
+	# cerver.http_route_set_auth (users_profile_route, cerver.HTTP_ROUTE_AUTH_TYPE_BEARER);
+	# cerver.http_route_set_decode_data_into_json (users_profile_route);
+	# cerver.http_route_child_add (users_route, users_profile_route);
 
 	# start
 	cerver.cerver_start (api_cerver)
