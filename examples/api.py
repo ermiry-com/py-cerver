@@ -69,7 +69,7 @@ def users_register_handler (http_receive, request):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def users_login_handler (http_receive, request):
 	global api_cerver
-	
+
 	body_values = cerver.http_request_get_body_values (request)
 	username = http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
 	password = http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
@@ -85,7 +85,14 @@ def users_login_handler (http_receive, request):
 				cerver.http_cerver_auth_jwt_add_value (http_jwt, "username".encode ('utf-8'), user.username);
 				cerver.http_cerver_auth_jwt_add_value (http_jwt, "role".encode ('utf-8'), user.role);
 
-				cerver.http_cerver_auth_generate_bearer_jwt_json (cerver.http_cerver_get (api_cerver))
+				cerver.http_cerver_auth_generate_bearer_jwt_json (cerver.http_cerver_get (api_cerver), http_jwt)
+				response = cerver.http_response_create (
+					200, cerver.http_jwt_get_json (http_jwt), http_jwt_get_json_len (http_jwt)
+				)
+
+				cerver.http_response_print (response)
+				cerver.http_response_send (response, http_receive)
+				cerver.http_response_delete (response)
 			else:
 				response = cerver.http_response_json_msg (
 					cerver.HTTP_STATUS_BAD_REQUEST, "Wrong password!".encode ('utf-8')
