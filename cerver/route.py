@@ -38,3 +38,6 @@ http_route_set_auth.argtypes = [c_void_p, HttpRouteModifier]
 
 http_route_set_decode_data = lib.http_route_set_decode_data
 http_route_set_decode_data.argtypes = [c_void_p, HttpDecodeData, HttpDeleteDecoded]
+
+http_route_set_decode_data_into_json = lib.http_route_set_decode_data_into_json
+http_route_set_decode_data_into_json.argtypes = [c_void_p]
