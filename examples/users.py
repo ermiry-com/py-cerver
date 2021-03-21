@@ -1,7 +1,7 @@
 users = []
 
 class User ():
-	def __init__ (self, id, iat, name, role, username)
+	def __init__ (self, id, iat, name, role, username):
 		self.id = id
 		self.iat = iat
 		self.name = name
