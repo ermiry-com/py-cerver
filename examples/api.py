@@ -1,7 +1,9 @@
 import os, signal, sys
-import ctypes
 import time
+import random
 import json
+
+import ctypes
 
 import cerver
 from users import *
@@ -31,20 +33,20 @@ def main_users_handler (http_receive, request):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def users_register_handler (http_receive, request):
 	body_values = cerver.http_request_get_body_values (request)
-	name = http_query_pairs_get_value (body_values, "name".encode ('utf-8'));
-	username = http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
-	password = http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
+	name = cerver.http_query_pairs_get_value (body_values, "name".encode ('utf-8'));
+	username = cerver.http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
+	password = cerver.http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
 
 	if name is not None and username is not None and password is not None:
 		user = User (
 			str (random.randint (1, 1001)),
 			int (time.time ()),
-			str (name.contents.str),
+			name.contents.str,
 			"common",
-			str (username.contents.str)
+			username.contents.str
 		)
 
-		user.password = str (password.contents.str)
+		user.password = password.contents.str
 
 		user_add (user)
 
@@ -71,25 +73,27 @@ def users_login_handler (http_receive, request):
 	global api_cerver
 
 	body_values = cerver.http_request_get_body_values (request)
-	username = http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
-	password = http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
+	username = cerver.http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
+	password = cerver.http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
 
 	if username is not None and password is not None:
-		user = user_get_by_username (str (username.contents.str))
+		user = user_get_by_username (username.contents.str)
 		if user is not None:
-			if user.password == str (username.contents.str):
+			if user.password == password.contents.str:
 				http_jwt = cerver.http_cerver_auth_jwt_new ();
 				cerver.http_cerver_auth_jwt_add_value_int (http_jwt, "iat".encode ('utf-8'), int (time.time ()));
-				cerver.http_cerver_auth_jwt_add_value (http_jwt, "id".encode ('utf-8'), user.id);
+				cerver.http_cerver_auth_jwt_add_value (http_jwt, "id".encode ('utf-8'), user.id.encode ('utf-8'));
 				cerver.http_cerver_auth_jwt_add_value (http_jwt, "name".encode ('utf-8'), user.name);
 				cerver.http_cerver_auth_jwt_add_value (http_jwt, "username".encode ('utf-8'), user.username);
-				cerver.http_cerver_auth_jwt_add_value (http_jwt, "role".encode ('utf-8'), user.role);
+				cerver.http_cerver_auth_jwt_add_value (http_jwt, "role".encode ('utf-8'), user.role.encode ('utf-8'));
 
 				cerver.http_cerver_auth_generate_bearer_jwt_json (cerver.http_cerver_get (api_cerver), http_jwt)
+
 				response = cerver.http_response_create (
-					200, cerver.http_jwt_get_json (http_jwt), http_jwt_get_json_len (http_jwt)
+					200, cerver.http_jwt_get_json (http_jwt), cerver.http_jwt_get_json_len (http_jwt)
 				)
 
+				cerver.http_response_compile (response);
 				cerver.http_response_print (response)
 				cerver.http_response_send (response, http_receive)
 				cerver.http_response_delete (response)
@@ -118,6 +122,24 @@ def users_login_handler (http_receive, request):
 		cerver.http_response_send (response, http_receive)
 		cerver.http_response_delete (response)
 
+# GET /api/users/profile
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def users_profile_handler (http_receive, request):
+	json_string = ctypes.cast (cerver.http_request_get_decoded_data (request), ctypes.c_char_p)
+	user_dict = json.loads (json_string.value)
+	user = User (**user_dict)
+
+	message = "%s profile!" % (user.username)
+
+	response = cerver.http_response_json_msg (
+		cerver.HTTP_STATUS_BAD_REQUEST, message.encode ('utf-8')
+	)
+
+	cerver.http_response_print (response)
+	cerver.http_response_send (response, http_receive)
+	cerver.http_response_delete (response)
+		
+
 def start ():
 	global api_cerver
 	api_cerver = cerver.cerver_create_web (
@@ -136,7 +158,7 @@ def start ():
 
 	cerver.http_cerver_auth_set_jwt_algorithm (http_cerver, cerver.JWT_ALG_RS256)
 	cerver.http_cerver_auth_set_jwt_priv_key_filename (http_cerver, "keys/key.key".encode ('utf-8'))
-	cerver.http_cerver_auth_set_jwt_pub_key_filename (http_cerver, "keys/key.key.pub".encode ('utf-8'))
+	cerver.http_cerver_auth_set_jwt_pub_key_filename (http_cerver, "keys/key.pub".encode ('utf-8'))
 
 	# GET /api/users
 	users_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "api/users".encode ('utf-8'), main_users_handler)
@@ -151,10 +173,10 @@ def start ():
 	cerver.http_route_child_add (users_route, users_login_route)
 
 	# GET api/users/profile
-	# users_profile_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "profile".encode ('utf-8'), users_profile_handler)
-	# cerver.http_route_set_auth (users_profile_route, cerver.HTTP_ROUTE_AUTH_TYPE_BEARER);
-	# cerver.http_route_set_decode_data_into_json (users_profile_route);
-	# cerver.http_route_child_add (users_route, users_profile_route);
+	users_profile_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "profile".encode ('utf-8'), users_profile_handler)
+	cerver.http_route_set_auth (users_profile_route, cerver.HTTP_ROUTE_AUTH_TYPE_BEARER);
+	cerver.http_route_set_decode_data_into_json (users_profile_route);
+	cerver.http_route_child_add (users_route, users_profile_route);
 
 	# start
 	cerver.cerver_start (api_cerver)
