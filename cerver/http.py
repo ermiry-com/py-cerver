@@ -119,3 +119,8 @@ http_query_pairs_get_value.restype = POINTER (String)
 
 http_query_pairs_print = lib.http_query_pairs_print
 http_query_pairs_print.argtypes = [c_void_p]
+
+# handler
+http_receive_get_cerver = lib.http_receive_get_cerver
+http_receive_get_cerver.argtypes = [c_void_p]
+http_receive_get_cerver.restype = c_void_p
