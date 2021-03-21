@@ -1,4 +1,4 @@
-from ctypes import c_uint8, c_void_p, c_char_p, c_bool, CFUNCTYPE
+from ctypes import c_uint8, c_void_p, c_char_p, c_bool, c_int, CFUNCTYPE
 
 from .lib import lib
 
@@ -62,8 +62,8 @@ http_cerver_set_uploads_delete_when_done.argtypes = [c_void_p, c_bool]
 # auth
 # sets the jwt algorithm used for encoding & decoding jwt tokens
 # the default value is JWT_ALG_HS256
-http_cerver_route_register = lib.http_cerver_route_register
-http_cerver_route_register.argtypes = [c_void_p, jwt_alg_t]
+http_cerver_auth_set_jwt_algorithm = lib.http_cerver_auth_set_jwt_algorithm
+http_cerver_auth_set_jwt_algorithm.argtypes = [c_void_p, jwt_alg_t]
 
 # sets the filename from where the jwt private key will be loaded
 http_cerver_auth_set_jwt_priv_key_filename = lib.http_cerver_auth_set_jwt_priv_key_filename
@@ -72,6 +72,25 @@ http_cerver_auth_set_jwt_priv_key_filename.argtypes = [c_void_p, c_char_p]
 # sets the filename from where the jwt public key will be loaded
 http_cerver_auth_set_jwt_pub_key_filename = lib.http_cerver_auth_set_jwt_pub_key_filename
 http_cerver_auth_set_jwt_pub_key_filename.argtypes = [c_void_p, c_char_p]
+
+http_cerver_auth_jwt_new = lib.http_cerver_auth_jwt_new
+http_cerver_auth_jwt_new.restype = c_void_p
+
+http_cerver_auth_jwt_delete = lib.http_cerver_auth_jwt_delete
+http_cerver_auth_jwt_delete.argtypes = [c_void_p]
+
+http_cerver_auth_jwt_add_value = lib.http_cerver_auth_jwt_add_value
+http_cerver_auth_jwt_add_value.argtypes = [c_void_p, c_char_p, c_char_p]
+
+http_cerver_auth_jwt_add_value_bool = lib.http_cerver_auth_jwt_add_value_bool
+http_cerver_auth_jwt_add_value_bool.argtypes = [c_void_p, c_char_p, c_bool]
+
+http_cerver_auth_jwt_add_value_int = lib.http_cerver_auth_jwt_add_value_int
+http_cerver_auth_jwt_add_value_int.argtypes = [c_void_p, c_char_p, c_int]
+
+http_cerver_auth_generate_bearer_jwt_json = lib.http_cerver_auth_generate_bearer_jwt_json
+http_cerver_auth_generate_bearer_jwt_json.argtypes = [c_void_p, c_void_p]
+http_cerver_auth_generate_bearer_jwt_json.restype = c_uint8
 
 # stats
 http_cerver_all_stats_print = lib.http_cerver_all_stats_print
