@@ -70,8 +70,6 @@ def users_register_handler (http_receive, request):
 # POST /api/users/login
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def users_login_handler (http_receive, request):
-	global api_cerver
-
 	body_values = cerver.http_request_get_body_values (request)
 	username = cerver.http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
 	password = cerver.http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
@@ -87,7 +85,7 @@ def users_login_handler (http_receive, request):
 				cerver.http_cerver_auth_jwt_add_value (http_jwt, "username".encode ('utf-8'), user.username);
 				cerver.http_cerver_auth_jwt_add_value (http_jwt, "role".encode ('utf-8'), user.role.encode ('utf-8'));
 
-				cerver.http_cerver_auth_generate_bearer_jwt_json (cerver.http_cerver_get (api_cerver), http_jwt)
+				cerver.http_cerver_auth_generate_bearer_jwt_json (cerver.http_receive_get_cerver (http_receive), http_jwt)
 
 				response = cerver.http_response_create (
 					200, cerver.http_jwt_get_json (http_jwt), cerver.http_jwt_get_json_len (http_jwt)
@@ -132,7 +130,7 @@ def users_profile_handler (http_receive, request):
 	message = "%s profile!" % (user.username)
 
 	response = cerver.http_response_json_msg (
-		cerver.HTTP_STATUS_BAD_REQUEST, message.encode ('utf-8')
+		cerver.HTTP_STATUS_OK, message.encode ('utf-8')
 	)
 
 	cerver.http_response_print (response)
