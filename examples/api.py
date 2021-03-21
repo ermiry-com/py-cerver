@@ -1,7 +1,10 @@
 import os, signal, sys
 import ctypes
+import time
+import json
 
 import cerver
+from users import *
 
 api_cerver = None
 
@@ -13,24 +16,100 @@ def end (signum, frame):
 	cerver.cerver_end ()
 	sys.exit ("Done!")
 
-# GET /
+# GET /api/users
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def main_handler (http_receive, request):
-	cerver.http_response_render_file (
-		http_receive,
-		"./examples/public/index.html".encode ('utf-8')
-	)
-
-# GET /test
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def test_handler (http_receive, request):
+def main_users_handler (http_receive, request):
 	response = cerver.http_response_json_msg (
-		cerver.HTTP_STATUS_OK, "Test route works!".encode ('utf-8')
+		cerver.HTTP_STATUS_OK, "Users route works!".encode ('utf-8')
 	)
 
 	cerver.http_response_print (response)
 	cerver.http_response_send (response, http_receive)
 	cerver.http_response_delete (response)
+
+# POST /api/users/register
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def users_register_handler (http_receive, request):
+	body_values = cerver.http_request_get_body_values (request)
+	name = http_query_pairs_get_value (body_values, "name".encode ('utf-8'));
+	username = http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
+	password = http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
+
+	if name is not None and username is not None and password is not None:
+		user = User (
+			str (random.randint (1, 1001)),
+			int (time.time ()),
+			str (name.contents.str),
+			"common",
+			str (username.contents.str)
+		)
+
+		user.password = str (password.contents.str)
+
+		user_add (user)
+
+		response = cerver.http_response_json_msg (
+			cerver.HTTP_STATUS_OK, "Created a new user!".encode ('utf-8')
+		)
+
+		cerver.http_response_print (response)
+		cerver.http_response_send (response, http_receive)
+		cerver.http_response_delete (response)
+
+	else:
+		response = cerver.http_response_json_msg (
+			cerver.HTTP_STATUS_BAD_REQUEST, "Missing user values!".encode ('utf-8')
+		)
+
+		cerver.http_response_print (response)
+		cerver.http_response_send (response, http_receive)
+		cerver.http_response_delete (response)
+
+# POST /api/users/login
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def users_login_handler (http_receive, request):
+	global api_cerver
+	
+	body_values = cerver.http_request_get_body_values (request)
+	username = http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
+	password = http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
+
+	if username is not None and password is not None:
+		user = user_get_by_username (str (username.contents.str))
+		if user is not None:
+			if user.password == str (username.contents.str):
+				http_jwt = cerver.http_cerver_auth_jwt_new ();
+				cerver.http_cerver_auth_jwt_add_value_int (http_jwt, "iat".encode ('utf-8'), int (time.time ()));
+				cerver.http_cerver_auth_jwt_add_value (http_jwt, "id".encode ('utf-8'), user.id);
+				cerver.http_cerver_auth_jwt_add_value (http_jwt, "name".encode ('utf-8'), user.name);
+				cerver.http_cerver_auth_jwt_add_value (http_jwt, "username".encode ('utf-8'), user.username);
+				cerver.http_cerver_auth_jwt_add_value (http_jwt, "role".encode ('utf-8'), user.role);
+
+				cerver.http_cerver_auth_generate_bearer_jwt_json (cerver.http_cerver_get (api_cerver))
+			else:
+				response = cerver.http_response_json_msg (
+					cerver.HTTP_STATUS_BAD_REQUEST, "Wrong password!".encode ('utf-8')
+				)
+
+				cerver.http_response_print (response)
+				cerver.http_response_send (response, http_receive)
+				cerver.http_response_delete (response)
+		else:
+			response = cerver.http_response_json_msg (
+				cerver.HTTP_STATUS_NOT_FOUND, "User not found!".encode ('utf-8')
+			)
+
+			cerver.http_response_print (response)
+			cerver.http_response_send (response, http_receive)
+			cerver.http_response_delete (response)
+	else:
+		response = cerver.http_response_json_msg (
+			cerver.HTTP_STATUS_BAD_REQUEST, "Missing user values!".encode ('utf-8')
+		)
+
+		cerver.http_response_print (response)
+		cerver.http_response_send (response, http_receive)
+		cerver.http_response_delete (response)
 
 def start ():
 	global api_cerver
@@ -56,18 +135,18 @@ def start ():
 	users_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "/api/users".encode ('utf-8'), main_users_handler)
 	cerver.http_cerver_route_register (http_cerver, users_route)
 
-	# POST api/users/login
-	users_login_route = cerver.http_route_create (cerver.REQUEST_METHOD_POST, "login".encode ('utf-8'), users_login_handler)
-	cerver.http_route_child_add (users_route, users_login_route)
-
 	# POST api/users/register
 	users_register_route = cerver.http_route_create (cerver.REQUEST_METHOD_POST, "register".encode ('utf-8'), users_register_handler)
 	cerver.http_route_child_add (users_route, users_register_route)
 
+	# POST api/users/login
+	users_login_route = cerver.http_route_create (cerver.REQUEST_METHOD_POST, "login".encode ('utf-8'), users_login_handler)
+	cerver.http_route_child_add (users_route, users_login_route)
+
 	# GET api/users/profile
 	users_profile_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "profile".encode ('utf-8'), users_profile_handler)
 	cerver.http_route_set_auth (users_profile_route, cerver.HTTP_ROUTE_AUTH_TYPE_BEARER);
-	cerver.http_route_set_decode_data (users_profile_route, user_parse_from_json, user_delete);
+	cerver.http_route_set_decode_data_into_json (users_profile_route);
 	cerver.http_route_child_add (users_route, users_profile_route);
 
 	# start
