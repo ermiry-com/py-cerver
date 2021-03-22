@@ -112,6 +112,10 @@ http_cerver_auth_generate_bearer_jwt_json.restype = c_uint8
 http_cerver_all_stats_print = lib.http_cerver_all_stats_print
 http_cerver_all_stats_print.argtypes = [c_void_p]
 
+# admin
+http_cerver_enable_admin_routes = lib.http_cerver_enable_admin_routes
+http_cerver_enable_admin_routes.argtypes = [c_void_p, c_bool]
+
 # parser
 http_query_pairs_get_value = lib.http_query_pairs_get_value
 http_query_pairs_get_value.argtypes = [c_void_p, c_char_p]
