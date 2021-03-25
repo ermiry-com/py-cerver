@@ -1,12 +1,11 @@
-ARG CERVER_VERSION=2.0b-30
+ARG CERVER_VERSION=2.0b-31
 
-ARG BUILD_DEPS='libssl-dev'
 ARG RUNTIME_DEPS='libssl1.1'
 
 FROM gcc as builder
 
-ARG BUILD_DEPS
-RUN apt-get update && apt-get install -y ${BUILD_DEPS}
+ARG RUNTIME_DEPS
+RUN apt-get update && apt-get install -y ${RUNTIME_DEPS}
 
 # cerver
 ARG CERVER_VERSION
@@ -19,17 +18,19 @@ RUN mkdir /opt/cerver && cd /opt/cerver \
 ############
 FROM python:3.8.5-alpine
 
-ARG RUNTIME_DEPS
-RUN apt-get update && apt-get install -y ${RUNTIME_DEPS} && apt-get clean
+# libssl
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/
 
 # cerver
 ARG CERVER_VERSION
 COPY --from=builder /opt/cerver/cerver-${CERVER_VERSION}/bin/libcerver.so /usr/local/lib/
 COPY --from=builder /opt/cerver/cerver-${CERVER_VERSION}/include/cerver /usr/local/include/cerver
 
-# pycerver
-RUN pip install --no-cache-dir pycerver==0.3
-
 RUN ldconfig
+
+# pycerver
+WORKDIR /home/pycerver
+RUN pip install --no-cache-dir pycerver==0.4
 
 CMD ["/bin/bash"]
