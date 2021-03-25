@@ -1,11 +1,23 @@
 #!/bin/bash
 
+# ensure a clean build
+make clean
+
+# remove any active container
+sudo docker kill $(sudo docker ps -q)
+
+# compile tests
+make TYPE=test -j4 test || { exit 1; }
+
+# compile docker
+sudo docker build -t ermiry/pycerver:test -f Dockerfile.test . || { exit 1; }
+
 # web
 sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/cerver:test ./bin/web/web
+	ermiry/pycerver:test python3 web.py
 
 sleep 2
 
@@ -20,7 +32,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/cerver:test ./bin/web/api
+	ermiry/pycerver:test python3 api.py
 
 sleep 2
 
@@ -35,7 +47,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/cerver:test ./bin/web/upload
+	ermiry/pycerver:test python3 upload.py
 
 sleep 2
 
@@ -50,7 +62,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/cerver:test ./bin/web/jobs
+	ermiry/pycerver:test python3 jobs.py
 
 sleep 2
 
@@ -65,7 +77,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/cerver:test ./bin/web/admin
+	ermiry/pycerver:test python3 admin.py
 
 sleep 2
 
