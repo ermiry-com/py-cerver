@@ -116,6 +116,9 @@ http_cerver_all_stats_print.argtypes = [c_void_p]
 http_cerver_enable_admin_routes = lib.http_cerver_enable_admin_routes
 http_cerver_enable_admin_routes.argtypes = [c_void_p, c_bool]
 
+http_cerver_register_admin_file_system = lib.http_cerver_register_admin_file_system
+http_cerver_register_admin_file_system.argtypes = [c_void_p, c_char_p]
+
 # parser
 http_query_pairs_get_value = lib.http_query_pairs_get_value
 http_query_pairs_get_value.argtypes = [c_void_p, c_char_p]
