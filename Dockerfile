@@ -16,7 +16,7 @@ RUN mkdir /opt/cerver && cd /opt/cerver \
     && make TYPE=production -j4
 
 ############
-FROM python:3.8.5-alpine
+FROM python:3.9.2-slim-buster
 
 # libssl
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /usr/lib/x86_64-linux-gnu/
@@ -26,8 +26,6 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/x86_64-l
 ARG CERVER_VERSION
 COPY --from=builder /opt/cerver/cerver-${CERVER_VERSION}/bin/libcerver.so /usr/local/lib/
 COPY --from=builder /opt/cerver/cerver-${CERVER_VERSION}/include/cerver /usr/local/include/cerver
-
-RUN ldconfig
 
 # pycerver
 WORKDIR /home/pycerver
