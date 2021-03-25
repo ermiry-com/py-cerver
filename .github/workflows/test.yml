@@ -19,7 +19,7 @@ jobs:
       - name: Build Docker Image
         run: docker build -t ermiry/pycerver:test -f Dockerfile.test .
 
-      - name: Compile Tests
+      - name: Compile Cerver
         env:
           CERVER_VERSION: 2.0b-31
         run: |
@@ -28,7 +28,11 @@ jobs:
           unzip $CERVER_VERSION.zip
           cd cerver-$CERVER_VERSION
           make TYPE=test -j4
-          make TYPE=test test
+          make TYPE=test install
+          ldconfig
+
+      - name: Compile Tests
+        run: make TYPE=test test
 
       - name: Web Integration Test
         run: |
