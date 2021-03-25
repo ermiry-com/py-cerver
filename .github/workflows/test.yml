@@ -19,6 +19,9 @@ jobs:
       - name: Build Docker Image
         run: docker build -t ermiry/pycerver:test -f Dockerfile.test .
 
+      - name: Compile Sources
+        run: make TYPE=test
+
       - name: Compile Tests
         run: make TYPE=test test
 
