@@ -1,14 +1,25 @@
 ## General
-- Added string type in dedicated module
-
-## Threads
-- Using python object instead of void ptr for job queue
-- Removed old main threads methods import
+- Added base development, test & production Dockerfiles
+- Added dedicated scripts to build images
+- Added dedicated release instructions
 
 ## HTTP
-- Added HTTP uploads methods bindings
-- Added more HTTP request methods bindings
+- Added more main HTTP methods
+- Added http_route_set_decode_data_into_json ()
+- Added more HTTP auth methods bindings
+- Added query pairs methods bindings
+- Added HTTP request getters bindings
+- Added http_receive_get_cerver () binding
+- Added http_cerver_enable_admin_routes () binding
 
 ## Examples
-- Handling mutli-part requests in upload example
-- Using custom pyobject in job queue example
+- Refactored example user class definition
+- Added base login & register handlers in api example
+- Added base HTTP admin example
+
+## Tests
+- Added base script to run integration tests
+- Added base makefile to compile tests
+- Added latest available test app sources
+- Added base client curl test methods
+- Added base client & cerver HTTP integration methods
