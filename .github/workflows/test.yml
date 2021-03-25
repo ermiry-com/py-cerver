@@ -36,7 +36,7 @@ jobs:
 
       - name: Web Integration Test
         run: |
-          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test ./bin/web/web
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 web.py
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/web
@@ -44,7 +44,7 @@ jobs:
 
       - name: Web API Integration Test
         run: |
-          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test ./bin/web/api
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 api.py
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/api
@@ -52,7 +52,7 @@ jobs:
       
       - name: Web Upload Integration Test
         run: |
-          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test ./bin/web/upload
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 upload.py
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/upload
@@ -60,7 +60,7 @@ jobs:
 
       - name: Web Jobs Integration Test
         run: |
-          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test ./bin/web/jobs
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 jobs.py
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/jobs
@@ -68,7 +68,7 @@ jobs:
 
       - name: Web Admin Integration Test
         run: |
-          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test ./bin/web/admin
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 admin.py
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/admin
