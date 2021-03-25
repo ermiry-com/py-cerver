@@ -1,0 +1,130 @@
+name: Cerver Tests
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  test:
+    name: Cerver tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: sudo apt-get install libcurl4-openssl-dev
+
+      - name: Build Docker Image
+        run: docker build -t ermiry/cerver:test -f Dockerfile.test .
+
+      - name: Compile Sources
+        run: make TYPE=test COVERAGE=1
+
+      - name: Compile Tests
+        run: make TYPE=test COVERAGE=1 test
+
+      - name: Unit Tests
+        run: bash test/run.sh
+
+      - name: Ping Integration Test
+        run: |
+          docker run -d --name test --rm -p 7000:7000 ermiry/cerver:test ./bin/cerver/ping
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/ping
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Packets Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 7000:7000 ermiry/cerver:test ./bin/cerver/packets
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/packets
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Requests Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 7000:7000 ermiry/cerver:test ./bin/cerver/requests
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/requests
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Auth Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 7000:7000 ermiry/cerver:test ./bin/cerver/auth
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/auth
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Sessions Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 7000:7000 ermiry/cerver:test ./bin/cerver/sessions
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/sessions
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Threads Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 7000:7000 ermiry/cerver:test ./bin/cerver/threads
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/threads
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Web Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/cerver:test ./bin/web/web
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/web
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Web API Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/cerver:test ./bin/web/api
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/api
+          sudo docker kill $(sudo docker ps -q)
+      
+      - name: Web Upload Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/cerver:test ./bin/web/upload
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/upload
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Web Jobs Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/cerver:test ./bin/web/jobs
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/jobs
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Web Admin Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/cerver:test ./bin/web/admin
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/admin
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Coverage
+        run: make coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/
+          flags: unittests
+          name: build
+          fail_ci_if_error: true
+          # verbose: true
