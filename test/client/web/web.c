@@ -78,18 +78,18 @@ static unsigned int web_request_all_actual (
 	);
 
 	// GET /custom
-	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/custom", address);
-	errors |= curl_simple_handle_data (
-		curl, actual_address,
-		web_request_all_data_handler, data_buffer
-	);
+	// (void) snprintf (actual_address, ADDRESS_SIZE, "%s/custom", address);
+	// errors |= curl_simple_handle_data (
+	// 	curl, actual_address,
+	// 	web_request_all_data_handler, data_buffer
+	// );
 
 	// GET /reference
-	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/reference", address);
-	errors |= curl_simple_handle_data (
-		curl, actual_address,
-		web_request_all_data_handler, data_buffer
-	);
+	// (void) snprintf (actual_address, ADDRESS_SIZE, "%s/reference", address);
+	// errors |= curl_simple_handle_data (
+	// 	curl, actual_address,
+	// 	web_request_all_data_handler, data_buffer
+	// );
 
 	return errors;
 
