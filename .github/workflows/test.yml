@@ -1,0 +1,75 @@
+name: PyCerver Tests
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  test:
+    name: PyCerver tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: sudo apt-get install libcurl4-openssl-dev
+
+      - name: Build Docker Image
+        run: docker build -t ermiry/pycerver:test -f Dockerfile.test .
+
+      - name: Compile Cerver
+        env:
+          CERVER_VERSION: 2.0b-32
+        run: |
+          mkdir /opt/cerver && cd /opt/cerver
+          wget -q --no-check-certificate https://github.com/ermiry/cerver/archive/$CERVER_VERSION.zip
+          unzip $CERVER_VERSION.zip
+          cd cerver-$CERVER_VERSION
+          make TYPE=test -j4
+          sudo make TYPE=test install
+          sudo ldconfig
+
+      - name: Compile Tests
+        run: make TYPE=test test
+
+      - name: Web Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 web.py
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/web
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Web API Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 api.py
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/api
+          sudo docker kill $(sudo docker ps -q)
+      
+      - name: Web Upload Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 upload.py
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/upload
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Web Jobs Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 jobs.py
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/jobs
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Web Admin Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 admin.py
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/admin
+          sudo docker kill $(sudo docker ps -q)
