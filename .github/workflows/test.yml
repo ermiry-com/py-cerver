@@ -17,14 +17,14 @@ jobs:
         run: sudo apt-get install libcurl4-openssl-dev
 
       - name: Build Docker Image
-        run: docker build -t ermiry/cerver:test -f Dockerfile.test .
+        run: docker build -t ermiry/pycerver:test -f Dockerfile.test .
 
       - name: Compile Tests
         run: make TYPE=test test
 
       - name: Web Integration Test
         run: |
-          sudo docker run -d --name test --rm -p 8080:8080 ermiry/cerver:test ./bin/web/web
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test ./bin/web/web
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/web
@@ -32,7 +32,7 @@ jobs:
 
       - name: Web API Integration Test
         run: |
-          sudo docker run -d --name test --rm -p 8080:8080 ermiry/cerver:test ./bin/web/api
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test ./bin/web/api
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/api
@@ -40,7 +40,7 @@ jobs:
       
       - name: Web Upload Integration Test
         run: |
-          sudo docker run -d --name test --rm -p 8080:8080 ermiry/cerver:test ./bin/web/upload
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test ./bin/web/upload
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/upload
@@ -48,7 +48,7 @@ jobs:
 
       - name: Web Jobs Integration Test
         run: |
-          sudo docker run -d --name test --rm -p 8080:8080 ermiry/cerver:test ./bin/web/jobs
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test ./bin/web/jobs
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/jobs
@@ -56,7 +56,7 @@ jobs:
 
       - name: Web Admin Integration Test
         run: |
-          sudo docker run -d --name test --rm -p 8080:8080 ermiry/cerver:test ./bin/web/admin
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test ./bin/web/admin
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/admin
