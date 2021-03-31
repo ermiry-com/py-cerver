@@ -1,6 +1,10 @@
+import signal
+
 from ctypes import c_int, c_uint8, c_uint16, c_char_p, c_size_t, c_void_p, c_bool
 
 from .lib import lib
+
+from .version import cerver_version_print_full
 
 CerverType = c_int
 
@@ -46,6 +50,25 @@ cerver_set_reusable_address_flags.argtypes = [c_void_p, c_bool]
 cerver_start = lib.cerver_start
 cerver_start.argtypes = [c_void_p]
 cerver_start.restype = c_uint8
+
+def cerver_initialize (end, print_version = True):
+    """
+    Function to correctly initialize cerver
+    # Parameters
+    ------------
+    ### end: func ()
+        Function to kill cerver process
+    ### print_version: bool, optional.
+        Flag to choose printing version of cerver.
+        Defaults to True.
+    """
+    signal.signal (signal.SIGINT, end)
+    signal.signal (signal.SIGTERM, end)
+
+    cerver_init()
+    
+    if(print_version):
+        cerver_version_print_full ()
 
 # end
 cerver_shutdown = lib.cerver_shutdown
