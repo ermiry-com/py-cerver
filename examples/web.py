@@ -51,16 +51,9 @@ def json_handler (http_receive, request):
 # GET /hola
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def hola_handler (http_receive, request):
-	cerver.http_send(http_receive, 200, "Hola handler!")
-
-#GET /echo
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def echo_handler (http_receive, request):
-	query_values = cerver.http_request_get_query_params(request)
-	value = cerver.http_request_get_query_value (query_values, "value")
-	print(value)
-	cerver.http_send(http_receive, 200, {"echo": value})
-
+	cerver.http_response_json_msg_send (
+		http_receive, 200, "Hola handler!".encode ('utf-8')
+	)
 
 # GET /adios
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
@@ -114,10 +107,6 @@ def start ():
 	# GET /hola
 	hola_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "hola".encode ('utf-8'), hola_handler)
 	cerver.http_cerver_route_register (http_cerver, hola_route)
-
-	# GET /echo
-	echo_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "echo".encode ('utf-8'), echo_handler)
-	cerver.http_cerver_route_register (http_cerver, echo_route)
 
 	# GET /adios
 	adios_route = cerver.http_route_create (cerver.REQUEST_METHOD_GET, "adios".encode ('utf-8'), adios_handler)

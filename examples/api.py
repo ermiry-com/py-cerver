@@ -33,20 +33,20 @@ def main_users_handler (http_receive, request):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def users_register_handler (http_receive, request):
 	body_values = cerver.http_request_get_body_values (request)
-	name = cerver.http_request_get_query_value(body_values, "name")
-	username = cerver.http_request_get_query_value(body_values, "username")
-	password = cerver.http_request_get_query_value(body_values, "password")
+	name = cerver.http_query_pairs_get_value (body_values, "name".encode ('utf-8'));
+	username = cerver.http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
+	password = cerver.http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
 
 	if name is not None and username is not None and password is not None:
 		user = User (
 			str (random.randint (1, 1001)),
 			int (time.time ()),
-			name,
+			name.contents.str,
 			"common",
-			username
+			username.contents.str
 		)
 
-		user.password = password
+		user.password = password.contents.str
 
 		user_add (user)
 
@@ -71,20 +71,30 @@ def users_register_handler (http_receive, request):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def users_login_handler (http_receive, request):
 	body_values = cerver.http_request_get_body_values (request)
-	username = cerver.http_request_get_query_value(body_values, "username")
-	password = cerver.http_request_get_query_value(body_values, "password")
+	username = cerver.http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
+	password = cerver.http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
 
 	if username is not None and password is not None:
-		user = user_get_by_username (username)
+		user = user_get_by_username (username.contents.str)
 		if user is not None:
-			if user.password == password:
-				cerver.jwt_sign_and_send(http_receive, 200, {
-					"iat": int(time.time ()),
-					"id": user.id,
-					"name": user.name,
-					"username": user.username,
-					"role": user.role
-				})
+			if user.password == password.contents.str:
+				http_jwt = cerver.http_cerver_auth_jwt_new ();
+				cerver.http_cerver_auth_jwt_add_value_int (http_jwt, "iat".encode ('utf-8'), int (time.time ()));
+				cerver.http_cerver_auth_jwt_add_value (http_jwt, "id".encode ('utf-8'), user.id.encode ('utf-8'));
+				cerver.http_cerver_auth_jwt_add_value (http_jwt, "name".encode ('utf-8'), user.name);
+				cerver.http_cerver_auth_jwt_add_value (http_jwt, "username".encode ('utf-8'), user.username);
+				cerver.http_cerver_auth_jwt_add_value (http_jwt, "role".encode ('utf-8'), user.role.encode ('utf-8'));
+
+				cerver.http_cerver_auth_generate_bearer_jwt_json (cerver.http_receive_get_cerver (http_receive), http_jwt)
+
+				response = cerver.http_response_create (
+					200, cerver.http_jwt_get_json (http_jwt), cerver.http_jwt_get_json_len (http_jwt)
+				)
+
+				cerver.http_response_compile (response);
+				cerver.http_response_print (response)
+				cerver.http_response_send (response, http_receive)
+				cerver.http_response_delete (response)
 			else:
 				response = cerver.http_response_json_msg (
 					cerver.HTTP_STATUS_BAD_REQUEST, "Wrong password!".encode ('utf-8')
