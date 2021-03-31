@@ -7,6 +7,7 @@ from .alg import *
 from .content import *
 from .headers import *
 from .http import *
+from .query import *
 from .request import *
 from .response import *
 from .route import *
