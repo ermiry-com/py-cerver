@@ -5,6 +5,7 @@ from .lib import lib
 from .types.string import String
 
 from .alg import jwt_alg_t
+from .response import http_response_create, http_response_compile, http_response_send, http_response_delete
 from .route import HttpRouteAuthType
 
 # types
@@ -108,6 +109,52 @@ http_cerver_auth_generate_bearer_jwt_json = lib.http_cerver_auth_generate_bearer
 http_cerver_auth_generate_bearer_jwt_json.argtypes = [c_void_p, c_void_p]
 http_cerver_auth_generate_bearer_jwt_json.restype = c_uint8
 
+def jwt_sign (values = {}):
+    """
+    Function to sign Bearer JWT (Must be deleted to avoid memory Leak)
+    # Parameters
+    ------------
+    ### values: dict, optional
+        values that will go inside Bearer JWT. Defaults to {}. 
+    """
+    http_jwt = http_cerver_auth_jwt_new()
+    for key in values:
+        if(type(values[key]) == int):
+            http_cerver_auth_jwt_add_value_int (http_jwt, key.encode("utf-8"), int(values[key]))
+        elif (type(values[key]) == bool):
+            http_cerver_auth_jwt_add_value_bool (http_jwt, key.encode ("utf-8"), values[key])
+        elif (type(values[key]) == str):
+            http_cerver_auth_jwt_add_value (http_jwt, key.encode ("utf-8"), values[key].encode ("utf-8"))
+
+    return http_jwt
+
+
+def jwt_sign_and_send(http_receive, status_code = 200, values = {}):
+    """
+    Function to sign and send Bearer JWT
+
+    # Parameters
+    ------------
+    ### http_receive : HttpReceive
+        The receive structure associated with the current request
+    ### status_code : int, optional
+        http status code. Defaults to 200.
+    ### values : dict, optional
+        values that will go inside Bearer JWT. Defaults to {}.
+    """
+    http_jwt = jwt_sign(values)
+    http_cerver_auth_generate_bearer_jwt_json (http_receive_get_cerver (http_receive), http_jwt)
+
+    response = http_response_create(
+        status_code, http_jwt_get_json (http_jwt), http_jwt_get_json_len (http_jwt)
+    )
+
+    http_response_compile (response)
+    http_response_send (response, http_receive)
+    http_response_delete (response)
+
+    http_cerver_auth_jwt_delete(http_jwt)
+
 # stats
 http_cerver_all_stats_print = lib.http_cerver_all_stats_print
 http_cerver_all_stats_print.argtypes = [c_void_p]
@@ -118,14 +165,6 @@ http_cerver_enable_admin_routes.argtypes = [c_void_p, c_bool]
 
 http_cerver_register_admin_file_system = lib.http_cerver_register_admin_file_system
 http_cerver_register_admin_file_system.argtypes = [c_void_p, c_char_p]
-
-# parser
-http_query_pairs_get_value = lib.http_query_pairs_get_value
-http_query_pairs_get_value.argtypes = [c_void_p, c_char_p]
-http_query_pairs_get_value.restype = POINTER (String)
-
-http_query_pairs_print = lib.http_query_pairs_print
-http_query_pairs_print.argtypes = [c_void_p]
 
 # handler
 http_receive_get_cerver = lib.http_receive_get_cerver
