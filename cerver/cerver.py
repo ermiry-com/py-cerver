@@ -47,7 +47,7 @@ CERVER_DEFAULT_UPDATE_INTERVAL_SECS			= 1
 CerverType = c_int
 
 CERVER_TYPE_NONE = 0
-CERVER_TYPE_CUSTOM = 1 
+CERVER_TYPE_CUSTOM = 1
 CERVER_TYPE_GAME = 2
 CERVER_TYPE_WEB = 3
 CERVER_TYPE_FILES = 4
@@ -90,24 +90,24 @@ cerver_start.argtypes = [c_void_p]
 cerver_start.restype = c_uint8
 
 def cerver_initialize (end, print_version = True):
-    """
-    Function to correctly initialize cerver
-    # Parameters
-    ------------
-    ### end: func ()
-        Function to kill cerver process
-    ### print_version: bool, optional.
-        Flag to choose printing version of cerver.
-        Defaults to True.
-    """
-    signal.signal (signal.SIGINT, end)
-    signal.signal (signal.SIGTERM, end)
+	"""
+	Function to correctly initialize cerver
+	# Parameters
+	------------
+	### end: func ()
+		Function to kill cerver process
+	### print_version: bool, optional.
+		Flag to choose printing version of cerver.
+		Defaults to True.
+	"""
+	signal.signal (signal.SIGINT, end)
+	signal.signal (signal.SIGTERM, end)
 
-    cerver_init ()
-    
-    if (print_version):
-        cerver_version_print_full ()
-        pycerver_version_print_full ()
+	cerver_init ()
+
+	if (print_version):
+		cerver_version_print_full ()
+		pycerver_version_print_full ()
 
 # end
 cerver_shutdown = lib.cerver_shutdown
