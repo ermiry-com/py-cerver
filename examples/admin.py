@@ -58,4 +58,6 @@ if __name__ == "__main__":
 
 	cerver.cerver_version_print_full ()
 
+	cerver.pycerver_version_print_full ()
+
 	start ()
