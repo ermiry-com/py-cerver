@@ -13,9 +13,11 @@ from .response import http_response_create, http_response_compile, http_response
 from .route import HttpRouteAuthType, HTTP_ROUTE_AUTH_TYPE_BEARER, http_route_create, http_route_child_add, http_route_set_auth, http_route_set_decode_data_into_json
 from .request import http_request_get_decoded_data
 
-def cerver_main_http_configuration (port = 8080, connection_queue = 10,
+def cerver_main_http_configuration (
+	port = 8080, connection_queue = 10,
 	buffer_size = 4096, n_threads = 4,
-	handler_type = CERVER_HANDLER_TYPE_THREADS, reusable_address_flags = True
+	handler_type = CERVER_HANDLER_TYPE_THREADS,
+	reusable_address_flags = True
 ):
 	"""
 	Function to create an api_cerver with custom configuration
@@ -40,8 +42,8 @@ def cerver_main_http_configuration (port = 8080, connection_queue = 10,
 		port,
 		connection_queue
 	)
-	cerver_set_receive_buffer_size(http_cerver, buffer_size)
-	cerver_set_thpool_n_threads(http_cerver, n_threads)
+	cerver_set_receive_buffer_size (http_cerver, buffer_size)
+	cerver_set_thpool_n_threads (http_cerver, n_threads)
 	cerver_set_handler_type (http_cerver, handler_type)
 	cerver_set_reusable_address_flags (http_cerver, reusable_address_flags)
 	return http_cerver
@@ -85,7 +87,10 @@ http_cerver_set_not_found_handler.argtypes = [c_void_p]
 http_cerver_set_not_found_route = lib.http_cerver_set_not_found_route
 http_cerver_set_not_found_route.argtypes = [c_void_p, NotFoundHandler]
 
-def http_create_route (request_method, route_name, handler, main_route = None, http_cerver = None):
+def http_create_route (
+	request_method, route_name, handler,
+	main_route = None, http_cerver = None
+):
 	"""
 	Function to create and register a route
 	# Parameters
@@ -112,7 +117,10 @@ def http_create_route (request_method, route_name, handler, main_route = None, h
 		http_route_child_add (main_route, route)
 	return route
 
-def http_create_secure_route (request_method, route_name, handler, main_route, http_cerver = None, secure_method = HTTP_ROUTE_AUTH_TYPE_BEARER):
+def http_create_secure_route (
+	request_method, route_name, handler,
+	main_route, http_cerver = None, secure_method = HTTP_ROUTE_AUTH_TYPE_BEARER
+):
 	"""
 	Function to create and register a secure route
 	# Parameters
@@ -134,11 +142,11 @@ def http_create_secure_route (request_method, route_name, handler, main_route, h
 		Secure method that route will manage to get token information
 		Defaults to HTTP_ROUTE_AUTH_TYPE_BEARER.
 	"""
-	route = http_route_create(request_method, route_name.encode("utf-8"), handler)
-	http_route_set_auth(route, secure_method)
-	http_route_set_decode_data_into_json(route)
+	route = http_route_create (request_method, route_name.encode ("utf-8"), handler)
+	http_route_set_auth (route, secure_method)
+	http_route_set_decode_data_into_json (route)
 	if main_route is None:
-		http_cerver_route_register(http_cerver, route)
+		http_cerver_route_register (http_cerver, route)
 	else:
 		http_route_child_add (main_route, route)
 	return route
@@ -205,7 +213,8 @@ http_cerver_auth_generate_bearer_jwt_json = lib.http_cerver_auth_generate_bearer
 http_cerver_auth_generate_bearer_jwt_json.argtypes = [c_void_p, c_void_p]
 http_cerver_auth_generate_bearer_jwt_json.restype = c_uint8
 
-def cerver_auth_http_configuration(http_cerver, jwt_algorithm = JWT_ALG_NONE,
+def cerver_auth_http_configuration (
+	http_cerver, jwt_algorithm = JWT_ALG_NONE,
 	priv_key_filename = "None", pub_key_filename = "None"
 ):
 	"""
@@ -228,7 +237,7 @@ def cerver_auth_http_configuration(http_cerver, jwt_algorithm = JWT_ALG_NONE,
 	http_cerver_auth_set_jwt_algorithm (http_cerver, jwt_algorithm)
 	if jwt_algorithm is not JWT_ALG_NONE:
 		http_cerver_auth_set_jwt_priv_key_filename (http_cerver, priv_key_filename.encode ("utf-8"))
-		http_cerver_auth_set_jwt_pub_key_filename(http_cerver, pub_key_filename.encode ("utf-8"))
+		http_cerver_auth_set_jwt_pub_key_filename (http_cerver, pub_key_filename.encode ("utf-8"))
 
 def http_jwt_sign (values = {}):
 	"""
@@ -236,21 +245,23 @@ def http_jwt_sign (values = {}):
 	# Parameters
 	------------
 	### values: dict, optional
-		values that will go inside Bearer JWT. Defaults to {}. 
+		values that will go inside Bearer JWT. Defaults to {}.
 	"""
-	http_jwt = http_cerver_auth_jwt_new()
+	http_jwt = http_cerver_auth_jwt_new ()
 	for key in values:
-		if(type(values[key]) == int):
-			http_cerver_auth_jwt_add_value_int (http_jwt, key.encode("utf-8"), int(values[key]))
-		elif (type(values[key]) == bool):
+		if (type (values[key]) == int):
+			http_cerver_auth_jwt_add_value_int (http_jwt, key.encode("utf-8"), int (values[key]))
+		elif (type (values[key]) == bool):
 			http_cerver_auth_jwt_add_value_bool (http_jwt, key.encode ("utf-8"), values[key])
-		elif (type(values[key]) == str):
+		elif (type (values[key]) == str):
 			http_cerver_auth_jwt_add_value (http_jwt, key.encode ("utf-8"), values[key].encode ("utf-8"))
 
 	return http_jwt
 
 
-def http_jwt_sign_and_send(http_receive, status_code = 200, values = {}):
+def http_jwt_sign_and_send (
+	http_receive, status_code = 200, values = {}
+):
 	"""
 	Function to sign and send Bearer JWT
 
@@ -276,9 +287,9 @@ def http_jwt_sign_and_send(http_receive, status_code = 200, values = {}):
 
 	http_cerver_auth_jwt_delete(http_jwt)
 
-def http_jwt_token_decode(request):
+def http_jwt_token_decode (request):
 	json_string = cast (http_request_get_decoded_data (request), c_char_p)
-	result = json.loads(json_string.value.decode("utf-8"))
+	result = json.loads (json_string.value.decode("utf-8"))
 	return result
 
 # stats

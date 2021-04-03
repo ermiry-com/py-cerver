@@ -11,7 +11,7 @@ from .query import http_query_pairs_get_value
 RequestMethod = c_int
 
 REQUEST_METHOD_DELETE = 0
-REQUEST_METHOD_GET = 1 
+REQUEST_METHOD_GET = 1
 REQUEST_METHOD_HEAD = 2
 REQUEST_METHOD_POST = 3
 REQUEST_METHOD_PUT = 4
@@ -83,27 +83,27 @@ http_request_get_body_values.argtypes = [c_void_p]
 http_request_get_body_values.restype = c_void_p
 
 def http_request_get_query_value (values, query_name):
-    """
-    Function to get a query param from request
-    # Parameters
-    ------------
-    ### values: DoubleList <KeyValuePair>
-        Key-value pars parsed from x-www-form-urlencoded data or query params
-    """
-    value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
-    return value.contents.str.decode("utf-8")
+	"""
+	Function to get a query param from request
+	# Parameters
+	------------
+	### values: DoubleList <KeyValuePair>
+		Key-value pars parsed from x-www-form-urlencoded data or query params
+	"""
+	value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	return value.contents.str.decode ("utf-8")
 
 def http_request_get_body_json (request):
-    """
-    Function to get body in a dictionary
-    # Parameters
-    ------------
-    ### request: HttpRequest
-        Current request structure
-    """
-    body_str = http_request_get_body (request)
-    body = json.loads (body_str.contents.str.decode("utf-8"))
-    return body
+	"""
+	Function to get body in a dictionary
+	# Parameters
+	------------
+	### request: HttpRequest
+		Current request structure
+	"""
+	body_str = http_request_get_body (request)
+	body = json.loads (body_str.contents.str.decode ("utf-8"))
+	return body
 
 # headers
 http_request_headers_print = lib.http_request_headers_print
