@@ -13,4 +13,4 @@ from .response import *
 from .route import *
 from .status import *
 
-__version__ = "0.4"
+__version__ = "0.5"
