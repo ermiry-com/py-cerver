@@ -91,6 +91,8 @@ def users_login_handler (http_receive, request):
 					200, cerver.http_jwt_get_json (http_jwt), cerver.http_jwt_get_json_len (http_jwt)
 				)
 
+				cerver.http_cerver_auth_jwt_delete (http_jwt)
+
 				cerver.http_response_compile (response);
 				cerver.http_response_print (response)
 				cerver.http_response_send (response, http_receive)
@@ -187,5 +189,7 @@ if __name__ == "__main__":
 	cerver.cerver_init ()
 
 	cerver.cerver_version_print_full ()
+
+	cerver.pycerver_version_print_full ()
 
 	start ()
