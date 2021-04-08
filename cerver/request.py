@@ -6,6 +6,7 @@ from .lib import lib
 
 from .types.string import String
 
+from .content import ContentType
 from .query import http_query_pairs_get_value
 
 RequestMethod = c_int
