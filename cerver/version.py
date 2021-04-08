@@ -30,14 +30,14 @@ def pycerver_version_print_full ():
 		PYCERVER_VERSION_AUTHOR
 	)
 
-def cerver_version_print_version_id ():
+def pycerver_version_print_version_id ():
 	cerver_log_both (
 		LOG_TYPE_NONE, LOG_TYPE_NONE,
 		"\nPyCerver Version ID: %s\n".encode ('utf-8'),
 		PYCERVER_VERSION
 	)
 
-def cerver_version_print_version_name ():
+def pycerver_version_print_version_name ():
 	cerver_log_both (
 		LOG_TYPE_NONE, LOG_TYPE_NONE,
 		"\nPyCerver Version: %s\n".encode ('utf-8'),
