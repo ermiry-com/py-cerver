@@ -1,5 +1,7 @@
 from ctypes import c_int, c_char_p, c_bool
 
+from .lib import lib
+
 ContentType = c_int
 
 HTTP_CONTENT_TYPE_NONE		= 0
