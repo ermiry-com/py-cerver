@@ -2,9 +2,9 @@ from ctypes import c_int, c_uint, c_void_p, c_char_p, c_bool, POINTER
 
 import json
 
-from .lib import lib
+from ..lib import lib
 
-from .types.string import String
+from ..types.string import String
 
 from .content import ContentType
 from .query import http_query_pairs_get_value
