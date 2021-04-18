@@ -12,12 +12,27 @@ make TYPE=test -j4 test || { exit 1; }
 # compile docker
 sudo docker build -t ermiry/pycerver:test -f Dockerfile.test . || { exit 1; }
 
+# ping
+sudo docker run \
+	-d \
+	--name test --rm \
+	-p 7000:7000 \
+	ermiry/pycerver:test python3 ping.py
+
+sleep 2
+
+sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
+
+./test/bin/client/ping || { exit 1; }
+
+sudo docker kill $(sudo docker ps -q)
+
 # web
 sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 web.py
+	ermiry/pycerver:test python3 web/web.py
 
 sleep 2
 
@@ -32,7 +47,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 api.py
+	ermiry/pycerver:test python3 web/api.py
 
 sleep 2
 
@@ -47,7 +62,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 upload.py
+	ermiry/pycerver:test python3 web/upload.py
 
 sleep 2
 
@@ -62,7 +77,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 jobs.py
+	ermiry/pycerver:test python3 web/jobs.py
 
 sleep 2
 
@@ -77,7 +92,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 admin.py
+	ermiry/pycerver:test python3 web/admin.py
 
 sleep 2
 
@@ -92,7 +107,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 wrapper.py
+	ermiry/pycerver:test python3 web/wrapper.py
 
 sleep 2
 
