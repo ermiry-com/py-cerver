@@ -14,7 +14,6 @@ def end (signum, frame):
 	cerver_end ()
 	sys.exit ("Done!")
 
-# GET /api/users
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p)
 def handler_method (packet_ptr):
 	packet = ctypes.cast (packet_ptr, ctypes.POINTER (Packet))
