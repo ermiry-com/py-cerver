@@ -157,8 +157,8 @@ def start ():
 	http_cerver = http_cerver_get (api_cerver)
 
 	http_cerver_auth_set_jwt_algorithm (http_cerver, JWT_ALG_RS256)
-	http_cerver_auth_set_jwt_priv_key_filename (http_cerver, "keys/key.key".encode ('utf-8'))
-	http_cerver_auth_set_jwt_pub_key_filename (http_cerver, "keys/key.pub".encode ('utf-8'))
+	http_cerver_auth_set_jwt_priv_key_filename (http_cerver, "./web/keys/key.key".encode ('utf-8'))
+	http_cerver_auth_set_jwt_pub_key_filename (http_cerver, "./web/keys/key.pub".encode ('utf-8'))
 
 	# GET /api/users
 	users_route = http_route_create (REQUEST_METHOD_GET, "api/users".encode ('utf-8'), main_users_handler)

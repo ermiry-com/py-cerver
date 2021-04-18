@@ -54,7 +54,7 @@ def start ():
 
 	api_cerver = cerver_main_http_configuration ()
 	http_cerver = http_cerver_get (api_cerver)
-	cerver_auth_http_configuration (http_cerver, JWT_ALG_RS256, "keys/key.key", "keys/key.pub")
+	cerver_auth_http_configuration (http_cerver, JWT_ALG_RS256, "./web/keys/key.key", "./web/keys/key.pub")
 
 	# GET /
 	main_route = http_create_route (REQUEST_METHOD_GET, "/", main_handler, http_cerver = http_cerver)
