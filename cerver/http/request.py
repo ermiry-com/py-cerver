@@ -64,7 +64,7 @@ http_request_get_n_params.argtypes = [c_void_p]
 http_request_get_n_params.restype = c_uint
 
 http_request_get_param_at_idx = lib.http_request_get_param_at_idx
-http_request_get_param_at_idx.argtypes = [c_void_p]
+http_request_get_param_at_idx.argtypes = [c_void_p, c_uint]
 http_request_get_param_at_idx.restype = POINTER (String)
 
 http_request_get_header = lib.http_request_get_header
