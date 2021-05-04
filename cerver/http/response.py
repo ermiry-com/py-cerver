@@ -2,7 +2,7 @@ from ctypes import c_char_p, c_uint8, c_void_p, c_uint, c_size_t
 
 import json
 
-from .lib import lib
+from ..lib import lib
 
 from .content import ContentType, HTTP_CONTENT_TYPE_HTML
 from .headers import HttpHeader
