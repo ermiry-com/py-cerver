@@ -102,21 +102,21 @@ http_response_create_and_send.restype = c_uint8
 # this methods takes care of generating a repsonse with text/html content type
 # returns 0 on success, 1 on error
 http_response_render_text = lib.http_response_render_text
-http_response_render_text.argtypes = [c_void_p, c_char_p, c_size_t]
+http_response_render_text.argtypes = [c_void_p, http_status, c_char_p, c_size_t]
 http_response_render_text.restype = c_uint8
 
 # sends the selected json back to the user
 # this methods takes care of generating a repsonse with application/json content type
 # returns 0 on success, 1 on error
 http_response_render_json = lib.http_response_render_json
-http_response_render_json.argtypes = [c_void_p, c_char_p, c_size_t]
+http_response_render_json.argtypes = [c_void_p, http_status, c_char_p, c_size_t]
 http_response_render_json.restype = c_uint8
 
 # opens the selected file and sends it back to the user
 # this method takes care of generating the header based on the file values
 # returns 0 on success, 1 on error
 http_response_render_file = lib.http_response_render_file
-http_response_render_file.argtypes = [c_void_p, c_char_p]
+http_response_render_file.argtypes = [c_void_p, http_status, c_char_p]
 http_response_render_file.restype = c_uint8
 
 # json
@@ -175,7 +175,7 @@ def http_send_response (
 	if type (body) is dict:
 		body_string = json.dumps (body)
 		body_len = len (body_string)
-		http_response_render_json (http_receive, body_string.encode ("utf-8"), body_len)
+		http_response_render_json (http_receive, status_code, body_string.encode ("utf-8"), body_len)
 	else: 
 		real_body = body
 		if type (body) is str:
