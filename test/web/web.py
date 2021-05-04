@@ -18,7 +18,7 @@ def end (signum, frame):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def main_handler (http_receive, request):
 	http_response_render_file (
-		http_receive,
+		http_receive, HTTP_STATUS_OK,
 		"./web/public/index.html".encode ('utf-8')
 	)
 
@@ -39,7 +39,10 @@ def text_handler (http_receive, request):
 	text = "<!DOCTYPE html><html><head><meta charset=\"utf-8\" /><title>Cerver</title></head><body><h2>text_handler () works!</h2></body></html>".encode ('utf-8')
 	text_len = len (text)
 
-	http_response_render_text (http_receive, text, text_len)
+	http_response_render_text (
+		http_receive, HTTP_STATUS_OK,
+		text, text_len
+	)
 
 # GET /json
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
@@ -47,7 +50,10 @@ def json_handler (http_receive, request):
 	json =  "{\"msg\": \"okay\"}".encode ('utf-8')
 	json_len = len (json)
 
-	http_response_render_json (http_receive, json, json_len)
+	http_response_render_json (
+		http_receive, HTTP_STATUS_OK,
+		json, json_len
+	)
 
 # GET /hola
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
