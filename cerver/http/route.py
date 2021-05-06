@@ -1,6 +1,6 @@
 from ctypes import c_int, c_char_p, c_void_p, CFUNCTYPE
 
-from .lib import lib
+from ..lib import lib
 
 from .request import RequestMethod
 

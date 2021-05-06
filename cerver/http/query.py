@@ -1,8 +1,8 @@
 from ctypes import c_void_p, c_char_p, POINTER
 
-from .lib import lib
+from ..lib import lib
 
-from .types.string import String
+from ..types.string import String
 
 http_query_pairs_get_value = lib.http_query_pairs_get_value
 http_query_pairs_get_value.argtypes = [c_void_p, c_char_p]

@@ -17,7 +17,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 web.py
+	ermiry/pycerver:test python3 web/web.py
 
 sleep 2
 
@@ -32,7 +32,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 api.py
+	ermiry/pycerver:test python3 web/api.py
 
 sleep 2
 
@@ -47,7 +47,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 upload.py
+	ermiry/pycerver:test python3 web/upload.py
 
 sleep 2
 
@@ -62,7 +62,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 jobs.py
+	ermiry/pycerver:test python3 web/jobs.py
 
 sleep 2
 
@@ -77,12 +77,27 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 admin.py
+	ermiry/pycerver:test python3 web/admin.py
 
 sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./test/bin/client/web/admin || { exit 1; }
+
+sudo docker kill $(sudo docker ps -q)
+
+# wrapper
+sudo docker run \
+	-d \
+	--name test --rm \
+	-p 8080:8080 \
+	ermiry/pycerver:test python3 web/wrapper.py
+
+sleep 2
+
+sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
+
+./test/bin/client/web/wrapper || { exit 1; }
 
 sudo docker kill $(sudo docker ps -q)
