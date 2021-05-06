@@ -10,8 +10,6 @@ IMAGE_TYPE_JPEG = 2
 IMAGE_TYPE_GIF = 3
 IMAGE_TYPE_BMP = 4
 
-CERVER_EXPORT const char * (const ImageType type);
-
 files_image_type_to_string = lib.files_image_type_to_string
 files_image_type_to_string.argtypes = [ImageType]
 files_image_type_to_string.restype = c_char_p
