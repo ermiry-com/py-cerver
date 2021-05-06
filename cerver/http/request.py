@@ -59,8 +59,11 @@ def http_request_get_params_as_list(request):
 		n_params = http_request_get_n_params(request)
 		for i in range(n_params):
 			try:
-				params.append(http_request_get_param_at_idx(i).contents.str.decode("utf-8"))
-			except:
+				param = http_request_get_param_at_idx(request, i)
+				param = param.contents.str.decode("utf-8")
+				params.append(param)
+			except Exception as e:
+				print(f"Param {i} cannot be decoded")
 				pass
 
 		return params
