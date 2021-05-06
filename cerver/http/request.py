@@ -106,8 +106,12 @@ def http_request_get_query_value (values, query_name):
 	### values: DoubleList <KeyValuePair>
 		Key-value pars parsed from x-www-form-urlencoded data or query params
 	"""
-	value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
-	return value.contents.str.decode ("utf-8")
+	try:
+		value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+		return value.contents.str.decode ("utf-8")
+	except: 
+		print(f"{query_name} was unable to be decoded")
+		return None
 
 def http_request_get_body_json (request):
 	"""
