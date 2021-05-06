@@ -1,6 +1,6 @@
 from ctypes import c_char_p, c_uint8, c_void_p, c_uint, c_size_t
 
-from json
+import json
 
 from ..lib import lib
 
