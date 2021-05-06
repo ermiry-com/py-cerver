@@ -43,6 +43,30 @@ http_request_get_param_at_idx = lib.http_request_get_param_at_idx
 http_request_get_param_at_idx.argtypes = [c_void_p, c_uint]
 http_request_get_param_at_idx.restype = POINTER (String)
 
+def http_request_get_params_as_list(request):
+	"""
+	Function to get all params in a list
+	# Parameters
+	------------
+	### request: Request
+		Request of the current route
+	# Returns
+	-----------
+	A list with n_params
+	"""
+	try:
+		params = []
+		n_params = http_request_get_n_params(request)
+		for i in range(n_params):
+			try:
+				params.append(http_request_get_param_at_idx(i).contents.str.decode("utf-8"))
+			except:
+				pass
+
+		return params
+	except:
+		return []
+
 http_request_get_header = lib.http_request_get_header
 http_request_get_header.argtypes = [c_void_p, HttpHeader]
 http_request_get_header.restype = POINTER (String)
@@ -90,9 +114,12 @@ def http_request_get_body_json (request):
 	### request: HttpRequest
 		Current request structure
 	"""
-	body_str = http_request_get_body (request)
-	body = json.loads (body_str.contents.str.decode ("utf-8"))
-	return body
+	try:
+		body_str = http_request_get_body (request)
+		body = json.loads (body_str.contents.str.decode ("utf-8"))
+		return body
+	except:
+		return {}
 
 # headers
 http_request_headers_print = lib.http_request_headers_print
