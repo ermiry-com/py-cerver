@@ -27,6 +27,18 @@ def echo_handler (http_receive, request):
 	value = http_request_get_query_value (body_values, "value")
 	http_send_response (http_receive, HTTP_STATUS_OK, { "echo_says": f"Wrapper received: {value}" })
 
+#GET /params/:id
+@ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p)
+def params_handler (http_receive, request):
+	params = http_request_get_params_as_list(request)
+	if len(params) > 0:
+		http_send_response(http_receive, HTTP_STATUS_OK, {
+			"msg": f"Request received {len(params)} in request",
+			"params": params
+		})
+	else:
+		http_send_response(http_receive, HTTP_STATUS_BAD_REQUEST, {"msg": "No params where received"})
+
 # POST /data
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def data_handler (http_receive, request):
@@ -49,6 +61,7 @@ def auth_handler (http_receive, request):
 		"token_values": token_values
 	})
 
+
 def start ():
 	global api_cerver
 
@@ -61,6 +74,9 @@ def start ():
 
 	# GET /echo
 	echo_route = http_create_route (REQUEST_METHOD_GET, "echo", echo_handler, main_route)
+
+	#GET /params/:id
+	http_create_route(REQUEST_METHOD_GET, "params/:id", params_handler, main_route)
 
 	# POST /data
 	data_route = http_create_route (REQUEST_METHOD_POST, "data", data_handler, main_route)
