@@ -1,6 +1,6 @@
 from ctypes import c_char_p, c_uint8, c_void_p, c_uint, c_size_t
 
-from bson import json_util
+from json
 
 from ..lib import lib
 
@@ -173,7 +173,7 @@ def http_send_response (
 		Content type of the body. If body is dict then content_type will be application/json. Defaults to text/html; charset=UTF-8
 	"""
 	if type (body) is dict:
-		body_string = json_util.dumps (body)
+		body_string = json.dumps (body)
 		body_len = len (body_string)
 		http_response_render_json (http_receive, status_code, body_string.encode ("utf-8"), body_len)
 	else: 
