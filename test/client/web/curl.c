@@ -175,6 +175,47 @@ unsigned int curl_simple_post (
 }
 
 // works like curl_simple_post ()
+// but sets json related headers and body
+// returns 0 on success, 1 on any error
+unsigned int curl_simple_post_json (
+	CURL *curl, const char *address,
+	const char *json, const size_t json_len
+) {
+
+	unsigned int retval = 1;
+
+	curl_easy_setopt (curl, CURLOPT_URL, address);
+
+	struct curl_slist *headers = NULL;
+    (void) curl_slist_append (headers, "Accept: application/json");
+    (void) curl_slist_append (headers, "Content-Type: application/json");
+    (void) curl_slist_append (headers, "Charset: utf-8");
+
+	curl_easy_setopt (curl, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_easy_setopt (curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt (curl, CURLOPT_POSTFIELDS, json);
+	curl_easy_setopt (curl, CURLOPT_POSTFIELDSIZE, json_len);
+
+	// perfrom the request
+	CURLcode res = curl_easy_perform (curl);
+	if (res == CURLE_OK) {
+		retval = 0;
+	}
+
+	else {
+		cerver_log_error (
+			"curl_simple_post () failed: %s\n",
+			curl_easy_strerror (res)
+		);
+	}
+
+	curl_slist_free_all (headers);
+
+	return retval;
+
+}
+
+// works like curl_simple_post ()
 // but sets a custom Authorization header
 unsigned int curl_simple_post_with_auth (
 	CURL *curl, const char *address,

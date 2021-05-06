@@ -46,6 +46,14 @@ extern unsigned int curl_simple_post (
 	const char *data, const size_t datalen
 );
 
+// perform a POST with application/json data
+// uses an already created CURL structure
+// returns 0 on success, 1 on any error 
+extern unsigned int curl_simple_post_json (
+	CURL *curl, const char *address,
+	const char *json, const size_t json_len
+);
+
 // works like curl_simple_post ()
 // but sets a custom Authorization header
 extern unsigned int curl_simple_post_with_auth (
