@@ -1,8 +1,10 @@
 from ctypes import c_char_p, c_uint8, c_void_p, c_uint, c_size_t
 
-from .lib import lib
+import json
 
-from .content import ContentType
+from ..lib import lib
+
+from .content import ContentType, HTTP_CONTENT_TYPE_HTML
 from .headers import HttpHeader
 from .status import http_status
 
@@ -100,21 +102,21 @@ http_response_create_and_send.restype = c_uint8
 # this methods takes care of generating a repsonse with text/html content type
 # returns 0 on success, 1 on error
 http_response_render_text = lib.http_response_render_text
-http_response_render_text.argtypes = [c_void_p, c_char_p, c_size_t]
+http_response_render_text.argtypes = [c_void_p, http_status, c_char_p, c_size_t]
 http_response_render_text.restype = c_uint8
 
 # sends the selected json back to the user
 # this methods takes care of generating a repsonse with application/json content type
 # returns 0 on success, 1 on error
 http_response_render_json = lib.http_response_render_json
-http_response_render_json.argtypes = [c_void_p, c_char_p, c_size_t]
+http_response_render_json.argtypes = [c_void_p, http_status, c_char_p, c_size_t]
 http_response_render_json.restype = c_uint8
 
 # opens the selected file and sends it back to the user
 # this method takes care of generating the header based on the file values
 # returns 0 on success, 1 on error
 http_response_render_file = lib.http_response_render_file
-http_response_render_file.argtypes = [c_void_p, c_char_p]
+http_response_render_file.argtypes = [c_void_p, http_status, c_char_p]
 http_response_render_file.restype = c_uint8
 
 # json
@@ -149,3 +151,45 @@ http_response_json_key_value.restype = c_void_p
 http_response_json_key_value_send = lib.http_response_json_key_value_send
 http_response_json_key_value_send.argtypes = [c_void_p, c_uint, c_char_p, c_char_p]
 http_response_json_key_value_send.restype = c_uint8
+
+def http_send_response (
+	http_receive, status_code,
+	body, body_len = None,
+	content_type = HTTP_CONTENT_TYPE_HTML
+):
+	"""
+	Function to create and send a http_response
+	# Parameters
+	------------
+	### http_receive : HttpReceive
+		The receive structure associated with the current request
+	### status_code : int, optional
+		http status code. Defaults to 200.
+	### body: dict, str, bytes
+		Value(s) to send
+	### body_len
+		Size of the body to send. Defaults to None (Will be calculated)
+	### content_type
+		Content type of the body. If body is dict then content_type will be application/json. Defaults to text/html; charset=UTF-8
+	"""
+	if type (body) is dict:
+		body_string = json.dumps (body)
+		body_len = len (body_string)
+		http_response_render_json (http_receive, status_code, body_string.encode ("utf-8"), body_len)
+	else: 
+		real_body = body
+		if type (body) is str:
+			real_body = body.encode ("utf-8")
+		if body_len is None:
+			body_len = len (body)
+
+		response = http_response_create (
+			status_code, real_body, body_len
+		)
+
+		http_response_add_content_type_header (response, content_type)
+
+		http_response_add_content_length_header (response, body_len)
+		http_response_compile (response)
+		http_response_send (response, http_receive)
+		http_response_delete (response)

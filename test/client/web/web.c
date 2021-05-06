@@ -20,6 +20,145 @@ static size_t web_request_all_data_handler (
 
 }
 
+// GET /
+static unsigned int web_request_main (
+	CURL *curl, char *actual_address, char *data_buffer
+) {
+	
+	unsigned int errors = 0;
+
+	if (curl_simple_handle_data (
+		curl, address,
+		web_request_all_data_handler, data_buffer
+	)) {
+		cerver_log_error ("web_request_main () failed!");
+		errors = 1;
+	}
+
+	return errors;
+
+}
+
+// GET /test
+static unsigned int web_request_test (
+	CURL *curl, char *actual_address, char *data_buffer
+) {
+
+	unsigned int errors = 0;
+	
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/test", address);
+	if (curl_simple_handle_data (
+		curl, actual_address,
+		web_request_all_data_handler, data_buffer
+	)) {
+		cerver_log_error ("web_request_test () failed!");
+		errors = 1;
+	}
+
+	return errors;
+
+}
+
+// GET /text
+static unsigned int web_request_text (
+	CURL *curl, char *actual_address, char *data_buffer
+) {
+	
+	unsigned int errors = 0;
+	
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/text", address);
+	if (curl_simple_handle_data (
+		curl, actual_address,
+		web_request_all_data_handler, data_buffer
+	)) {
+		cerver_log_error ("web_request_text () failed!");
+		errors = 1;
+	}
+
+	return errors;
+
+}
+
+// GET /json
+static unsigned int web_request_json (
+	CURL *curl, char *actual_address, char *data_buffer
+) {
+	
+	unsigned int errors = 0;
+	
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json", address);
+	if (curl_simple_handle_data (
+		curl, actual_address,
+		web_request_all_data_handler, data_buffer
+	)) {
+		cerver_log_error ("web_request_json () failed!");
+		errors = 1;
+	}
+
+	return errors;
+
+}
+
+// GET /hola
+static unsigned int web_request_hola (
+	CURL *curl, char *actual_address, char *data_buffer
+) {
+	
+	unsigned int errors = 0;
+	
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/hola", address);
+	if (curl_simple_handle_data (
+		curl, actual_address,
+		web_request_all_data_handler, data_buffer
+	)) {
+		cerver_log_error ("web_request_hola () failed!");
+		errors = 1;
+	}
+
+	return errors;
+
+}
+
+// GET /adios
+static unsigned int web_request_adios (
+	CURL *curl, char *actual_address, char *data_buffer
+) {
+	
+	unsigned int errors = 0;
+	
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/adios", address);
+	if (curl_simple_handle_data (
+		curl, actual_address,
+		web_request_all_data_handler, data_buffer
+	)) {
+		cerver_log_error ("web_request_adios () failed!");
+		errors = 1;
+	}
+
+	return errors;
+
+}
+
+// GET /key
+static unsigned int web_request_key (
+	CURL *curl, char *actual_address, char *data_buffer
+) {
+	
+	unsigned int errors = 0;
+	
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/key", address);
+	if (curl_simple_handle_data (
+		curl, actual_address,
+		web_request_all_data_handler, data_buffer
+	)) {
+		cerver_log_error ("web_request_key () failed!");
+		errors = 1;
+	}
+
+	return errors;
+
+}
+
 static unsigned int web_request_all_actual (
 	CURL *curl
 ) {
@@ -29,53 +168,19 @@ static unsigned int web_request_all_actual (
 	char data_buffer[4096] = { 0 };
 	char actual_address[ADDRESS_SIZE] = { 0 };
 
-	// GET /
-	errors |= curl_simple_handle_data (
-		curl, address,
-		web_request_all_data_handler, data_buffer
-	);
+	errors |= web_request_main (curl, actual_address, data_buffer);
 
-	// GET /test
-	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/test", address);
-	errors |= curl_simple_handle_data (
-		curl, actual_address,
-		web_request_all_data_handler, data_buffer
-	);
+	errors |= web_request_test (curl, actual_address, data_buffer);
 
-	// GET /text
-	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/text", address);
-	errors |= curl_simple_handle_data (
-		curl, actual_address,
-		web_request_all_data_handler, data_buffer
-	);
+	errors |= web_request_text (curl, actual_address, data_buffer);
 
-	// GET /json
-	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json", address);
-	errors |= curl_simple_handle_data (
-		curl, actual_address,
-		web_request_all_data_handler, data_buffer
-	);
+	errors |= web_request_json (curl, actual_address, data_buffer);
 
-	// GET /hola
-	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/hola", address);
-	errors |= curl_simple_handle_data (
-		curl, actual_address,
-		web_request_all_data_handler, data_buffer
-	);
+	errors |= web_request_hola (curl, actual_address, data_buffer);
 
-	// GET /adios
-	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/adios", address);
-	errors |= curl_simple_handle_data (
-		curl, actual_address,
-		web_request_all_data_handler, data_buffer
-	);
+	errors |= web_request_adios (curl, actual_address, data_buffer);
 
-	// GET /key
-	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/key", address);
-	errors |= curl_simple_handle_data (
-		curl, actual_address,
-		web_request_all_data_handler, data_buffer
-	);
+	errors |= web_request_key (curl, actual_address, data_buffer);
 
 	// GET /custom
 	// (void) snprintf (actual_address, ADDRESS_SIZE, "%s/custom", address);

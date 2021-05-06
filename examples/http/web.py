@@ -19,7 +19,7 @@ def end (signum, frame):
 def main_handler (http_receive, request):
 	http_response_render_file (
 		http_receive, HTTP_STATUS_OK,
-		"./web/public/index.html".encode ('utf-8')
+		"./examples/public/index.html".encode ('utf-8')
 	)
 
 # GET /test
@@ -93,7 +93,7 @@ def start ():
 	# HTTP configuration
 	http_cerver = http_cerver_get (web_cerver)
 
-	http_cerver_static_path_add (http_cerver, "./web/public".encode ('utf-8'))
+	http_cerver_static_path_add (http_cerver, "./examples/public".encode ('utf-8'))
 
 	# GET /
 	main_route = http_route_create (REQUEST_METHOD_GET, "/".encode ('utf-8'), main_handler)
@@ -134,5 +134,7 @@ if __name__ == "__main__":
 	cerver_init ()
 
 	cerver_version_print_full ()
+
+	pycerver_version_print_full ()
 
 	start ()
