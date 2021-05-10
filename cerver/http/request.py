@@ -47,9 +47,9 @@ http_request_get_header = lib.http_request_get_header
 http_request_get_header.argtypes = [c_void_p, HttpHeader]
 http_request_get_header.restype = POINTER (String)
 
-http_request_get_content_tytpe = lib.http_request_get_content_tytpe
-http_request_get_content_tytpe.argtypes = [c_void_p]
-http_request_get_content_tytpe.restype = ContentType
+http_request_get_content_type = lib.http_request_get_content_type
+http_request_get_content_type.argtypes = [c_void_p]
+http_request_get_content_type.restype = ContentType
 
 http_request_get_content_type_string = lib.http_request_get_content_type_string
 http_request_get_content_type_string.argtypes = [c_void_p]
@@ -77,7 +77,9 @@ def http_request_get_query_value (values, query_name):
 	# Parameters
 	------------
 	### values: DoubleList <KeyValuePair>
-		Key-value pars parsed from x-www-form-urlencoded data or query params
+		key-value pairs parsed from x-www-form-urlencoded data or query params
+	### query_name: string
+		the key used to find a matching value
 	"""
 	value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
 	return value.contents.str.decode ("utf-8")
@@ -88,7 +90,7 @@ def http_request_get_body_json (request):
 	# Parameters
 	------------
 	### request: HttpRequest
-		Current request structure
+		reference to a HTTP request instance
 	"""
 	body_str = http_request_get_body (request)
 	body = json.loads (body_str.contents.str.decode ("utf-8"))
