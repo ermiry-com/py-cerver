@@ -1,8 +1,8 @@
+import json
+
 from ctypes import c_uint8, c_void_p, c_char_p, c_bool, c_int, c_size_t, CFUNCTYPE, POINTER, cast
 
 from ..lib import lib
-
-import json
 
 from ..types.string import String
 
