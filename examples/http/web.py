@@ -59,14 +59,14 @@ def json_handler (http_receive, request):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def hola_handler (http_receive, request):
 	http_response_json_msg_send (
-		http_receive, 200, "Hola handler!".encode ('utf-8')
+		http_receive, HTTP_STATUS_OK, "Hola handler!".encode ('utf-8')
 	)
 
 # GET /adios
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def adios_handler (http_receive, request):
 	http_response_json_msg_send (
-		http_receive, 200, "Adios handler!".encode ('utf-8')
+		http_receive, HTTP_STATUS_OK, "Adios handler!".encode ('utf-8')
 	)
 
 # GET /key

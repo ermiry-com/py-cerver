@@ -90,7 +90,7 @@ def users_login_handler (http_receive, request):
 				http_cerver_auth_generate_bearer_jwt_json (http_receive_get_cerver (http_receive), http_jwt)
 
 				response = http_response_create (
-					200, http_jwt_get_json (http_jwt), http_jwt_get_json_len (http_jwt)
+					HTTP_STATUS_OK, http_jwt_get_json (http_jwt), http_jwt_get_json_len (http_jwt)
 				)
 
 				http_cerver_auth_jwt_delete (http_jwt)

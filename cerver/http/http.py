@@ -1,8 +1,8 @@
+import json
+
 from ctypes import c_uint8, c_void_p, c_char_p, c_bool, c_int, c_size_t, CFUNCTYPE, POINTER, cast
 
 from ..lib import lib
-
-import json
 
 from ..types.string import String
 
@@ -213,6 +213,10 @@ http_cerver_auth_generate_bearer_jwt_json = lib.http_cerver_auth_generate_bearer
 http_cerver_auth_generate_bearer_jwt_json.argtypes = [c_void_p, c_void_p]
 http_cerver_auth_generate_bearer_jwt_json.restype = c_uint8
 
+http_cerver_auth_generate_bearer_jwt_json_with_value = lib.http_cerver_auth_generate_bearer_jwt_json_with_value
+http_cerver_auth_generate_bearer_jwt_json_with_value.argtypes = [c_void_p, c_void_p, c_char_p, c_char_p]
+http_cerver_auth_generate_bearer_jwt_json_with_value.restype = c_uint8
+
 def cerver_auth_http_configuration (
 	http_cerver, jwt_algorithm = JWT_ALG_NONE,
 	priv_key_filename = "None", pub_key_filename = "None"
@@ -274,10 +278,12 @@ def http_jwt_sign_and_send (
 	### values : dict, optional
 		values that will go inside Bearer JWT. Defaults to {}.
 	"""
-	http_jwt = http_jwt_sign(values)
-	http_cerver_auth_generate_bearer_jwt_json (http_receive_get_cerver (http_receive), http_jwt)
+	http_jwt = http_jwt_sign (values)
+	http_cerver_auth_generate_bearer_jwt_json (
+		http_receive_get_cerver (http_receive), http_jwt
+	)
 
-	response = http_response_create(
+	response = http_response_create (
 		status_code, http_jwt_get_json (http_jwt), http_jwt_get_json_len (http_jwt)
 	)
 
@@ -285,11 +291,11 @@ def http_jwt_sign_and_send (
 	http_response_send (response, http_receive)
 	http_response_delete (response)
 
-	http_cerver_auth_jwt_delete(http_jwt)
+	http_cerver_auth_jwt_delete (http_jwt)
 
 def http_jwt_token_decode (request):
 	json_string = cast (http_request_get_decoded_data (request), c_char_p)
-	result = json.loads (json_string.value.decode("utf-8"))
+	result = json.loads (json_string.value.decode ("utf-8"))
 	return result
 
 # stats

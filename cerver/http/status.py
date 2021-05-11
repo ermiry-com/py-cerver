@@ -1,4 +1,6 @@
-from ctypes import c_int
+from ctypes import c_int, c_char_p
+
+from ..lib import lib
 
 http_status = c_int
 
@@ -62,3 +64,7 @@ HTTP_STATUS_INSUFFICIENT_STORAGE = 507
 HTTP_STATUS_LOOP_DETECTED = 508
 HTTP_STATUS_NOT_EXTENDED = 510
 HTTP_STATUS_NETWORK_AUTHENTICATION_REQUIRED = 511
+
+http_status_string = lib.http_status_string
+http_status_string.argtypes = [http_status]
+http_status_string.restype = c_char_p
