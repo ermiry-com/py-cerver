@@ -33,10 +33,10 @@ def custom_handler_method (data):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def main_handler (http_receive, request):
 	http_response_json_msg_send (
-		http_receive, 200, "Main handler!".encode ('utf-8')
+		http_receive, HTTP_STATUS_OK, "Main handler!".encode ('utf-8')
 	)
 
-# GET /jobs
+# POST /jobs
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def jobs_handler (http_receive, request):
 	global job_queue
@@ -50,7 +50,7 @@ def jobs_handler (http_receive, request):
 	job_handler_wait (job_queue, data, None)
 
 	http_response_json_msg_send (
-		http_receive, 200, data.result.encode ('utf-8')
+		http_receive, HTTP_STATUS_OK, data.result.encode ('utf-8')
 	)
 
 def start ():
