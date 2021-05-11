@@ -29,6 +29,6 @@ COPY --from=builder /opt/cerver/cerver-${CERVER_VERSION}/include/cerver /usr/loc
 
 # pycerver
 WORKDIR /home/pycerver
-RUN pip install --no-cache-dir pycerver==0.6.2
+RUN pip install --no-cache-dir pycerver==0.6.3
 
 CMD ["/bin/bash"]
