@@ -1,5 +1,7 @@
 from ctypes import c_int, c_char_p
 
+from ..lib import lib
+
 HttpHeader = c_int
 
 # Authentication
