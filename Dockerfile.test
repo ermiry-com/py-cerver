@@ -34,6 +34,7 @@ COPY ./cerver ./cerver
 COPY ./path.sh .
 RUN /bin/bash path.sh
 
+COPY ./test/cerver .
 COPY ./test/web/ ./web
 # COPY ./test/web/public ./public
 # COPY ./test/web/keys ./keys
