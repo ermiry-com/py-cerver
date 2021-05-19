@@ -1,4 +1,4 @@
-ARG CERVER_VERSION=2.0b-33
+ARG CERVER_VERSION=2.0b-36
 
 ARG RUNTIME_DEPS='libssl1.1'
 
@@ -34,7 +34,6 @@ COPY ./cerver ./cerver
 COPY ./path.sh .
 RUN /bin/bash path.sh
 
-COPY ./test/cerver .
 COPY ./test/web/ ./web
 # COPY ./test/web/public ./public
 # COPY ./test/web/keys ./keys
