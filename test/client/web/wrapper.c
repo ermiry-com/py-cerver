@@ -23,7 +23,7 @@ static size_t wrapper_request_all_data_handler (
 }
 
 static unsigned int wrapper_request_echo (
-	CURL *curl, const char *actual_address, char *data_buffer
+	CURL *curl, char *actual_address, char *data_buffer
 ) {
 
 	unsigned int retval = 1;
