@@ -14,61 +14,104 @@ def end (signum, frame):
 	cerver_end ()
 	sys.exit ("Done!")
 
-# GET /
+# GET /render
+# test http_response_render_file ()
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def main_handler (http_receive, request):
+def main_render_handler (http_receive, request):
 	http_response_render_file (
-		http_receive,
+		http_receive, HTTP_STATUS_OK,
 		"./web/public/index.html".encode ('utf-8')
 	)
 
-# GET /test
+# GET /render/text
+# test http_response_render_text ()
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def test_handler (http_receive, request):
-	response = http_response_json_msg (
-		HTTP_STATUS_OK, "Test route works!".encode ('utf-8')
-	)
-
-	http_response_print (response)
-	http_response_send (response, http_receive)
-	http_response_delete (response)
-
-# GET /text
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def text_handler (http_receive, request):
+def text_render_handler (http_receive, request):
 	text = "<!DOCTYPE html><html><head><meta charset=\"utf-8\" /><title>Cerver</title></head><body><h2>text_handler () works!</h2></body></html>".encode ('utf-8')
 	text_len = len (text)
 
-	http_response_render_text (http_receive, text, text_len)
+	http_response_render_text (
+		http_receive, HTTP_STATUS_OK,
+		text, text_len
+	)
 
-# GET /json
+# GET /render/json
+# test http_response_render_json ()
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def json_handler (http_receive, request):
+def json_render_handler (http_receive, request):
 	json =  "{\"msg\": \"okay\"}".encode ('utf-8')
 	json_len = len (json)
 
-	http_response_render_json (http_receive, json, json_len)
-
-# GET /hola
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def hola_handler (http_receive, request):
-	http_response_json_msg_send (
-		http_receive, 200, "Hola handler!".encode ('utf-8')
-	)
-
-# GET /adios
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def adios_handler (http_receive, request):
-	http_response_json_msg_send (
-		http_receive, 200, "Adios handler!".encode ('utf-8')
-	)
-
-# GET /key
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def key_handler (http_receive, request):
-	http_response_json_key_value_send (
+	http_response_render_json (
 		http_receive, HTTP_STATUS_OK,
-		"key".encode ('utf-8'), "value".encode ('utf-8')
+		json, json_len
+	)
+
+# GET /json/create
+# test http_response_create_json ()
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def json_create_handler (http_receive, request):
+	json =  "{\"msg\": \"okay\"}".encode ('utf-8')
+	json_len = len (json)
+
+	res = http_response_create_json (
+		HTTP_STATUS_OK, json, json_len
+	)
+
+	http_response_print (res)
+	http_response_send (res, http_receive)
+	http_response_delete (res)
+
+# GET /json/create/key
+# test http_response_create_json ()
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def json_create_key_value_handler (http_receive, request):
+	res = http_response_create_json_key_value (
+		HTTP_STATUS_OK, "msg".encode ('utf-8'), "okay".encode ('utf-8')
+	)
+
+	http_response_print (res)
+	http_response_send (res, http_receive)
+	http_response_delete (res)
+
+# GET /json/create/message
+# test http_response_json_msg ()
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def json_create_message_handler (http_receive, request):
+	res = http_response_json_msg (
+		HTTP_STATUS_OK, "okay".encode ('utf-8')
+	)
+
+	http_response_print (res)
+	http_response_send (res, http_receive)
+	http_response_delete (res)
+
+# GET /json/send/message
+# test http_response_json_msg_send ()
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def json_send_message_handler (http_receive, request):
+	http_response_json_msg_send (
+		http_receive, HTTP_STATUS_OK, "okay".encode ('utf-8')
+	)
+
+# GET /json/create/error
+# test http_response_json_error ()
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def json_create_error_handler (http_receive, request):
+	res = http_response_json_error (
+		HTTP_STATUS_BAD_REQUEST, "bad request".encode ('utf-8')
+	)
+
+	http_response_print (res)
+	http_response_send (res, http_receive)
+	http_response_delete (res)
+
+# GET /json/send/error
+# test http_response_json_msg_send ()
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def json_send_error_handler (http_receive, request):
+	http_response_json_error_send (
+		http_receive, HTTP_STATUS_BAD_REQUEST, "bad request".encode ('utf-8')
 	)
 
 def start ():
@@ -89,33 +132,41 @@ def start ():
 
 	http_cerver_static_path_add (http_cerver, "./web/public".encode ('utf-8'))
 
-	# GET /
-	main_route = http_route_create (REQUEST_METHOD_GET, "/".encode ('utf-8'), main_handler)
-	http_cerver_route_register (http_cerver, main_route)
+	# GET /render
+	render_route = http_route_create (REQUEST_METHOD_GET, "render".encode ('utf-8'), main_render_handler);
+	http_cerver_route_register (http_cerver, render_route);
 
-	# GET /test
-	test_route = http_route_create (REQUEST_METHOD_GET, "test".encode ('utf-8'), test_handler)
-	http_cerver_route_register (http_cerver, test_route)
+	# GET /render/text
+	render_text_route = http_route_create (REQUEST_METHOD_GET, "render/text".encode ('utf-8'), text_render_handler);
+	http_cerver_route_register (http_cerver, render_text_route);
 
-	# GET /text
-	text_route = http_route_create (REQUEST_METHOD_GET, "text".encode ('utf-8'), text_handler)
-	http_cerver_route_register (http_cerver, text_route)
+	# GET /render/json
+	render_json_route = http_route_create (REQUEST_METHOD_GET, "render/json".encode ('utf-8'), json_render_handler);
+	http_cerver_route_register (http_cerver, render_json_route);
 
-	# GET /json
-	json_route = http_route_create (REQUEST_METHOD_GET, "json".encode ('utf-8'), json_handler)
-	http_cerver_route_register (http_cerver, json_route)
+	# GET /json/create
+	json_create_route = http_route_create (REQUEST_METHOD_GET, "json/create".encode ('utf-8'), json_create_handler);
+	http_cerver_route_register (http_cerver, json_create_route);
 
-	# GET /hola
-	hola_route = http_route_create (REQUEST_METHOD_GET, "hola".encode ('utf-8'), hola_handler)
-	http_cerver_route_register (http_cerver, hola_route)
+	# GET /json/create/key
+	json_create_key_value_route = http_route_create (REQUEST_METHOD_GET, "json/create/key".encode ('utf-8'), json_create_key_value_handler);
+	http_cerver_route_register (http_cerver, json_create_key_value_route);
 
-	# GET /adios
-	adios_route = http_route_create (REQUEST_METHOD_GET, "adios".encode ('utf-8'), adios_handler)
-	http_cerver_route_register (http_cerver, adios_route)
+	# GET /json/create/message
+	json_create_message_route = http_route_create (REQUEST_METHOD_GET, "json/create/message".encode ('utf-8'), json_create_message_handler);
+	http_cerver_route_register (http_cerver, json_create_message_route);
 
-	# GET /key
-	key_route = http_route_create (REQUEST_METHOD_GET, "key".encode ('utf-8'), key_handler)
-	http_cerver_route_register (http_cerver, key_route)
+	# GET /json/send/message
+	json_send_message_route = http_route_create (REQUEST_METHOD_GET, "json/send/message".encode ('utf-8'), json_send_message_handler);
+	http_cerver_route_register (http_cerver, json_send_message_route);
+
+	# GET /json/create/error
+	json_create_error_route = http_route_create (REQUEST_METHOD_GET, "json/create/error".encode ('utf-8'), json_create_error_handler);
+	http_cerver_route_register (http_cerver, json_create_error_route);
+
+	# GET /json/send/error
+	json_send_error_route = http_route_create (REQUEST_METHOD_GET, "json/send/error".encode ('utf-8'), json_send_error_handler);
+	http_cerver_route_register (http_cerver, json_send_error_route);
 
 	# start
 	cerver_start (web_cerver)
