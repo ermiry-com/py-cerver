@@ -112,6 +112,13 @@ testapp:
 	@mkdir -p ./$(TESTTARGET)/app
 	$(CC) $(TESTAPPFGS) $(TESTAPPSRC) -shared -o $(TESTAPP) $(TESTAPPLIBS)
 
+INTCLIENTIN		:= ./$(TESTBUILD)/client
+INTCLIENTOUT	:= ./$(TESTTARGET)/client
+INTCLIENTLIBS	:= $(TESTLIBS) -Wl,-rpath=./$(TESTTARGET)/app -L ./$(TESTTARGET)/app -l app
+
+integration-client:
+	$(CC) $(TESTINC) $(INTCLIENTIN)/ping.o -o $(INTCLIENTOUT)/ping $(TESTLIBS)
+
 INTWEBCLIENTIN		:= ./$(TESTBUILD)/client/web
 INTWEBCLIENTOUT		:= ./$(TESTTARGET)/client/web
 INTWEBCLIENTLIBS	:= $(TESTLIBS) $(CURL)
@@ -126,11 +133,13 @@ integration-web-client:
 	$(CC) $(TESTINC) $(INTWEBCLIENTIN)/wrapper.o $(INTWEBCLIENTIN)/curl.o -o $(INTWEBCLIENTOUT)/wrapper $(INTWEBCLIENTLIBS)
 
 integration: testout $(TESTOBJS)
+	$(MAKE) integration-client
 	$(MAKE) integration-web-client
 
 testout:
 	@mkdir -p ./$(TESTTARGET)
 	@mkdir -p ./$(TESTTARGET)/client
+	@mkdir -p ./$(TESTTARGET)/client/web
 
 test: testout
 	$(MAKE) $(TESTOBJS)

@@ -1,26 +1,21 @@
 ## General
-- Refactored main cerver methods organization
-- Updated Dockerfiles to use cerver 2.0b-36
-- Updated test workflow to use latest HTTP cerver
+- Added base network definitions in dedicated source
+- Added base handler structure methods bindings
+- Added base packets definitions & methods
+- Added more main cerver methods bindings
+- Added script to configure path in test image
+- Refactored test Dockerfile to handle new tests
+- Added ping integration test in run script
 
 ## HTTP
-- Added http_status_string () method binding
-- Refactored http_route_create () definition
-- Refactored HTTP response methods organization
-- Added http_cerver_auth_generate_bearer_jwt_json_with_value ()
-- Added base HTTP headers methods bindings
+- Moved HTTP sources to dedicated module
 
 ## Examples
-- Updated examples to use HTTP status definitions
-- Added base HTTP quick start example
+- Refactored examples import configuration
+- Moved HTTP examples to dedicated directory
+- Successfully handled packets in new test example
 
 ## Tests
-- Refactored web integration test handlers
-
-## Fixes
-- Fixed http_request_get_content_type () typo
-
-## Documentation
-- Added documentation submodule
-- Updated documentation to Version 1.0
-- Added dedicated workflow to publish docs
+- Updated tests imports to match examples
+- Added dedicated header to be used by tests
+- Added base client ping integration test sources

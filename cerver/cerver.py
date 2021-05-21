@@ -67,6 +67,10 @@ cerver_stats_print = lib.cerver_stats_print
 cerver_stats_print.argtypes = [c_void_p, c_bool, c_bool]
 
 # main
+cerver_create = lib.cerver_create
+cerver_create.argtypes = [CerverType, c_char_p, c_uint16, c_int, c_bool, c_uint16]
+cerver_create.restype = c_void_p
+
 cerver_create_web = lib.cerver_create_web
 cerver_create_web.argtypes = [c_char_p, c_uint16, c_uint16]
 cerver_create_web.restype = c_void_p
@@ -103,6 +107,9 @@ cerver_set_handler_type.argtypes = [c_void_p, CerverHandlerType]
 
 cerver_set_reusable_address_flags = lib.cerver_set_reusable_address_flags
 cerver_set_reusable_address_flags.argtypes = [c_void_p, c_bool]
+
+cerver_set_app_handlers = lib.cerver_set_app_handlers
+cerver_set_app_handlers.argtypes = [c_void_p, c_void_p, c_void_p]
 
 # start
 cerver_start = lib.cerver_start
