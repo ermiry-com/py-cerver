@@ -1,10 +1,20 @@
-from ctypes import c_int, c_void_p, c_bool, CFUNCTYPE
+from ctypes import c_int, c_void_p, py_object, c_bool, CFUNCTYPE, Structure, POINTER
 
 from .lib import lib
 
+from .packets import Packet
+
+class HandlerData (Structure):
+	_fields_ = [
+		("handler_id", c_int),
+
+		("data", py_object),
+		("packet", POINTER (Packet))
+	]
+
 HandlerMethod = CFUNCTYPE (None, c_void_p)
 
-HandlerDataCreate = CFUNCTYPE (c_void_p, c_void_p)
+HandlerDataCreate = CFUNCTYPE (py_object, c_void_p)
 HandlerDataDelete = CFUNCTYPE (None, c_void_p)
 
 handler_delete = lib.handler_delete
