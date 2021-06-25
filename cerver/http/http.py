@@ -315,6 +315,14 @@ http_cerver_register_admin_file_system = lib.http_cerver_register_admin_file_sys
 http_cerver_register_admin_file_system.argtypes = [c_void_p, c_char_p]
 
 # handler
+http_receive_get_cerver_receive = lib.http_receive_get_cerver_receive
+http_receive_get_cerver_receive.argtypes = [c_void_p]
+http_receive_get_cerver_receive.restype = c_void_p
+
+http_receive_get_sock_fd = lib.http_receive_get_sock_fd
+http_receive_get_sock_fd.argtypes = [c_void_p]
+http_receive_get_sock_fd.restype = c_int
+
 http_receive_get_cerver = lib.http_receive_get_cerver
 http_receive_get_cerver.argtypes = [c_void_p]
 http_receive_get_cerver.restype = c_void_p
