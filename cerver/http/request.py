@@ -67,6 +67,10 @@ http_request_get_body = lib.http_request_get_body
 http_request_get_body.argtypes = [c_void_p]
 http_request_get_body.restype = POINTER (String)
 
+http_request_get_current_mpart = lib.http_request_get_current_mpart
+http_request_get_current_mpart.argtypes = [c_void_p]
+http_request_get_current_mpart.restype = c_void_p
+
 http_request_get_n_files = lib.http_request_get_n_files
 http_request_get_n_files.argtypes = [c_void_p]
 http_request_get_n_files.restype = c_uint8
@@ -127,6 +131,10 @@ http_request_query_params_get_value.argtypes = [c_void_p, c_char_p]
 http_request_query_params_get_value.restype = POINTER (String)
 
 # multi-parts
+http_request_multi_parts_get = lib.http_request_multi_parts_get
+http_request_multi_parts_get.argtypes = [c_void_p, c_char_p]
+http_request_multi_parts_get.restype = c_void_p
+
 http_request_multi_parts_get_value = lib.http_request_multi_parts_get_value
 http_request_multi_parts_get_value.argtypes = [c_void_p, c_char_p]
 http_request_multi_parts_get_value.restype = POINTER (String)
@@ -138,6 +146,14 @@ http_request_multi_parts_get_filename.restype = c_char_p
 http_request_multi_parts_get_saved_filename = lib.http_request_multi_parts_get_saved_filename
 http_request_multi_parts_get_saved_filename.argtypes = [c_void_p, c_char_p]
 http_request_multi_parts_get_saved_filename.restype = c_char_p
+
+http_request_multi_parts_iter_start = lib.http_request_multi_parts_iter_start
+http_request_multi_parts_iter_start.argtypes = [c_void_p]
+http_request_multi_parts_iter_start.restype = c_bool
+
+http_request_multi_parts_iter_get_next = lib.http_request_multi_parts_iter_get_next
+http_request_multi_parts_iter_get_next.argtypes = [c_void_p]
+http_request_multi_parts_iter_get_next.restype = c_void_p
 
 http_request_multi_part_keep_files = lib.http_request_multi_part_keep_files
 http_request_multi_part_keep_files.argtypes = [c_void_p]
