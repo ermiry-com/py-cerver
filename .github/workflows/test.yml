@@ -34,6 +34,14 @@ jobs:
       - name: Compile Tests
         run: make TYPE=test test
 
+      - name: Ping Integration Test
+        run: |
+          docker run -d --name test --rm -p 7000:7000 ermiry/pycerver:test python3 ping.py
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/ping
+          sudo docker kill $(sudo docker ps -q)
+
       - name: Web Integration Test
         run: |
           sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 web/web.py
