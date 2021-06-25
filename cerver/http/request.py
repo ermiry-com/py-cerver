@@ -67,6 +67,24 @@ http_request_get_body = lib.http_request_get_body
 http_request_get_body.argtypes = [c_void_p]
 http_request_get_body.restype = POINTER (String)
 
+http_request_get_n_files = lib.http_request_get_n_files
+http_request_get_n_files.argtypes = [c_void_p]
+http_request_get_n_files.restype = c_uint8
+
+http_request_get_n_values = lib.http_request_get_n_values
+http_request_get_n_values.argtypes = [c_void_p]
+http_request_get_n_values.restype = c_uint8
+
+http_request_get_dirname_len = lib.http_request_get_dirname_len
+http_request_get_dirname_len.argtypes = [c_void_p]
+http_request_get_dirname_len.restype = c_int
+
+http_request_get_dirname = lib.http_request_get_dirname
+http_request_get_dirname.argtypes = [c_void_p]
+http_request_get_dirname.restype = c_char_p
+
+http_request_set_dirname = lib.http_request_set_dirname
+
 http_request_get_body_values = lib.http_request_get_body_values
 http_request_get_body_values.argtypes = [c_void_p]
 http_request_get_body_values.restype = c_void_p
