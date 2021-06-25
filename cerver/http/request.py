@@ -1,4 +1,4 @@
-from ctypes import c_int, c_uint, c_void_p, c_char_p, c_bool, POINTER
+from ctypes import c_int, c_uint, c_uint8, c_void_p, c_char_p, c_bool, POINTER
 
 import json
 
@@ -7,7 +7,7 @@ from ..lib import lib
 from ..types.string import String
 
 from .content import ContentType
-from .headers import HttpHeader
+from .headers import http_header
 from .query import http_query_pairs_get_value
 
 RequestMethod = c_int
@@ -44,7 +44,7 @@ http_request_get_param_at_idx.argtypes = [c_void_p, c_uint]
 http_request_get_param_at_idx.restype = POINTER (String)
 
 http_request_get_header = lib.http_request_get_header
-http_request_get_header.argtypes = [c_void_p, HttpHeader]
+http_request_get_header.argtypes = [c_void_p, http_header]
 http_request_get_header.restype = POINTER (String)
 
 http_request_get_content_type = lib.http_request_get_content_type

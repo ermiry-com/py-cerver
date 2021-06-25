@@ -5,7 +5,7 @@ import json
 from ..lib import lib
 
 from .content import ContentType, HTTP_CONTENT_TYPE_HTML
-from .headers import HttpHeader
+from .headers import http_header
 from .status import http_status
 
 http_response_delete = lib.http_response_delete
@@ -32,7 +32,7 @@ http_response_set_header.argtypes = [c_void_p, c_void_p, c_size_t]
 # http_response_compile () to generate a continuos header buffer
 # returns 0 on success, 1 on error
 http_response_add_header = lib.http_response_add_header
-http_response_add_header.argtypes = [c_void_p, HttpHeader, c_char_p]
+http_response_add_header.argtypes = [c_void_p, http_header, c_char_p]
 http_response_add_header.restype = c_uint8
 
 # adds a HTTP_HEADER_CONTENT_TYPE header to the response
