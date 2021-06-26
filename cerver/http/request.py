@@ -137,7 +137,7 @@ http_request_multi_parts_get.restype = c_void_p
 
 http_request_multi_parts_get_value = lib.http_request_multi_parts_get_value
 http_request_multi_parts_get_value.argtypes = [c_void_p, c_char_p]
-http_request_multi_parts_get_value.restype = POINTER (String)
+http_request_multi_parts_get_value.restype = c_char_p
 
 http_request_multi_parts_get_filename = lib.http_request_multi_parts_get_filename
 http_request_multi_parts_get_filename.argtypes = [c_void_p, c_char_p]
