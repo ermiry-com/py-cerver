@@ -41,7 +41,7 @@ def upload_handler (http_receive, request):
 		print (value.contents.str)
 
 	http_response_json_msg_send (
-		http_receive, 200, "Upload works!".encode ('utf-8')
+		http_receive, HTTP_STATUS_OK, "Upload works!".encode ('utf-8')
 	)
 
 def iter_good_handler_send_success (http_receive):
@@ -79,6 +79,8 @@ def iter_good_handler_send_failure (http_receive):
 # POST /iter/good
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def iter_good_handler (http_receive, request):
+	http_request_multi_parts_print (request)
+
 	if (http_request_multi_parts_iter_start (request)):
 		mpart = http_request_multi_parts_iter_get_next (request)
 		while (mpart):
@@ -111,6 +113,8 @@ def iter_good_handler (http_receive, request):
 # POST /iter/empty
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def iter_empty_handler (http_receive, request):
+	http_request_multi_parts_print (request)
+
 	if (http_request_multi_parts_iter_start (request) is False):
 		http_response_json_msg_send (
 			http_receive, HTTP_STATUS_OK,
@@ -121,6 +125,30 @@ def iter_empty_handler (http_receive, request):
 		http_response_json_error_send (
 			http_receive, HTTP_STATUS_BAD_REQUEST,
 			"Iter empty route bad request!".encode ('utf-8')
+		)
+
+# POST /discard
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def discard_handler (http_receive, request):
+	http_request_multi_parts_print (request)
+
+	key = http_request_multi_parts_get_value (request, "key".encode ('utf-8'))
+	if (key == "okay".encode ('utf-8')):
+		cerver.utils.cerver_log_success (
+			"Success request, keeping multi part files...".encode ('utf-8')
+		)
+
+		http_response_json_msg_send (
+			http_receive, HTTP_STATUS_OK, "Success request!".encode ('utf-8')
+		)
+
+	else:
+		cerver.utils.cerver_log_error ("key != okay".encode ('utf-8'))
+		cerver.utils.cerver_log_debug ("Discarding multi part files...".encode ('utf-8'))
+		http_request_multi_part_discard_files (request)
+		http_response_json_error_send (
+			http_receive, HTTP_STATUS_BAD_REQUEST,
+			"Bad request!".encode ('utf-8')
 		)
 
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
@@ -177,9 +205,15 @@ def start ():
 	http_route_set_modifier (iter_good_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, iter_good_route)
 
+	# POST /iter/empty
 	iter_empty_route = http_route_create (REQUEST_METHOD_POST, "iter/empty".encode ('utf-8'), iter_empty_handler)
 	http_route_set_modifier (iter_empty_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, iter_empty_route)
+
+	# POST /discard
+	discard_route = http_route_create (REQUEST_METHOD_POST, "discard".encode ('utf-8'), discard_handler)
+	http_route_set_modifier (discard_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, discard_route)
 
 	# start
 	cerver_start (web_cerver)
