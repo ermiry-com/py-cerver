@@ -17,7 +17,7 @@ from .request import http_request_get_decoded_data
 CatchAllHandler = CFUNCTYPE (None, c_void_p, c_void_p)
 NotFoundHandler = CFUNCTYPE (None, c_void_p, c_void_p)
 UploadsFilenameGenerator = CFUNCTYPE (None, c_void_p, c_void_p)
-UploadsDirnameGenerator = CFUNCTYPE (c_void_p, c_void_p)
+UploadsDirnameGenerator = CFUNCTYPE (None, c_void_p, c_void_p)
 
 # main
 http_cerver_get = lib.http_cerver_get
