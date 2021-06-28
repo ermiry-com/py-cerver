@@ -1,6 +1,6 @@
 import json
 
-from ctypes import c_uint8, c_void_p, c_char_p, c_bool, c_int, c_size_t, CFUNCTYPE, POINTER, cast
+from ctypes import c_int, c_uint, c_uint8, c_void_p, c_char_p, c_bool, c_size_t, CFUNCTYPE, POINTER, cast
 
 from ..lib import lib
 
@@ -12,6 +12,17 @@ from .alg import jwt_alg_t, JWT_ALG_NONE
 from .response import http_response_create, http_response_compile, http_response_send, http_response_delete
 from .route import HttpRouteAuthType, HTTP_ROUTE_AUTH_TYPE_BEARER, http_route_create, http_route_child_add, http_route_set_auth, http_route_set_decode_data_into_json
 from .request import http_request_get_decoded_data
+
+# types
+CatchAllHandler = CFUNCTYPE (None, c_void_p, c_void_p)
+NotFoundHandler = CFUNCTYPE (None, c_void_p, c_void_p)
+UploadsFilenameGenerator = CFUNCTYPE (None, c_void_p, c_void_p)
+UploadsDirnameGenerator = CFUNCTYPE (None, c_void_p, c_void_p)
+
+# main
+http_cerver_get = lib.http_cerver_get
+http_cerver_get.argtypes = [c_void_p]
+http_cerver_get.restype = c_void_p
 
 def cerver_main_http_configuration (
 	port = 8080, connection_queue = 10,
@@ -47,17 +58,6 @@ def cerver_main_http_configuration (
 	cerver_set_handler_type (http_cerver, handler_type)
 	cerver_set_reusable_address_flags (http_cerver, reusable_address_flags)
 	return http_cerver
-
-# types
-CatchAllHandler = CFUNCTYPE (None, c_void_p, c_void_p)
-NotFoundHandler = CFUNCTYPE (None, c_void_p, c_void_p)
-UploadsFilenameGenerator = CFUNCTYPE (None, c_void_p, c_char_p, c_char_p)
-UploadsDirnameGenerator = CFUNCTYPE (POINTER (String), c_void_p)
-
-# main
-http_cerver_get = lib.http_cerver_get
-http_cerver_get.argtypes = [c_void_p]
-http_cerver_get.restype = c_void_p
 
 # public
 http_static_path_set_auth = lib.http_static_path_set_auth
@@ -153,10 +153,15 @@ def http_create_secure_route (
 
 # uploads
 http_cerver_set_uploads_path = lib.http_cerver_set_uploads_path
-http_cerver_set_uploads_path.argtypes = [c_void_p, c_char_p]
+
+http_cerver_set_uploads_file_mode = lib.http_cerver_set_uploads_file_mode
+http_cerver_set_uploads_file_mode.argtypes = [c_void_p, c_uint]
 
 http_cerver_set_uploads_filename_generator = lib.http_cerver_set_uploads_filename_generator
 http_cerver_set_uploads_filename_generator.argtypes = [c_void_p, UploadsFilenameGenerator]
+
+http_cerver_set_uploads_dir_mode = lib.http_cerver_set_uploads_dir_mode
+http_cerver_set_uploads_dir_mode.argtypes = [c_void_p, c_uint]
 
 http_cerver_set_uploads_dirname_generator = lib.http_cerver_set_uploads_dirname_generator
 http_cerver_set_uploads_dirname_generator.argtypes = [c_void_p, UploadsDirnameGenerator]
@@ -310,6 +315,14 @@ http_cerver_register_admin_file_system = lib.http_cerver_register_admin_file_sys
 http_cerver_register_admin_file_system.argtypes = [c_void_p, c_char_p]
 
 # handler
+http_receive_get_cerver_receive = lib.http_receive_get_cerver_receive
+http_receive_get_cerver_receive.argtypes = [c_void_p]
+http_receive_get_cerver_receive.restype = c_void_p
+
+http_receive_get_sock_fd = lib.http_receive_get_sock_fd
+http_receive_get_sock_fd.argtypes = [c_void_p]
+http_receive_get_sock_fd.restype = c_int
+
 http_receive_get_cerver = lib.http_receive_get_cerver
 http_receive_get_cerver.argtypes = [c_void_p]
 http_receive_get_cerver.restype = c_void_p

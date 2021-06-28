@@ -25,7 +25,7 @@ def end (signum, frame):
 @ctypes.CFUNCTYPE (None, ctypes.py_object)
 def custom_handler_method (data):
 	print ("custom_handler_method ()")
-	print (data.value.contents.str)
+	print (data.value)
 	data.result = "Hello there!"
 	time.sleep (1)
 
@@ -33,7 +33,7 @@ def custom_handler_method (data):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def main_handler (http_receive, request):
 	http_response_json_msg_send (
-		http_receive, 200, "Main handler!".encode ('utf-8')
+		http_receive, HTTP_STATUS_OK, "Main handler!".encode ('utf-8')
 	)
 
 # GET /jobs
@@ -50,7 +50,7 @@ def jobs_handler (http_receive, request):
 	job_handler_wait (job_queue, data, None)
 
 	http_response_json_msg_send (
-		http_receive, 200, data.result.encode ('utf-8')
+		http_receive, HTTP_STATUS_OK, data.result.encode ('utf-8')
 	)
 
 def start ():
@@ -62,11 +62,11 @@ def start ():
 	)
 
 	# main configuration
-	cerver_set_receive_buffer_size (web_cerver, 4096);
-	cerver_set_thpool_n_threads (web_cerver, 4);
-	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS);
+	cerver_set_receive_buffer_size (web_cerver, 4096)
+	cerver_set_thpool_n_threads (web_cerver, 4)
+	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS)
 
-	cerver_set_reusable_address_flags (web_cerver, True);
+	cerver_set_reusable_address_flags (web_cerver, True)
 
 	# HTTP configuration
 	http_cerver = http_cerver_get (web_cerver)

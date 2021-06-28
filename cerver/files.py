@@ -1,7 +1,25 @@
-from ctypes import c_int, c_char_p, c_bool
+from ctypes import c_int, c_uint, c_char_p, c_bool, POINTER
 
 from .lib import lib
 
+# main
+files_create_dir = lib.files_create_dir
+files_create_dir.argtypes = [c_char_p, c_uint]
+files_create_dir.restype = c_uint
+
+files_create_recursive_dir = lib.files_create_recursive_dir
+files_create_recursive_dir.argtypes = [c_char_p, c_uint]
+files_create_recursive_dir.restype = c_uint
+
+files_get_file_extension_reference = lib.files_get_file_extension_reference
+files_get_file_extension_reference.argtypes = [c_char_p, POINTER (c_uint)]
+files_get_file_extension_reference.restype = c_char_p
+
+file_exists = lib.file_exists
+file_exists.argtypes = [c_char_p]
+file_exists.restype = c_bool
+
+# images
 ImageType = c_int
 
 IMAGE_TYPE_NONE = 0

@@ -25,7 +25,7 @@ def end (signum, frame):
 @ctypes.CFUNCTYPE (None, ctypes.py_object)
 def custom_handler_method (data):
 	print ("custom_handler_method ()")
-	print (data.value.contents.str)
+	print (data.value)
 	data.result = "Hello there!"
 	time.sleep (1)
 
@@ -62,11 +62,11 @@ def start ():
 	)
 
 	# main configuration
-	cerver_set_receive_buffer_size (web_cerver, 4096);
-	cerver_set_thpool_n_threads (web_cerver, 4);
-	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS);
+	cerver_set_receive_buffer_size (web_cerver, 4096)
+	cerver_set_thpool_n_threads (web_cerver, 4)
+	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS)
 
-	cerver_set_reusable_address_flags (web_cerver, True);
+	cerver_set_reusable_address_flags (web_cerver, True)
 
 	# HTTP configuration
 	http_cerver = http_cerver_get (web_cerver)

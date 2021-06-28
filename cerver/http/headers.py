@@ -2,7 +2,7 @@ from ctypes import c_int, c_char_p
 
 from ..lib import lib
 
-HttpHeader = c_int
+http_header = c_int
 
 # Authentication
 HTTP_HEADER_AUTHENTICATE = 0
@@ -94,13 +94,13 @@ HTTP_HEADER_UPGRADE = 54
 HTTP_HEADER_INVALID = 53
 
 http_header_string = lib.http_header_string
-http_header_string.argtypes = [HttpHeader]
+http_header_string.argtypes = [http_header]
 http_header_string.restype = c_char_p
 
 http_header_description = lib.http_header_description
-http_header_description.argtypes = [HttpHeader]
+http_header_description.argtypes = [http_header]
 http_header_description.restype = c_char_p
 
 http_header_type_by_string = lib.http_header_type_by_string
 http_header_type_by_string.argtypes = [c_char_p]
-http_header_type_by_string.restype = HttpHeader
+http_header_type_by_string.restype = http_header

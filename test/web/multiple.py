@@ -17,37 +17,10 @@ def end (signum, frame):
 	cerver_end ()
 	sys.exit ("Done!")
 
-# GET /test
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def test_handler (http_receive, request):
-	response = http_response_json_msg (
-		HTTP_STATUS_OK, "Test route works!".encode ('utf-8')
-	)
-
-	http_response_print (response)
-	http_response_send (response, http_receive)
-	http_response_delete (response)
-
-# POST /upload
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def upload_handler (http_receive, request):
-	http_request_multi_parts_print (request)
-
-	value = http_request_multi_parts_get_value (
-		request, "value".encode ('utf-8')
-	)
-
-	if value:
-		print (value.contents.str)
-
-	http_response_json_msg_send (
-		http_receive, HTTP_STATUS_OK, "Upload works!".encode ('utf-8')
-	)
-
-def iter_good_handler_send_success (http_receive):
-	json = "{ \"msg\": \"Iter good route works!\" }"
+def multiple_handler_send_success (http_receive):
+	json = "{ \"msg\": \"Multiple route works!\" }"
 	json_len = len (json)
-	
+
 	response = http_response_create (HTTP_STATUS_OK, json.encode ('utf-8'), json_len)
 	if (response):
 		http_response_add_content_type_header (response, HTTP_CONTENT_TYPE_JSON)
@@ -60,7 +33,7 @@ def iter_good_handler_send_success (http_receive):
 		http_response_send (response, http_receive)
 		http_response_delete (response)
 
-def iter_good_handler_send_failure (http_receive):
+def multiple_handler_send_failure (http_receive):
 	json = "{ \"error\": \"Failed to get multi-part values!\" }"
 	json_len = len (json)
 
@@ -76,9 +49,9 @@ def iter_good_handler_send_failure (http_receive):
 		http_response_send (response, http_receive)
 		http_response_delete (response)
 
-# POST /iter/good
+# POST /multiple
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def iter_good_handler (http_receive, request):
+def multiple_handler (http_receive, request):
 	http_request_multi_parts_print (request)
 
 	if (http_request_multi_parts_iter_start (request)):
@@ -104,28 +77,11 @@ def iter_good_handler (http_receive, request):
 
 			mpart = http_request_multi_parts_iter_get_next (request)
 
-		iter_good_handler_send_success (http_receive)
+		multiple_handler_send_success (http_receive)
 
 	# failed to get multi-parts from request
 	else:
-		iter_good_handler_send_failure (http_receive)
-
-# POST /iter/empty
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def iter_empty_handler (http_receive, request):
-	http_request_multi_parts_print (request)
-
-	if (http_request_multi_parts_iter_start (request) is False):
-		http_response_json_msg_send (
-			http_receive, HTTP_STATUS_OK,
-			"Iter empty route works!".encode ('utf-8')
-		)
-
-	else:
-		http_response_json_error_send (
-			http_receive, HTTP_STATUS_BAD_REQUEST,
-			"Iter empty route bad request!".encode ('utf-8')
-		)
+		multiple_handler_send_failure (http_receive)
 
 # POST /discard
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
@@ -176,40 +132,26 @@ def start ():
 	)
 
 	# main configuration
-	cerver_set_receive_buffer_size (web_cerver, 4096);
-	cerver_set_thpool_n_threads (web_cerver, 4);
-	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS);
+	cerver_set_receive_buffer_size (web_cerver, 4096)
+	cerver_set_thpool_n_threads (web_cerver, 4)
+	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS)
 
-	cerver_set_reusable_address_flags (web_cerver, True);
+	cerver_set_reusable_address_flags (web_cerver, True)
 
 	# HTTP configuration
 	http_cerver = http_cerver_get (web_cerver)
 
-	files_create_dir ("uploads".encode ('utf-8'), 0o777)
-	http_cerver_set_uploads_path (http_cerver, "uploads".encode ('utf-8'))
+	# files_create_dir ("uploads".encode ('utf-8'), 0o777)
+	# http_cerver_set_uploads_path (http_cerver, "uploads".encode ('utf-8'))
 
 	http_cerver_set_uploads_filename_generator (
 		http_cerver, custom_uploads_filename_generator
 	)
 
-	# GET /test
-	test_route = http_route_create (REQUEST_METHOD_GET, "test".encode ('utf-8'), test_handler)
-	http_cerver_route_register (http_cerver, test_route)
-
-	# POST /upload
-	upload_route = http_route_create (REQUEST_METHOD_POST, "upload".encode ('utf-8'), upload_handler)
-	http_route_set_modifier (upload_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
-	http_cerver_route_register (http_cerver, upload_route)
-
-	# POST /iter/good
-	iter_good_route = http_route_create (REQUEST_METHOD_POST, "iter/good".encode ('utf-8'), iter_good_handler)
-	http_route_set_modifier (iter_good_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
-	http_cerver_route_register (http_cerver, iter_good_route)
-
-	# POST /iter/empty
-	iter_empty_route = http_route_create (REQUEST_METHOD_POST, "iter/empty".encode ('utf-8'), iter_empty_handler)
-	http_route_set_modifier (iter_empty_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
-	http_cerver_route_register (http_cerver, iter_empty_route)
+	# POST /multiple
+	multiple_route = http_route_create (REQUEST_METHOD_POST, "multiple".encode ('utf-8'), multiple_handler)
+	http_route_set_modifier (multiple_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, multiple_route)
 
 	# POST /discard
 	discard_route = http_route_create (REQUEST_METHOD_POST, "discard".encode ('utf-8'), discard_handler)

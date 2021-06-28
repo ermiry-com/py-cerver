@@ -21,7 +21,7 @@ jobs:
 
       - name: Compile Cerver
         env:
-          CERVER_VERSION: 2.0b-36
+          CERVER_VERSION: 2.0b-37
         run: |
           mkdir /opt/cerver && cd /opt/cerver
           wget -q --no-check-certificate https://github.com/ermiry/cerver/archive/$CERVER_VERSION.zip
@@ -64,6 +64,14 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/upload
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Web Multiple Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 web/multiple.py
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/multiple
           sudo docker kill $(sudo docker ps -q)
 
       - name: Web Jobs Integration Test
