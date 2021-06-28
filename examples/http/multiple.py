@@ -83,6 +83,30 @@ def multiple_handler (http_receive, request):
 	else:
 		multiple_handler_send_failure (http_receive)
 
+# POST /discard
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def discard_handler (http_receive, request):
+	http_request_multi_parts_print (request)
+
+	key = http_request_multi_parts_get_value (request, "key".encode ('utf-8'))
+	if (key == "okay".encode ('utf-8')):
+		cerver.utils.cerver_log_success (
+			"Success request, keeping multi part files...".encode ('utf-8')
+		)
+
+		http_response_json_msg_send (
+			http_receive, HTTP_STATUS_OK, "Success request!".encode ('utf-8')
+		)
+
+	else:
+		cerver.utils.cerver_log_error ("key != okay".encode ('utf-8'))
+		cerver.utils.cerver_log_debug ("Discarding multi part files...".encode ('utf-8'))
+		http_request_multi_part_discard_files (request)
+		http_response_json_error_send (
+			http_receive, HTTP_STATUS_BAD_REQUEST,
+			"Bad request!".encode ('utf-8')
+		)
+
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def custom_uploads_filename_generator (
 	http_receive, request
@@ -128,6 +152,11 @@ def start ():
 	multiple_route = http_route_create (REQUEST_METHOD_POST, "multiple".encode ('utf-8'), multiple_handler)
 	http_route_set_modifier (multiple_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, multiple_route)
+
+	# POST /discard
+	discard_route = http_route_create (REQUEST_METHOD_POST, "discard".encode ('utf-8'), discard_handler)
+	http_route_set_modifier (discard_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, discard_route)
 
 	# start
 	cerver_start (web_cerver)
