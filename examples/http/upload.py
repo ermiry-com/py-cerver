@@ -185,6 +185,7 @@ def start ():
 	# HTTP configuration
 	http_cerver = http_cerver_get (web_cerver)
 
+	files_create_dir ("uploads".encode ('utf-8'), 0o777)
 	http_cerver_set_uploads_path (http_cerver, "uploads".encode ('utf-8'))
 
 	http_cerver_set_uploads_filename_generator (
