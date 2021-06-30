@@ -1,4 +1,4 @@
-from ctypes import Structure, c_void_p, py_object, c_int, c_uint, POINTER, CFUNCTYPE
+from ctypes import Structure, c_void_p, py_object, c_int, c_uint, c_uint64, POINTER, CFUNCTYPE
 
 from ..lib import lib
 
@@ -16,6 +16,10 @@ job_new.restype = POINTER (Job)
 
 job_delete = lib.job_delete
 job_delete.argtypes = [c_void_p]
+
+job_comparator = lib.job_comparator
+job_comparator.argtypes = [c_void_p, c_void_p]
+job_comparator.restype = c_int
 
 job_create = lib.job_create
 job_create.argtypes = [JobMethod, c_void_p]
@@ -81,19 +85,27 @@ job_queue_set_handler.argtypes = [c_void_p, JobQueueHandler]
 
 job_queue_push = lib.job_queue_push
 job_queue_push.argtypes = [c_void_p, c_void_p]
-job_queue_push.restype = c_int
+job_queue_push.restype = c_uint
 
 job_queue_push_job = lib.job_queue_push_job
 job_queue_push_job.argtypes = [c_void_p, JobMethod, c_void_p]
-job_queue_push_job.restype = c_int
+job_queue_push_job.restype = c_uint
+
+job_queue_push_job_with_id = lib.job_queue_push_job_with_id
+job_queue_push_job_with_id.argtypes = [c_void_p, c_uint64, JobMethod, c_void_p]
+job_queue_push_job_with_id.restype = c_uint
 
 job_queue_push_handler = lib.job_queue_push_handler
 job_queue_push_handler.argtypes = [c_void_p, c_void_p, c_void_p, c_void_p, JobDataDelete]
-job_queue_push_handler.restype = c_int
+job_queue_push_handler.restype = c_uint
 
 job_queue_pull = lib.job_queue_pull
 job_queue_pull.argtypes = [c_void_p]
 job_queue_pull.restype = c_void_p
+
+job_queue_request = lib.job_queue_request
+job_queue_request.argtypes = [c_void_p, c_uint64]
+job_queue_request.restype = c_void_p
 
 job_queue_start = lib.job_queue_start
 job_queue_start.argtypes = [c_void_p]
