@@ -153,6 +153,9 @@ def http_create_secure_route (
 
 # uploads
 http_cerver_set_uploads_path = lib.http_cerver_set_uploads_path
+http_cerver_set_uploads_path.argtypes = [c_void_p, c_char_p]
+
+http_cerver_generate_uploads_path = lib.http_cerver_generate_uploads_path
 
 http_cerver_set_uploads_file_mode = lib.http_cerver_set_uploads_file_mode
 http_cerver_set_uploads_file_mode.argtypes = [c_void_p, c_uint]
