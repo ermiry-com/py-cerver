@@ -160,11 +160,17 @@ http_cerver_generate_uploads_path = lib.http_cerver_generate_uploads_path
 http_cerver_set_uploads_file_mode = lib.http_cerver_set_uploads_file_mode
 http_cerver_set_uploads_file_mode.argtypes = [c_void_p, c_uint]
 
+http_cerver_default_uploads_filename_generator = lib.http_cerver_default_uploads_filename_generator
+http_cerver_default_uploads_filename_generator.argtypes = [c_void_p, c_void_p]
+
 http_cerver_set_uploads_filename_generator = lib.http_cerver_set_uploads_filename_generator
 http_cerver_set_uploads_filename_generator.argtypes = [c_void_p, UploadsFilenameGenerator]
 
 http_cerver_set_uploads_dir_mode = lib.http_cerver_set_uploads_dir_mode
 http_cerver_set_uploads_dir_mode.argtypes = [c_void_p, c_uint]
+
+http_cerver_default_uploads_dirname_generator = lib.http_cerver_default_uploads_dirname_generator
+http_cerver_default_uploads_dirname_generator.argtypes = [c_void_p, c_void_p]
 
 http_cerver_set_uploads_dirname_generator = lib.http_cerver_set_uploads_dirname_generator
 http_cerver_set_uploads_dirname_generator.argtypes = [c_void_p, UploadsDirnameGenerator]
