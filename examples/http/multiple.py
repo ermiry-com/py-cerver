@@ -144,9 +144,8 @@ def start ():
 	files_create_dir ("uploads".encode ('utf-8'), 0o777)
 	http_cerver_set_uploads_path (http_cerver, "uploads".encode ('utf-8'))
 
-	http_cerver_set_uploads_filename_generator (
-		http_cerver, custom_uploads_filename_generator
-	)
+	http_cerver_set_default_uploads_filename_generator (http_cerver)
+	http_cerver_set_default_uploads_dirname_generator (http_cerver)
 
 	# POST /multiple
 	multiple_route = http_route_create (REQUEST_METHOD_POST, "multiple".encode ('utf-8'), multiple_handler)
