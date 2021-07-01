@@ -67,6 +67,13 @@ cerver_stats_print = lib.cerver_stats_print
 cerver_stats_print.argtypes = [c_void_p, c_bool, c_bool]
 
 # main
+cerver_set_alias = lib.cerver_set_alias
+cerver_set_alias.argtypes = [c_void_p, c_char_p]
+
+cerver_set_welcome_msg = lib.cerver_set_welcome_msg
+cerver_set_welcome_msg.argtypes = [c_void_p, c_char_p]
+cerver_set_welcome_msg.restype = c_uint8
+
 cerver_create = lib.cerver_create
 cerver_create.argtypes = [CerverType, c_char_p, c_uint16, c_int, c_bool, c_uint16]
 cerver_create.restype = c_void_p

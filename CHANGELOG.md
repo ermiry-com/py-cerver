@@ -1,29 +1,28 @@
 ## General
-- Updated Dockerfiles to use cerver 2.0b-37
-- Added custom create directories methods
-- Added more files methods like files_get_file_extension_reference () & file_exists ()
-- Added custom printf () utility implementation
-- Added base instructions to debug PyCerver
-- Added Dockerfile to build custom python image
+- Updated Dockerfiles to use cerver 2.0b-40
+- Updated test workflow to use latest HTTP cerver
+- Added methods to set cerver alias and welcome
+- Changed previous clear script name to clean
+- Added script to download and install cerver
+
+## Threads
+- Added ability to request jobs from queue by id
+- Changed jobs methods return values types
 
 ## HTTP
-- Added new request dirname methods bindings
-- Added request's get n files and values methods
-- Refactored HTTP uploads definitions & methods
-- Added the ability to set file & dir creation modes
-- Added more HttpReceive methods bindings
-- Added dedicated multi-part structure getters
-- Added methods to traverse request's multi-parts
-- Refactored HTTP headers enum type definition
+- Added method to generate HTTP uploads paths
+- Changed http_cerver_set_uploads_path () to only take a static path
+- Added ability to set route custom auth handler
+- Added methods to set default uploads generators
 
 ## Examples
-- Added multi-parts iter handlers in upload example
-- Added discard handler in HTTP upload example
-- Added base dedicated HTTP multiple example
-- Updated jobs example with new multi-parts
+- Changed uploads example to use default generator
+- Setting default uploads generators in multiple example
+- Added example to showcase different auth types
 
 ## Tests
-- Added iter routes in upload integration tests
-- Added curl_upload_two_files () in test methods
-- Added dedicated multiple integration test
-- Refactored jobs client test requests methods
+- Updated curl_post_form_value () to handle data
+- Added base curl_perform_request () to better handle responses status codes
+- Updated multiple integration test to match example
+- Updated jobs client test with new curl methods
+- Added base dedicated HTTP auth integration test

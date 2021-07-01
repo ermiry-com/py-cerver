@@ -1,8 +1,6 @@
 import os, signal, sys
 import ctypes
 
-from datetime import datetime
-
 from cerver import *
 from cerver.http import *
 import cerver.utils
@@ -38,7 +36,7 @@ def upload_handler (http_receive, request):
 	)
 
 	if value:
-		print (value.contents.str)
+		print (value.decode ('utf-8'))
 
 	http_response_json_msg_send (
 		http_receive, HTTP_STATUS_OK, "Upload works!".encode ('utf-8')
@@ -151,24 +149,6 @@ def discard_handler (http_receive, request):
 			"Bad request!".encode ('utf-8')
 		)
 
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def custom_uploads_filename_generator (
-	http_receive, request
-):
-	mpart = http_request_get_current_mpart (request)
-
-	now = datetime.now ()
-	timestamp = datetime.timestamp (now)
-	timestamp = int (timestamp * 1000)
-
-	http_multi_part_set_generated_filename (
-		mpart,
-		"%d-%ld-%s".encode ('utf-8'),
-		http_receive_get_sock_fd (http_receive),
-		timestamp,
-		http_multi_part_get_filename (mpart)
-	)
-
 def start ():
 	global web_cerver
 	web_cerver = cerver_create_web (
@@ -185,12 +165,10 @@ def start ():
 	# HTTP configuration
 	http_cerver = http_cerver_get (web_cerver)
 
-	# files_create_dir ("uploads".encode ('utf-8'), 0o777)
-	# http_cerver_set_uploads_path (http_cerver, "uploads".encode ('utf-8'))
+	files_create_dir ("uploads".encode ('utf-8'), 0o777)
+	http_cerver_set_uploads_path (http_cerver, "uploads".encode ('utf-8'))
 
-	http_cerver_set_uploads_filename_generator (
-		http_cerver, custom_uploads_filename_generator
-	)
+	http_cerver_set_default_uploads_filename_generator (http_cerver)
 
 	# GET /test
 	test_route = http_route_create (REQUEST_METHOD_GET, "test".encode ('utf-8'), test_handler)

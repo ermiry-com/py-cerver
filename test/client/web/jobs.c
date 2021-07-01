@@ -46,7 +46,7 @@ static unsigned int jobs_request_main (
 
 // POST /jobs
 static unsigned int jobs_request_job (
-	const char *actual_address
+	const char *actual_address, char *data_buffer
 ) {
 
 	unsigned int retval = 1;
@@ -55,7 +55,9 @@ static unsigned int jobs_request_job (
 	if (curl) {
 		retval = curl_post_form_value (
 			curl, actual_address,
-			"value", "hola"
+			jobs_request_all_data_handler, data_buffer,
+			"value", "hola",
+			(unsigned int) HTTP_STATUS_OK
 		);
 	}
 
@@ -77,7 +79,7 @@ static unsigned int jobs_request_all_actual (void) {
 
 	// POST /jobs
 	(void) snprintf (actual_address, 128, "%s/jobs", address);
-	errors |= jobs_request_job (actual_address);
+	errors |= jobs_request_job (actual_address, data_buffer);
 
 	return errors;
 

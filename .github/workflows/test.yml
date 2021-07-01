@@ -21,7 +21,7 @@ jobs:
 
       - name: Compile Cerver
         env:
-          CERVER_VERSION: 2.0b-37
+          CERVER_VERSION: 2.0b-40
         run: |
           mkdir /opt/cerver && cd /opt/cerver
           wget -q --no-check-certificate https://github.com/ermiry/cerver/archive/$CERVER_VERSION.zip
@@ -48,6 +48,14 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./test/bin/client/web/web
+          sudo docker kill $(sudo docker ps -q)
+
+      - name: Web Auth Integration Test
+        run: |
+          sudo docker run -d --name test --rm -p 8080:8080 ermiry/pycerver:test python3 web/auth.py
+          sleep 2
+          sudo docker inspect test --format='{{.State.ExitCode}}'
+          ./test/bin/client/web/auth
           sudo docker kill $(sudo docker ps -q)
 
       - name: Web API Integration Test
