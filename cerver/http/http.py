@@ -9,9 +9,10 @@ from ..types.string import String
 from ..cerver import CERVER_HANDLER_TYPE_THREADS, cerver_create_web, cerver_set_receive_buffer_size, cerver_set_thpool_n_threads, cerver_set_handler_type, cerver_set_reusable_address_flags
 
 from .alg import jwt_alg_t, JWT_ALG_NONE
+from .headers import http_header
+from .request import http_request_get_decoded_data
 from .response import http_response_create, http_response_compile, http_response_send, http_response_delete
 from .route import HttpRouteAuthType, HTTP_ROUTE_AUTH_TYPE_BEARER, http_route_create, http_route_child_add, http_route_set_auth, http_route_set_decode_data_into_json
-from .request import http_request_get_decoded_data
 
 # types
 CatchAllHandler = CFUNCTYPE (None, c_void_p, c_void_p)
@@ -311,6 +312,11 @@ def http_jwt_token_decode (request):
 	json_string = cast (http_request_get_decoded_data (request), c_char_p)
 	result = json.loads (json_string.value.decode ("utf-8"))
 	return result
+
+# responses
+http_cerver_add_responses_header = lib.http_cerver_add_responses_header
+http_cerver_add_responses_header.argtypes = [c_void_p, http_header, c_char_p]
+http_cerver_add_responses_header.restype = c_uint8
 
 # stats
 http_cerver_all_stats_print = lib.http_cerver_all_stats_print
