@@ -28,24 +28,62 @@ http_response_set_status.argtypes = [c_void_p, http_status]
 http_response_set_header = lib.http_response_set_header
 http_response_set_header.argtypes = [c_void_p, c_void_p, c_size_t]
 
-# adds a new header to the response, the headers will be handled when calling 
+# adds a new header to the response
+# the headers will be handled when calling 
 # http_response_compile () to generate a continuos header buffer
 # returns 0 on success, 1 on error
 http_response_add_header = lib.http_response_add_header
 http_response_add_header.argtypes = [c_void_p, http_header, c_char_p]
 http_response_add_header.restype = c_uint8
 
-# adds a HTTP_HEADER_CONTENT_TYPE header to the response
+# adds a "Content-Type" header to the response
 # returns 0 on success, 1 on error
 http_response_add_content_type_header = lib.http_response_add_content_type_header
 http_response_add_content_type_header.argtypes = [c_void_p, ContentType]
 http_response_add_content_type_header.restype = c_uint8
 
-# adds a HTTP_HEADER_CONTENT_LENGTH header to the response
+# adds a "Content-Length" header to the response
 # returns 0 on success, 1 on error
 http_response_add_content_length_header = lib.http_response_add_content_length_header
 http_response_add_content_length_header.argtypes = [c_void_p, c_size_t]
 http_response_add_content_length_header.restype = c_uint8
+
+# adds a "Content-Type" with value "application/json"
+# adds a "Content-Length" header to the response
+http_response_add_json_headers = lib.http_response_add_json_headers
+http_response_add_json_headers.argtypes = [c_void_p, c_size_t]
+
+# adds an "Access-Control-Allow-Origin" header to the response
+# returns 0 on success, 1 on error
+http_response_add_cors_header = lib.http_response_add_cors_header
+http_response_add_cors_header.argtypes = [c_void_p, c_char_p]
+http_response_add_cors_header.restype = c_uint8
+
+# works like http_response_add_cors_header ()
+# but takes a HttpOrigin instead of a c string
+http_response_add_cors_header_from_origin = lib.http_response_add_cors_header_from_origin
+http_response_add_cors_header_from_origin.argtypes = [c_void_p, c_void_p]
+http_response_add_cors_header_from_origin.restype = c_uint8
+
+# works like http_response_add_cors_header () but first
+# checks if the domain matches any entry in the whitelist
+# returns 0 on success, 1 on error
+http_response_add_whitelist_cors_header = lib.http_response_add_whitelist_cors_header
+http_response_add_whitelist_cors_header.argtypes = [c_void_p, c_char_p]
+http_response_add_whitelist_cors_header.restype = c_uint8
+
+# works like http_response_add_whitelist_cors_header ()
+# but takes a HttpOrigin instead of a c string
+http_response_add_whitelist_cors_header_from_origin = lib.http_response_add_whitelist_cors_header_from_origin
+http_response_add_whitelist_cors_header_from_origin.argtypes = [c_void_p, c_void_p]
+http_response_add_whitelist_cors_header_from_origin.restype = c_uint8
+
+# checks if the HTTP request's origin matches any domain in the whitelist
+# then adds an "Access-Control-Allow-Origin" header to the response
+# returns 0 on success, 1 on error
+http_response_add_whitelist_cors_header_from_request = lib.http_response_add_whitelist_cors_header_from_request
+http_response_add_whitelist_cors_header_from_request.argtypes = [c_void_p, c_void_p]
+http_response_add_whitelist_cors_header_from_request.restype = c_uint8
 
 # sets the response's data (body), it will replace the existing one
 # the data will be deleted when the response gets deleted

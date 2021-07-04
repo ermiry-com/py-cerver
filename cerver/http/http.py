@@ -6,12 +6,16 @@ from ..lib import lib
 
 from ..types.string import String
 
-from ..cerver import CERVER_HANDLER_TYPE_THREADS, cerver_create_web, cerver_set_receive_buffer_size, cerver_set_thpool_n_threads, cerver_set_handler_type, cerver_set_reusable_address_flags
+from ..cerver import CERVER_HANDLER_TYPE_THREADS, cerver_create_web
+from ..cerver import cerver_set_receive_buffer_size, cerver_set_thpool_n_threads, cerver_set_handler_type, cerver_set_reusable_address_flags
 
 from .alg import jwt_alg_t, JWT_ALG_NONE
-from .response import http_response_create, http_response_compile, http_response_send, http_response_delete
-from .route import HttpRouteAuthType, HTTP_ROUTE_AUTH_TYPE_BEARER, http_route_create, http_route_child_add, http_route_set_auth, http_route_set_decode_data_into_json
+from .headers import http_header
 from .request import http_request_get_decoded_data
+from .response import http_response_create, http_response_compile, http_response_send, http_response_delete
+from .route import HttpRouteAuthType, HTTP_ROUTE_AUTH_TYPE_BEARER
+from .route import HttpDecodeData, HttpDeleteDecoded, AuthenticationHandler
+from .route import http_route_create, http_route_child_add, http_route_set_auth, http_route_set_decode_data_into_json
 
 # types
 CatchAllHandler = CFUNCTYPE (None, c_void_p, c_void_p)
@@ -312,6 +316,19 @@ def http_jwt_token_decode (request):
 	result = json.loads (json_string.value.decode ("utf-8"))
 	return result
 
+# origins
+http_cerver_add_origin_to_whitelist = lib.http_cerver_add_origin_to_whitelist
+http_cerver_add_origin_to_whitelist.argtypes = [c_void_p, c_char_p]
+http_cerver_add_origin_to_whitelist.restype = c_uint8
+
+http_cerver_print_origins_whitelist = lib.http_cerver_print_origins_whitelist
+http_cerver_print_origins_whitelist.argtypes = [c_void_p]
+
+# responses
+http_cerver_add_responses_header = lib.http_cerver_add_responses_header
+http_cerver_add_responses_header.argtypes = [c_void_p, http_header, c_char_p]
+http_cerver_add_responses_header.restype = c_uint8
+
 # stats
 http_cerver_all_stats_print = lib.http_cerver_all_stats_print
 http_cerver_all_stats_print.argtypes = [c_void_p]
@@ -319,6 +336,24 @@ http_cerver_all_stats_print.argtypes = [c_void_p]
 # admin
 http_cerver_enable_admin_routes = lib.http_cerver_enable_admin_routes
 http_cerver_enable_admin_routes.argtypes = [c_void_p, c_bool]
+
+http_cerver_enable_admin_routes_authentication = lib.http_cerver_enable_admin_routes_authentication
+http_cerver_enable_admin_routes_authentication.argtypes = [c_void_p, HttpRouteAuthType]
+
+http_cerver_admin_routes_auth_set_decode_data = lib.http_cerver_admin_routes_auth_set_decode_data
+http_cerver_admin_routes_auth_set_decode_data.argtypes = [c_void_p, HttpDecodeData, HttpDeleteDecoded]
+
+http_cerver_admin_routes_auth_decode_to_json = lib.http_cerver_admin_routes_auth_decode_to_json
+http_cerver_admin_routes_auth_decode_to_json.argtypes = [c_void_p]
+
+http_cerver_admin_routes_set_authentication_handler = lib.http_cerver_admin_routes_set_authentication_handler
+http_cerver_admin_routes_set_authentication_handler.argtypes = [c_void_p, AuthenticationHandler]
+
+http_cerver_enable_admin_cors_headers = lib.http_cerver_enable_admin_cors_headers
+http_cerver_enable_admin_cors_headers.argtypes = [c_void_p, c_bool]
+
+http_cerver_admin_set_origin = lib.http_cerver_admin_set_origin
+http_cerver_admin_set_origin.argtypes = [c_void_p, c_char_p]
 
 http_cerver_register_admin_file_system = lib.http_cerver_register_admin_file_system
 http_cerver_register_admin_file_system.argtypes = [c_void_p, c_char_p]
