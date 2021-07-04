@@ -164,6 +164,9 @@ http_request_multi_part_discard_files.argtypes = [c_void_p]
 http_request_multi_parts_print = lib.http_request_multi_parts_print
 http_request_multi_parts_print.argtypes = [c_void_p]
 
+http_request_multi_parts_files_print = lib.http_request_multi_parts_files_print
+http_request_multi_parts_files_print.argtypes = [c_void_p]
+
 # body
 http_request_body_get_value = lib.http_request_body_get_value
 http_request_body_get_value.argtypes = [c_void_p, c_char_p]
