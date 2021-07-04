@@ -2,10 +2,10 @@ from .lib import lib
 
 from .utils.log import LOG_TYPE_NONE, cerver_log_both
 
-PYCERVER_VERSION = "0.7.3".encode ('utf-8')
-PYCERVER_VERSION_NAME = "Version 0.7.3".encode ('utf-8')
-PYCERVER_VERSION_DATE = "30/06/2021".encode ('utf-8')
-PYCERVER_VERSION_TIME = "20:01 CST".encode ('utf-8')
+PYCERVER_VERSION = "0.7.4".encode ('utf-8')
+PYCERVER_VERSION_NAME = "Version 0.7.4".encode ('utf-8')
+PYCERVER_VERSION_DATE = "03/07/2021".encode ('utf-8')
+PYCERVER_VERSION_TIME = "20:23 CST".encode ('utf-8')
 PYCERVER_VERSION_AUTHOR = "Erick Salas".encode ('utf-8')
 
 cerver_version_print_full = lib.cerver_version_print_full
