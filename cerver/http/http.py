@@ -313,6 +313,14 @@ def http_jwt_token_decode (request):
 	result = json.loads (json_string.value.decode ("utf-8"))
 	return result
 
+# origins
+http_cerver_add_origin_to_whitelist = lib.http_cerver_add_origin_to_whitelist
+http_cerver_add_origin_to_whitelist.argtypes = [c_void_p, c_char_p]
+http_cerver_add_origin_to_whitelist.restype = c_uint8
+
+http_cerver_print_origins_whitelist = lib.http_cerver_print_origins_whitelist
+http_cerver_print_origins_whitelist.argtypes = [c_void_p]
+
 # responses
 http_cerver_add_responses_header = lib.http_cerver_add_responses_header
 http_cerver_add_responses_header.argtypes = [c_void_p, http_header, c_char_p]
