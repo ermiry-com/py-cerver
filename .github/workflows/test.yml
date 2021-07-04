@@ -21,7 +21,7 @@ jobs:
 
       - name: Compile Cerver
         env:
-          CERVER_VERSION: 2.0b-40
+          CERVER_VERSION: 2.0b-41
         run: |
           mkdir /opt/cerver && cd /opt/cerver
           wget -q --no-check-certificate https://github.com/ermiry/cerver/archive/$CERVER_VERSION.zip
