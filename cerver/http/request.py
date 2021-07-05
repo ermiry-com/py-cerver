@@ -1,4 +1,4 @@
-from ctypes import c_int, c_uint, c_uint8, c_void_p, c_char_p, c_bool, POINTER
+from ctypes import c_int, c_uint, c_uint8, c_void_p, c_char_p, c_bool, POINTER, CFUNCTYPE
 
 import json
 
@@ -22,6 +22,9 @@ REQUEST_METHOD_OPTIONS = 6
 REQUEST_METHOD_TRACE = 7
 
 REQUEST_METHOD_UNDEFINED = 8
+
+RequestDeleteDecoded = CFUNCTYPE (None, c_void_p)
+RequestDeleteCustom = CFUNCTYPE (None, c_void_p)
 
 # getters
 http_request_get_method = lib.http_request_get_method
@@ -67,6 +70,28 @@ http_request_content_type_is_json.restype = c_bool
 http_request_get_decoded_data = lib.http_request_get_decoded_data
 http_request_get_decoded_data.argtypes = [c_void_p]
 http_request_get_decoded_data.restype = c_void_p
+
+http_request_set_decoded_data = lib.http_request_set_decoded_data
+http_request_set_decoded_data.argtypes = [c_void_p, c_void_p]
+
+http_request_set_delete_decoded_data = lib.http_request_set_delete_decoded_data
+http_request_set_delete_decoded_data.argtypes = [c_void_p, RequestDeleteDecoded]
+
+http_request_set_default_delete_decoded_data = lib.http_request_set_default_delete_decoded_data
+http_request_set_default_delete_decoded_data.argtypes = [c_void_p]
+
+http_request_get_custom_data = lib.http_request_get_custom_data
+http_request_get_custom_data.argtypes = [c_void_p]
+http_request_get_custom_data.restype = c_void_p
+
+http_request_set_custom_data = lib.http_request_set_custom_data
+http_request_set_custom_data.argtypes = [c_void_p, c_void_p]
+
+http_request_set_delete_custom_data = lib.http_request_set_delete_custom_data
+http_request_set_delete_custom_data.argtypes = [c_void_p, RequestDeleteCustom]
+
+http_request_set_default_delete_custom_data = lib.http_request_set_default_delete_custom_data
+http_request_set_default_delete_custom_data.argtypes = [c_void_p]
 
 http_request_get_body = lib.http_request_get_body
 http_request_get_body.argtypes = [c_void_p]
