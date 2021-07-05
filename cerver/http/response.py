@@ -78,12 +78,27 @@ http_response_add_whitelist_cors_header_from_origin = lib.http_response_add_whit
 http_response_add_whitelist_cors_header_from_origin.argtypes = [c_void_p, c_void_p]
 http_response_add_whitelist_cors_header_from_origin.restype = c_uint8
 
-# checks if the HTTP request's origin matches any domain in the whitelist
+# checks if the HTTP request's "Origin" header value
+# matches any domain in the whitelist
 # then adds an "Access-Control-Allow-Origin" header to the response
 # returns 0 on success, 1 on error
 http_response_add_whitelist_cors_header_from_request = lib.http_response_add_whitelist_cors_header_from_request
 http_response_add_whitelist_cors_header_from_request.argtypes = [c_void_p, c_void_p]
 http_response_add_whitelist_cors_header_from_request.restype = c_uint8
+
+# sets CORS related header "Access-Control-Allow-Credentials"
+# this header is needed when a CORS request has an "Authorization" header
+http_response_add_cors_allow_credentials_header = lib.http_response_add_cors_allow_credentials_header
+http_response_add_cors_allow_credentials_header.argtypes = [c_void_p]
+http_response_add_cors_allow_credentials_header.restype = c_uint8
+
+# sets CORS related header "Access-Control-Allow-Methods"
+# to be a list of available methods like "GET, HEAD, OPTIONS"
+# this header is needed in preflight OPTIONS request's responses
+# returns 0 on success, 1 on error
+http_response_add_cors_allow_methods_header = lib.http_response_add_cors_allow_methods_header
+http_response_add_cors_allow_methods_header.argtypes = [c_void_p, c_char_p]
+http_response_add_cors_allow_methods_header.restype = c_uint8
 
 # sets the response's data (body), it will replace the existing one
 # the data will be deleted when the response gets deleted
