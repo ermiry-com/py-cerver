@@ -352,6 +352,9 @@ http_cerver_all_stats_print.argtypes = [c_void_p]
 http_cerver_enable_admin_routes = lib.http_cerver_enable_admin_routes
 http_cerver_enable_admin_routes.argtypes = [c_void_p, c_bool]
 
+http_cerver_enable_admin_info_route = lib.http_cerver_enable_admin_info_route
+http_cerver_enable_admin_info_route.argtypes = [c_void_p, c_bool]
+
 http_cerver_enable_admin_head_handlers = lib.http_cerver_enable_admin_head_handlers
 http_cerver_enable_admin_head_handlers.argtypes = [c_void_p, c_bool]
 
