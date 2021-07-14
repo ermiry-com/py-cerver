@@ -22,6 +22,7 @@ CatchAllHandler = CFUNCTYPE (None, c_void_p, c_void_p)
 NotFoundHandler = CFUNCTYPE (None, c_void_p, c_void_p)
 UploadsFilenameGenerator = CFUNCTYPE (None, c_void_p, c_void_p)
 UploadsDirnameGenerator = CFUNCTYPE (None, c_void_p, c_void_p)
+HttpDeleteCustom = CFUNCTYPE (None, c_void_p)
 
 # main
 http_cerver_get = lib.http_cerver_get
@@ -324,6 +325,20 @@ http_cerver_add_origin_to_whitelist.restype = c_uint8
 http_cerver_print_origins_whitelist = lib.http_cerver_print_origins_whitelist
 http_cerver_print_origins_whitelist.argtypes = [c_void_p]
 
+# data
+http_cerver_get_custom_data = lib.http_cerver_get_custom_data
+http_cerver_get_custom_data.argtypes = [c_void_p]
+http_cerver_get_custom_data.restype = c_void_p
+
+http_cerver_set_custom_data = lib.http_cerver_set_custom_data
+http_cerver_set_custom_data.argtypes = [c_void_p, c_void_p]
+
+http_cerver_set_delete_custom_data = lib.http_cerver_set_delete_custom_data
+http_cerver_set_delete_custom_data.argtypes = [c_void_p, HttpDeleteCustom]
+
+http_cerver_set_default_delete_custom_data = lib.http_cerver_set_default_delete_custom_data
+http_cerver_set_default_delete_custom_data.argtypes = [c_void_p]
+
 # responses
 http_cerver_add_responses_header = lib.http_cerver_add_responses_header
 http_cerver_add_responses_header.argtypes = [c_void_p, http_header, c_char_p]
@@ -336,6 +351,9 @@ http_cerver_all_stats_print.argtypes = [c_void_p]
 # admin
 http_cerver_enable_admin_routes = lib.http_cerver_enable_admin_routes
 http_cerver_enable_admin_routes.argtypes = [c_void_p, c_bool]
+
+http_cerver_enable_admin_info_route = lib.http_cerver_enable_admin_info_route
+http_cerver_enable_admin_info_route.argtypes = [c_void_p, c_bool]
 
 http_cerver_enable_admin_head_handlers = lib.http_cerver_enable_admin_head_handlers
 http_cerver_enable_admin_head_handlers.argtypes = [c_void_p, c_bool]
