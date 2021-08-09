@@ -382,6 +382,9 @@ http_cerver_admin_set_origin.argtypes = [c_void_p, c_char_p]
 http_cerver_register_admin_file_system = lib.http_cerver_register_admin_file_system
 http_cerver_register_admin_file_system.argtypes = [c_void_p, c_char_p]
 
+http_cerver_register_admin_worker = lib.http_cerver_register_admin_worker
+http_cerver_register_admin_worker.argtypes = [c_void_p, c_void_p]
+
 # handler
 http_receive_get_cerver_receive = lib.http_receive_get_cerver_receive
 http_receive_get_cerver_receive.argtypes = [c_void_p]
