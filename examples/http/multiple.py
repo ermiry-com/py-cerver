@@ -21,7 +21,10 @@ def multiple_handler_send_success (http_receive):
 	json = "{ \"msg\": \"Multiple route works!\" }"
 	json_len = len (json)
 
-	response = http_response_create (HTTP_STATUS_OK, json.encode ('utf-8'), json_len)
+	response = http_response_create (
+		HTTP_STATUS_OK, json.encode ('utf-8'), json_len
+	)
+
 	if (response):
 		http_response_add_content_type_header (response, HTTP_CONTENT_TYPE_JSON)
 		http_response_add_content_length_header (response, json_len)
@@ -37,7 +40,10 @@ def multiple_handler_send_failure (http_receive):
 	json = "{ \"error\": \"Failed to get multi-part values!\" }"
 	json_len = len (json)
 
-	response = http_response_create (HTTP_STATUS_BAD_REQUEST, json.encode ('utf-8'), json_len)
+	response = http_response_create (
+		HTTP_STATUS_BAD_REQUEST, json.encode ('utf-8'), json_len
+	)
+
 	if (response):
 		http_response_add_content_type_header (response, HTTP_CONTENT_TYPE_JSON)
 		http_response_add_content_length_header (response, json_len)
@@ -88,23 +94,23 @@ def multiple_handler (http_receive, request):
 def discard_handler (http_receive, request):
 	http_request_multi_parts_print (request)
 
-	key = http_request_multi_parts_get_value (request, "key".encode ('utf-8'))
-	if (key == "okay".encode ('utf-8')):
+	key = http_request_multi_parts_get_value (request, b"key")
+	if (key == b"okay"):
 		cerver.utils.cerver_log_success (
-			"Success request, keeping multi part files...".encode ('utf-8')
+			b"Success request, keeping multi part files..."
 		)
 
 		http_response_json_msg_send (
-			http_receive, HTTP_STATUS_OK, "Success request!".encode ('utf-8')
+			http_receive, HTTP_STATUS_OK, b"Success request!"
 		)
 
 	else:
-		cerver.utils.cerver_log_error ("key != okay".encode ('utf-8'))
-		cerver.utils.cerver_log_debug ("Discarding multi part files...".encode ('utf-8'))
+		cerver.utils.cerver_log_error (b"key != okay")
+		cerver.utils.cerver_log_debug (b"Discarding multi part files...")
 		http_request_multi_part_discard_files (request)
 		http_response_json_error_send (
 			http_receive, HTTP_STATUS_BAD_REQUEST,
-			"Bad request!".encode ('utf-8')
+			b"Bad request!"
 		)
 
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
@@ -119,7 +125,7 @@ def custom_uploads_filename_generator (
 
 	http_multi_part_set_generated_filename (
 		mpart,
-		"%d-%ld-%s".encode ('utf-8'),
+		b"%d-%ld-%s",
 		http_receive_get_sock_fd (http_receive),
 		timestamp,
 		http_multi_part_get_filename (mpart)
@@ -128,7 +134,7 @@ def custom_uploads_filename_generator (
 def start ():
 	global web_cerver
 	web_cerver = cerver_create_web (
-		"web-cerver".encode ('utf-8'), 8080, 10
+		b"web-cerver", 8080, 10
 	)
 
 	# main configuration
@@ -141,19 +147,19 @@ def start ():
 	# HTTP configuration
 	http_cerver = http_cerver_get (web_cerver)
 
-	files_create_dir ("uploads".encode ('utf-8'), 0o777)
-	http_cerver_set_uploads_path (http_cerver, "uploads".encode ('utf-8'))
+	files_create_dir (b"uploads", 0o777)
+	http_cerver_set_uploads_path (http_cerver, b"uploads")
 
 	http_cerver_set_default_uploads_filename_generator (http_cerver)
 	http_cerver_set_default_uploads_dirname_generator (http_cerver)
 
 	# POST /multiple
-	multiple_route = http_route_create (REQUEST_METHOD_POST, "multiple".encode ('utf-8'), multiple_handler)
+	multiple_route = http_route_create (REQUEST_METHOD_POST, b"multiple", multiple_handler)
 	http_route_set_modifier (multiple_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, multiple_route)
 
 	# POST /discard
-	discard_route = http_route_create (REQUEST_METHOD_POST, "discard".encode ('utf-8'), discard_handler)
+	discard_route = http_route_create (REQUEST_METHOD_POST, b"discard", discard_handler)
 	http_route_set_modifier (discard_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, discard_route)
 

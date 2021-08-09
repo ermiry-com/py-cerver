@@ -24,7 +24,7 @@ def end (signum, frame):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def main_users_handler (http_receive, request):
 	response = http_response_json_msg (
-		HTTP_STATUS_OK, "Users route works!".encode ('utf-8')
+		HTTP_STATUS_OK, b"Users route works!"
 	)
 
 	http_response_print (response)
@@ -35,9 +35,9 @@ def main_users_handler (http_receive, request):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def users_register_handler (http_receive, request):
 	body_values = http_request_get_body_values (request)
-	name = http_query_pairs_get_value (body_values, "name".encode ('utf-8'));
-	username = http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
-	password = http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
+	name = http_query_pairs_get_value (body_values, b"name")
+	username = http_query_pairs_get_value (body_values, b"username")
+	password = http_query_pairs_get_value (body_values, b"password")
 
 	if name is not None and username is not None and password is not None:
 		user = User (
@@ -53,7 +53,7 @@ def users_register_handler (http_receive, request):
 		user_add (user)
 
 		response = http_response_json_msg (
-			HTTP_STATUS_OK, "Created a new user!".encode ('utf-8')
+			HTTP_STATUS_OK, b"Created a new user!"
 		)
 
 		http_response_print (response)
@@ -62,7 +62,7 @@ def users_register_handler (http_receive, request):
 
 	else:
 		response = http_response_json_msg (
-			HTTP_STATUS_BAD_REQUEST, "Missing user values!".encode ('utf-8')
+			HTTP_STATUS_BAD_REQUEST, b"Missing user values!"
 		)
 
 		http_response_print (response)
@@ -73,19 +73,19 @@ def users_register_handler (http_receive, request):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def users_login_handler (http_receive, request):
 	body_values = http_request_get_body_values (request)
-	username = http_query_pairs_get_value (body_values, "username".encode ('utf-8'));
-	password = http_query_pairs_get_value (body_values, "password".encode ('utf-8'));
+	username = http_query_pairs_get_value (body_values, b"username")
+	password = http_query_pairs_get_value (body_values, b"password")
 
 	if username is not None and password is not None:
 		user = user_get_by_username (username.contents.str)
 		if user is not None:
 			if user.password == password.contents.str:
 				http_jwt = http_cerver_auth_jwt_new ();
-				http_cerver_auth_jwt_add_value_int (http_jwt, "iat".encode ('utf-8'), int (time.time ()));
-				http_cerver_auth_jwt_add_value (http_jwt, "id".encode ('utf-8'), user.id.encode ('utf-8'));
-				http_cerver_auth_jwt_add_value (http_jwt, "name".encode ('utf-8'), user.name);
-				http_cerver_auth_jwt_add_value (http_jwt, "username".encode ('utf-8'), user.username);
-				http_cerver_auth_jwt_add_value (http_jwt, "role".encode ('utf-8'), user.role.encode ('utf-8'));
+				http_cerver_auth_jwt_add_value_int (http_jwt, b"iat", int (time.time ()))
+				http_cerver_auth_jwt_add_value (http_jwt, b"id", user.id.encode ('utf-8'))
+				http_cerver_auth_jwt_add_value (http_jwt, b"name", user.name)
+				http_cerver_auth_jwt_add_value (http_jwt, b"username", user.username)
+				http_cerver_auth_jwt_add_value (http_jwt, b"role", user.role.encode ('utf-8'))
 
 				http_cerver_auth_generate_bearer_jwt_json (http_receive_get_cerver (http_receive), http_jwt)
 
@@ -101,7 +101,7 @@ def users_login_handler (http_receive, request):
 				http_response_delete (response)
 			else:
 				response = http_response_json_msg (
-					HTTP_STATUS_BAD_REQUEST, "Wrong password!".encode ('utf-8')
+					HTTP_STATUS_BAD_REQUEST, b"Wrong password!"
 				)
 
 				http_response_print (response)
@@ -109,7 +109,7 @@ def users_login_handler (http_receive, request):
 				http_response_delete (response)
 		else:
 			response = http_response_json_msg (
-				HTTP_STATUS_NOT_FOUND, "User not found!".encode ('utf-8')
+				HTTP_STATUS_NOT_FOUND, b"User not found!"
 			)
 
 			http_response_print (response)
@@ -117,7 +117,7 @@ def users_login_handler (http_receive, request):
 			http_response_delete (response)
 	else:
 		response = http_response_json_msg (
-			HTTP_STATUS_BAD_REQUEST, "Missing user values!".encode ('utf-8')
+			HTTP_STATUS_BAD_REQUEST, b"Missing user values!"
 		)
 
 		http_response_print (response)
@@ -145,7 +145,7 @@ def users_profile_handler (http_receive, request):
 def start ():
 	global api_cerver
 	api_cerver = cerver_create_web (
-		"api-cerver".encode ('utf-8'), 8080, 10
+		b"api-cerver", 8080, 10
 	)
 
 	# main configuration
@@ -159,23 +159,23 @@ def start ():
 	http_cerver = http_cerver_get (api_cerver)
 
 	http_cerver_auth_set_jwt_algorithm (http_cerver, JWT_ALG_RS256)
-	http_cerver_auth_set_jwt_priv_key_filename (http_cerver, "keys/key.key".encode ('utf-8'))
-	http_cerver_auth_set_jwt_pub_key_filename (http_cerver, "keys/key.pub".encode ('utf-8'))
+	http_cerver_auth_set_jwt_priv_key_filename (http_cerver, b"keys/key.key")
+	http_cerver_auth_set_jwt_pub_key_filename (http_cerver, b"keys/key.pub")
 
 	# GET /api/users
-	users_route = http_route_create (REQUEST_METHOD_GET, "api/users".encode ('utf-8'), main_users_handler)
+	users_route = http_route_create (REQUEST_METHOD_GET, b"api/users", main_users_handler)
 	http_cerver_route_register (http_cerver, users_route)
 
 	# POST api/users/register
-	users_register_route = http_route_create (REQUEST_METHOD_POST, "register".encode ('utf-8'), users_register_handler)
+	users_register_route = http_route_create (REQUEST_METHOD_POST, b"register", users_register_handler)
 	http_route_child_add (users_route, users_register_route)
 
 	# POST api/users/login
-	users_login_route = http_route_create (REQUEST_METHOD_POST, "login".encode ('utf-8'), users_login_handler)
+	users_login_route = http_route_create (REQUEST_METHOD_POST, b"login", users_login_handler)
 	http_route_child_add (users_route, users_login_route)
 
 	# GET api/users/profile
-	users_profile_route = http_route_create (REQUEST_METHOD_GET, "profile".encode ('utf-8'), users_profile_handler)
+	users_profile_route = http_route_create (REQUEST_METHOD_GET, b"profile", users_profile_handler)
 	http_route_set_auth (users_profile_route, HTTP_ROUTE_AUTH_TYPE_BEARER);
 	http_route_set_decode_data_into_json (users_profile_route);
 	http_route_child_add (users_route, users_profile_route);

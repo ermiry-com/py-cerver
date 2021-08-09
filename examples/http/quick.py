@@ -16,7 +16,7 @@ def end (signum, frame):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def test_handler (http_receive, request):
 	response = http_response_json_msg (
-		HTTP_STATUS_OK, "Test route works!".encode ('utf-8')
+		HTTP_STATUS_OK, b"Test route works!"
 	)
 
 	http_response_print (response)
@@ -26,18 +26,18 @@ def test_handler (http_receive, request):
 def start ():
 	global web_cerver
 	web_cerver = cerver_create_web (
-		"web-cerver".encode ('utf-8'), 8080, 10
+		b"web-cerver", 8080, 10
 	)
 
 	# main configuration
-	cerver_set_thpool_n_threads (web_cerver, 4);
-	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS);
+	cerver_set_thpool_n_threads (web_cerver, 4)
+	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS)
 
 	# HTTP configuration
 	http_cerver = http_cerver_get (web_cerver)
 
 	# GET /test
-	test_route = http_route_create (REQUEST_METHOD_GET, "test".encode ('utf-8'), test_handler)
+	test_route = http_route_create (REQUEST_METHOD_GET, b"test", test_handler)
 	http_cerver_route_register (http_cerver, test_route)
 
 	# start
