@@ -10,8 +10,8 @@ sudo docker kill $(sudo docker ps -q)
 make TYPE=test -j4 test || { exit 1; }
 
 # compile docker
-echo "Building test docker image..."
-sudo docker build -t ermiry/pycerver:test -f Dockerfile.test . || { exit 1; }
+echo "Building local test docker image..."
+sudo docker build -t ermiry/pycerver:local -f Dockerfile.local . || { exit 1; }
 
 # ping
 echo "Ping integration test..."
@@ -19,7 +19,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 7000:7000 \
-	ermiry/pycerver:test python3 ping.py
+	ermiry/pycerver:local python3 ping.py
 
 sleep 2
 
@@ -35,7 +35,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 web/web.py
+	ermiry/pycerver:local python3 web/web.py
 
 sleep 2
 
@@ -51,7 +51,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 web/auth.py
+	ermiry/pycerver:local python3 web/auth.py
 
 sleep 2
 
@@ -67,7 +67,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 web/api.py
+	ermiry/pycerver:local python3 web/api.py
 
 sleep 2
 
@@ -83,7 +83,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 web/upload.py
+	ermiry/pycerver:local python3 web/upload.py
 
 sleep 2
 
@@ -99,7 +99,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 web/multiple.py
+	ermiry/pycerver:local python3 web/multiple.py
 
 sleep 2
 
@@ -115,7 +115,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 web/jobs.py
+	ermiry/pycerver:local python3 web/jobs.py
 
 sleep 2
 
@@ -131,7 +131,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 web/admin.py
+	ermiry/pycerver:local python3 web/admin.py
 
 sleep 2
 
@@ -147,7 +147,7 @@ sudo docker run \
 	-d \
 	--name test --rm \
 	-p 8080:8080 \
-	ermiry/pycerver:test python3 web/wrapper.py
+	ermiry/pycerver:local python3 web/wrapper.py
 
 sleep 2
 
