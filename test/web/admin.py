@@ -18,7 +18,7 @@ def end (signum, frame):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def main_handler (http_receive, request):
 	response = http_response_json_msg (
-		HTTP_STATUS_OK, "Admin HTTP cerver!".encode ('utf-8')
+		HTTP_STATUS_OK, b"Admin HTTP cerver!"
 	)
 
 	http_response_print (response)
@@ -28,7 +28,7 @@ def main_handler (http_receive, request):
 def start ():
 	global web_cerver
 	web_cerver = cerver_create_web (
-		"web-cerver".encode ('utf-8'), 8080, 10
+		b"web-cerver", 8080, 10
 	)
 
 	# main configuration
@@ -44,7 +44,7 @@ def start ():
 	http_cerver_enable_admin_routes (http_cerver, True)
 
 	# GET /
-	main_route = http_route_create (REQUEST_METHOD_GET, "/".encode ('utf-8'), main_handler)
+	main_route = http_route_create (REQUEST_METHOD_GET, b"/", main_handler)
 	http_cerver_route_register (http_cerver, main_route)
 
 	# start

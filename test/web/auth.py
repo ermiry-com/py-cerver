@@ -61,8 +61,8 @@ def custom_authentication_handler (http_receive, request):
 
 	http_request_multi_parts_print (request)
 
-	key = http_request_multi_parts_get_value (request, "key".encode ('utf-8'))
-	if (key == "okay".encode ('utf-8')):
+	key = http_request_multi_parts_get_value (request, b"key")
+	if (key == b"okay"):
 		cerver.utils.cerver_log_success (b"Success auth!")
 
 		result = 0
@@ -75,7 +75,7 @@ def custom_authentication_handler (http_receive, request):
 def start ():
 	global auth_cerver
 	auth_cerver = cerver_create_web (
-		"auth-cerver".encode ('utf-8'), 8080, 10
+		b"auth-cerver", 8080, 10
 	)
 
 	# main configuration
