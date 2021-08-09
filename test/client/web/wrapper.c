@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <cerver/http/status.h>
+
 #include <cerver/utils/log.h>
 
 #include "curl.h"
@@ -32,6 +34,7 @@ static unsigned int wrapper_request_echo (
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/echo?value=test", address);
 	retval = curl_simple_handle_data (
 		curl, actual_address,
+		HTTP_STATUS_OK,
 		wrapper_request_all_data_handler, data_buffer
 	);
 
@@ -55,6 +58,7 @@ static unsigned int wrapper_request_all_actual (
 	// GET /
 	errors |= curl_simple_handle_data (
 		curl, address,
+		HTTP_STATUS_OK,
 		wrapper_request_all_data_handler, data_buffer
 	);
 

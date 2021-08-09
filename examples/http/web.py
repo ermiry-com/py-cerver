@@ -19,14 +19,14 @@ def end (signum, frame):
 def main_handler (http_receive, request):
 	http_response_render_file (
 		http_receive, HTTP_STATUS_OK,
-		"./examples/public/index.html".encode ('utf-8')
+		b"./examples/public/index.html"
 	)
 
 # GET /test
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def test_handler (http_receive, request):
 	response = http_response_json_msg (
-		HTTP_STATUS_OK, "Test route works!".encode ('utf-8')
+		HTTP_STATUS_OK, b"Test route works!"
 	)
 
 	http_response_print (response)
@@ -36,7 +36,7 @@ def test_handler (http_receive, request):
 # GET /text
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def text_handler (http_receive, request):
-	text = "<!DOCTYPE html><html><head><meta charset=\"utf-8\" /><title>Cerver</title></head><body><h2>text_handler () works!</h2></body></html>".encode ('utf-8')
+	text = b"<!DOCTYPE html><html><head><meta charset=\"utf-8\" /><title>Cerver</title></head><body><h2>text_handler () works!</h2></body></html>"
 	text_len = len (text)
 
 	http_response_render_text (
@@ -47,7 +47,7 @@ def text_handler (http_receive, request):
 # GET /json
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def json_handler (http_receive, request):
-	json =  "{\"msg\": \"okay\"}".encode ('utf-8')
+	json =  b"{\"msg\": \"okay\"}"
 	json_len = len (json)
 
 	http_response_render_json (
@@ -59,14 +59,14 @@ def json_handler (http_receive, request):
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def hola_handler (http_receive, request):
 	http_response_json_msg_send (
-		http_receive, HTTP_STATUS_OK, "Hola handler!".encode ('utf-8')
+		http_receive, HTTP_STATUS_OK, b"Hola handler!"
 	)
 
 # GET /adios
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def adios_handler (http_receive, request):
 	http_response_json_msg_send (
-		http_receive, HTTP_STATUS_OK, "Adios handler!".encode ('utf-8')
+		http_receive, HTTP_STATUS_OK, b"Adios handler!"
 	)
 
 # GET /key
@@ -74,53 +74,53 @@ def adios_handler (http_receive, request):
 def key_handler (http_receive, request):
 	http_response_json_key_value_send (
 		http_receive, HTTP_STATUS_OK,
-		"key".encode ('utf-8'), "value".encode ('utf-8')
+		b"key", b"value"
 	)
 
 def start ():
 	global web_cerver
 	web_cerver = cerver_create_web (
-		"web-cerver".encode ('utf-8'), 8080, 10
+		b"web-cerver", 8080, 10
 	)
 
 	# main configuration
-	cerver_set_receive_buffer_size (web_cerver, 4096);
-	cerver_set_thpool_n_threads (web_cerver, 4);
-	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS);
+	cerver_set_receive_buffer_size (web_cerver, 4096)
+	cerver_set_thpool_n_threads (web_cerver, 4)
+	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS)
 
-	cerver_set_reusable_address_flags (web_cerver, True);
+	cerver_set_reusable_address_flags (web_cerver, True)
 
 	# HTTP configuration
 	http_cerver = http_cerver_get (web_cerver)
 
-	http_cerver_static_path_add (http_cerver, "./examples/public".encode ('utf-8'))
+	http_cerver_static_path_add (http_cerver, b"./examples/public")
 
 	# GET /
-	main_route = http_route_create (REQUEST_METHOD_GET, "/".encode ('utf-8'), main_handler)
+	main_route = http_route_create (REQUEST_METHOD_GET, b"/", main_handler)
 	http_cerver_route_register (http_cerver, main_route)
 
 	# GET /test
-	test_route = http_route_create (REQUEST_METHOD_GET, "test".encode ('utf-8'), test_handler)
+	test_route = http_route_create (REQUEST_METHOD_GET, b"test", test_handler)
 	http_cerver_route_register (http_cerver, test_route)
 
 	# GET /text
-	text_route = http_route_create (REQUEST_METHOD_GET, "text".encode ('utf-8'), text_handler)
+	text_route = http_route_create (REQUEST_METHOD_GET, b"text", text_handler)
 	http_cerver_route_register (http_cerver, text_route)
 
 	# GET /json
-	json_route = http_route_create (REQUEST_METHOD_GET, "json".encode ('utf-8'), json_handler)
+	json_route = http_route_create (REQUEST_METHOD_GET, b"json", json_handler)
 	http_cerver_route_register (http_cerver, json_route)
 
 	# GET /hola
-	hola_route = http_route_create (REQUEST_METHOD_GET, "hola".encode ('utf-8'), hola_handler)
+	hola_route = http_route_create (REQUEST_METHOD_GET, b"hola", hola_handler)
 	http_cerver_route_register (http_cerver, hola_route)
 
 	# GET /adios
-	adios_route = http_route_create (REQUEST_METHOD_GET, "adios".encode ('utf-8'), adios_handler)
+	adios_route = http_route_create (REQUEST_METHOD_GET, b"adios", adios_handler)
 	http_cerver_route_register (http_cerver, adios_route)
 
 	# GET /key
-	key_route = http_route_create (REQUEST_METHOD_GET, "key".encode ('utf-8'), key_handler)
+	key_route = http_route_create (REQUEST_METHOD_GET, b"key", key_handler)
 	http_cerver_route_register (http_cerver, key_route)
 
 	# start

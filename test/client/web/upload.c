@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <cerver/http/status.h>
+
 #include <cerver/utils/log.h>
 
 #include "curl.h"
@@ -31,6 +33,7 @@ static unsigned int upload_request_all_actual (
 	(void) snprintf (actual_address, 128, "%s/test", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
+		HTTP_STATUS_OK,
 		upload_request_all_data_handler, data_buffer
 	);
 
@@ -38,16 +41,28 @@ static unsigned int upload_request_all_actual (
 	(void) snprintf (actual_address, 128, "%s/upload", address);
 	errors |= curl_upload_file (
 		curl, actual_address,
+		HTTP_STATUS_OK,
 		upload_request_all_data_handler, data_buffer,
 		"./test/web/img/ermiry.png"
 	);
+
+	// POST /multiple
+	// (void) snprintf (actual_address, 128, "%s/multiple", address);
+	// errors |= curl_upload_two_files (
+	// 	curl, actual_address,
+	// 	HTTP_STATUS_OK,
+	// 	upload_request_all_data_handler, data_buffer,
+	// 	"./test/web/img/ermiry.png",
+	// 	"./test/web/img/github.jpeg"
+	// );
 
 	// POST /iter/good
 	(void) snprintf (actual_address, 128, "%s/iter/good", address);
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
+		HTTP_STATUS_OK,
 		"./test/web/img/ermiry.png",
-		"key", "value"
+		"key", "okay"
 	);
 
 	// POST /iter/empty
@@ -57,6 +72,7 @@ static unsigned int upload_request_all_actual (
 	(void) snprintf (actual_address, 128, "%s/iter/empty", address);
 	errors |= curl_simple_post (
 		curl, actual_address,
+		HTTP_STATUS_OK,
 		json, json_len
 	);
 
@@ -64,13 +80,15 @@ static unsigned int upload_request_all_actual (
 	(void) snprintf (actual_address, 128, "%s/discard", address);
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
+		HTTP_STATUS_OK,
 		"./test/web/img/ermiry.png",
-		"key", "value"
+		"key", "okay"
 	);
 
 	// POST /discard - discard
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
+		HTTP_STATUS_BAD_REQUEST,
 		"./test/web/img/ermiry.png",
 		"key", "discard"
 	);

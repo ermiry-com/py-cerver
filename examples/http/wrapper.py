@@ -54,22 +54,35 @@ def start ():
 
 	api_cerver = cerver_main_http_configuration ()
 	http_cerver = http_cerver_get (api_cerver)
-	cerver_auth_http_configuration (http_cerver, JWT_ALG_RS256, "keys/key.key", "keys/key.pub")
+
+	cerver_auth_http_configuration (
+		http_cerver, JWT_ALG_RS256, "keys/key.key", "keys/key.pub"
+	)
 
 	# GET /
-	main_route = http_create_route (REQUEST_METHOD_GET, "/", main_handler, http_cerver = http_cerver)
+	main_route = http_create_route (
+		REQUEST_METHOD_GET, "/", main_handler, http_cerver = http_cerver
+	)
 
 	# GET /echo
-	echo_route = http_create_route (REQUEST_METHOD_GET, "echo", echo_handler, main_route)
+	echo_route = http_create_route (
+		REQUEST_METHOD_GET, "echo", echo_handler, main_route
+	)
 
 	# POST /data
-	data_route = http_create_route (REQUEST_METHOD_POST, "data", data_handler, main_route)
+	data_route = http_create_route (
+		REQUEST_METHOD_POST, "data", data_handler, main_route
+	)
 
 	# POST /token
-	token_route = http_create_route (REQUEST_METHOD_POST, "token", token_handler, main_route)
+	token_route = http_create_route (
+		REQUEST_METHOD_POST, "token", token_handler, main_route
+	)
 
 	# GET /auth
-	auth_route = http_create_secure_route (REQUEST_METHOD_GET, "auth", auth_handler, main_route)
+	auth_route = http_create_secure_route (
+		REQUEST_METHOD_GET, "auth", auth_handler, main_route
+	)
 
 	cerver_start (api_cerver)
 
