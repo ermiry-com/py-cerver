@@ -1,4 +1,5 @@
-from ctypes import Structure, c_void_p, py_object, c_int, c_uint, c_uint64, POINTER, CFUNCTYPE
+from ctypes import POINTER, CFUNCTYPE, Structure
+from ctypes import c_void_p, py_object, c_int, c_uint, c_uint64
 
 from ..lib import lib
 
@@ -110,6 +111,12 @@ job_queue_request.restype = c_void_p
 job_queue_start = lib.job_queue_start
 job_queue_start.argtypes = [c_void_p]
 job_queue_start.restype = c_uint
+
+job_queue_wait = lib.job_queue_wait
+job_queue_wait.argtypes = [c_void_p]
+
+job_queue_signal = lib.job_queue_signal
+job_queue_signal.argtypes = [c_void_p]
 
 job_queue_stop = lib.job_queue_stop
 job_queue_stop.argtypes = [c_void_p]
