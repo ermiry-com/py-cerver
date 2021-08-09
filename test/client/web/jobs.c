@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <cerver/http/http.h>
+#include <cerver/http/status.h>
 
 #include <cerver/http/json/json.h>
 
@@ -34,6 +35,7 @@ static unsigned int jobs_request_main (
 	if (curl) {
 		retval = curl_simple_handle_data (
 			curl, address,
+			HTTP_STATUS_OK,
 			jobs_request_all_data_handler, data_buffer
 		);
 	}
@@ -55,9 +57,9 @@ static unsigned int jobs_request_job (
 	if (curl) {
 		retval = curl_post_form_value (
 			curl, actual_address,
+			HTTP_STATUS_OK,
 			jobs_request_all_data_handler, data_buffer,
-			"value", "hola",
-			(unsigned int) HTTP_STATUS_OK
+			"value", "hola"
 		);
 	}
 
