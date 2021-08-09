@@ -40,6 +40,12 @@ worker_set_work.argtypes = [c_void_p, WorkerMethod]
 worker_set_delete_data = lib.worker_set_delete_data
 worker_set_delete_data.argtypes = [c_void_p, WorkerMethod]
 
+worker_set_reference = lib.worker_set_reference
+worker_set_reference.argtypes = [c_void_p, py_object]
+
+worker_set_remove_reference = lib.worker_set_remove_reference
+worker_set_remove_reference.argtypes = [c_void_p, WorkerMethod]
+
 worker_start_with_state = lib.worker_start_with_state
 worker_start_with_state.argtypes = [c_void_p, WorkerState]
 worker_start_with_state.restype = c_uint
@@ -61,5 +67,9 @@ worker_end.argtypes = [c_void_p]
 worker_end.restype = c_uint
 
 worker_push_job = lib.worker_push_job
-worker_push_job.argtypes = [c_void_p, WorkerMethod, py_object]
+worker_push_job.argtypes = [c_void_p, py_object]
 worker_push_job.restype = c_uint
+
+worker_push_job_with_work = lib.worker_push_job_with_work
+worker_push_job_with_work.argtypes = [c_void_p, WorkerMethod, py_object]
+worker_push_job_with_work.restype = c_uint
