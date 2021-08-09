@@ -11,8 +11,6 @@ worker = None
 
 next_id = 0
 
-references = []
-
 class Data ():
 	def __init__ (self, id, value):
 		self.id = id
@@ -29,8 +27,6 @@ def data_create (value):
 	data = Data (next_id, value)
 	next_id += 1
 
-	references.append (data)
-
 	return data
 
 # end
@@ -40,7 +36,9 @@ def end (signum, frame):
 	cerver_teardown (worker_service)
 	cerver_end ()
 
-	worker_end (worker)
+	worker.end ()
+
+	time.sleep (1)
 
 	sys.exit ("Done!")
 
@@ -66,7 +64,7 @@ def worker_handler (http_receive, request):
 
 	if (value):
 		data = data_create (value)
-		if (not worker_push_job (worker, custom_worker_method, data)):
+		if (not worker.push (data)):
 			http_response_json_key_value_send (
 				http_receive, HTTP_STATUS_OK,
 				b"oki", b"doki"
@@ -89,7 +87,7 @@ def worker_handler (http_receive, request):
 # GET /work/start
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def worker_start_handler (http_receive, request):
-	if (not worker_resume (worker)):
+	if (not worker.resume ()):
 		http_response_json_key_value_send (
 			http_receive, HTTP_STATUS_OK,
 			b"oki", b"doki"
@@ -105,7 +103,7 @@ def worker_start_handler (http_receive, request):
 # GET /work/stop
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def worker_stop_handler (http_receive, request):
-	if (not worker_stop (worker)):
+	if (not worker.stop ()):
 		http_response_json_key_value_send (
 			http_receive, HTTP_STATUS_OK,
 			b"oki", b"doki"
@@ -154,15 +152,12 @@ def start ():
 	http_cerver_route_register (http_cerver, worker_stop_route)
 
 	# worker
-	worker = worker_create ()
-	worker_set_name (worker, b"test")
-	worker_set_work (worker, custom_worker_method)
-	# worker_set_delete_data (worker, data_delete)
-	worker_start (worker)
+	worker = Worker ("test", custom_worker_method)
+	worker.start ()
 
 	# HTTP admin configuration
 	http_cerver_enable_admin_routes (http_cerver, True)
-	http_cerver_register_admin_worker (http_cerver, worker)
+	http_cerver_register_admin_worker (http_cerver, worker.worker)
 
 	# start
 	cerver_start (worker_service)

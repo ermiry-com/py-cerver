@@ -1,24 +1,13 @@
 ## General
-- Updated Dockerfiles to use cerver 2.0b-45
-- Refactored test Dockerfile to be used for debugging
-- Added Dockerfile to be used for integration tests
-- Added dedicated script to build local test image
+- Updated Dockerfiles to use cerver 2.0b-46
 
 ## Threads
-- Added job queue wait & signal methods bindings
-- Added new worker related definitions & methods
-
-## HTTP
-- Added ability to register a worker to HTTP admin
+- Added base threads cond & mutex methods
+- Added new worker methods bindings
+- Added base custom worker implementation
 
 ## Examples
-- Added base dedicated HTTP worker example
-- Refactored examples to use binary strings directly
+- Updated HTTP example with new worker
 
 ## Tests
-- Refactored tests run script to use local image
-- Updated test curl methods to take an expected status
-- Updated web clients tests with new curl methods
-- Refactored HTTP integration tests to match examples
-- Added base HTTP worker integration test service
-- Added matching web worker client test sources
+- Update worker integration test to match example
