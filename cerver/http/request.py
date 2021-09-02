@@ -152,6 +152,9 @@ def http_request_get_body_json (request):
 http_request_headers_print = lib.http_request_headers_print
 http_request_headers_print.argtypes = [c_void_p]
 
+http_request_headers_print_full = lib.http_request_headers_print_full
+http_request_headers_print_full.argtypes = [c_void_p]
+
 # query
 http_request_query_params_print = lib.http_request_query_params_print
 http_request_query_params_print.argtypes = [c_void_p]

@@ -17,9 +17,9 @@ def end (signum, frame):
 # GET /
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def main_handler (http_receive, request):
-	http_response_render_file (
+	http_response_send_file (
 		http_receive, HTTP_STATUS_OK,
-		b"./examples/public/index.html"
+		b"./examples/http/public/index.html"
 	)
 
 # GET /test
@@ -69,14 +69,6 @@ def adios_handler (http_receive, request):
 		http_receive, HTTP_STATUS_OK, b"Adios handler!"
 	)
 
-# GET /key
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def key_handler (http_receive, request):
-	http_response_json_key_value_send (
-		http_receive, HTTP_STATUS_OK,
-		b"key", b"value"
-	)
-
 def start ():
 	global web_cerver
 	web_cerver = cerver_create_web (
@@ -84,6 +76,8 @@ def start ():
 	)
 
 	# main configuration
+	cerver_set_alias (web_cerver, b"web")
+
 	cerver_set_receive_buffer_size (web_cerver, 4096)
 	cerver_set_thpool_n_threads (web_cerver, 4)
 	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS)
@@ -93,7 +87,7 @@ def start ():
 	# HTTP configuration
 	http_cerver = http_cerver_get (web_cerver)
 
-	http_cerver_static_path_add (http_cerver, b"./examples/public")
+	http_cerver_static_path_add (http_cerver, b"./examples/http/public")
 
 	# GET /
 	main_route = http_route_create (REQUEST_METHOD_GET, b"/", main_handler)
@@ -118,10 +112,6 @@ def start ():
 	# GET /adios
 	adios_route = http_route_create (REQUEST_METHOD_GET, b"adios", adios_handler)
 	http_cerver_route_register (http_cerver, adios_route)
-
-	# GET /key
-	key_route = http_route_create (REQUEST_METHOD_GET, b"key", key_handler)
-	http_cerver_route_register (http_cerver, key_route)
 
 	# start
 	cerver_start (web_cerver)

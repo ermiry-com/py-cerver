@@ -13,7 +13,7 @@ RUN mkdir /opt/cerver && cd /opt/cerver \
     && wget -q --no-check-certificate https://github.com/ermiry/cerver/archive/${CERVER_VERSION}.zip \
     && unzip ${CERVER_VERSION}.zip \
     && cd cerver-${CERVER_VERSION} \
-    && make TYPE=production -j4
+    && make TYPE=test -j4
 
 ############
 FROM python:3.9.2-slim-buster
@@ -29,6 +29,11 @@ COPY --from=builder /opt/cerver/cerver-${CERVER_VERSION}/include/cerver /usr/loc
 
 # pycerver
 WORKDIR /home/pycerver
-RUN pip install --no-cache-dir pycerver==0.8.2
+COPY ./cerver ./cerver
+
+COPY ./path.sh .
+RUN /bin/bash path.sh
+
+COPY ./examples ./examples
 
 CMD ["/bin/bash"]

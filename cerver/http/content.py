@@ -95,6 +95,10 @@ http_content_type_by_mime = lib.http_content_type_by_mime
 http_content_type_by_mime.argtypes = [c_char_p]
 http_content_type_by_mime.restype = ContentType
 
+http_content_type_by_extension = lib.http_content_type_by_extension
+http_content_type_by_extension.argtypes = [c_char_p]
+http_content_type_by_extension.restype = ContentType
+
 http_content_type_mime_by_extension = lib.http_content_type_mime_by_extension
 http_content_type_mime_by_extension.argtypes = [c_char_p]
 http_content_type_mime_by_extension.restype = c_char_p
@@ -102,3 +106,7 @@ http_content_type_mime_by_extension.restype = c_char_p
 http_content_type_is_json = lib.http_content_type_is_json
 http_content_type_is_json.argtypes = [c_char_p]
 http_content_type_is_json.restype = c_bool
+
+http_content_type_from_filename = lib.http_content_type_from_filename
+http_content_type_from_filename.argtypes = [c_char_p]
+http_content_type_from_filename.restype = ContentType

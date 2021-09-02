@@ -15,10 +15,10 @@ def end (signum, frame):
 	sys.exit ("Done!")
 
 # GET /render
-# test http_response_render_file ()
+# test http_response_send_file ()
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def main_render_handler (http_receive, request):
-	http_response_render_file (
+	http_response_send_file (
 		http_receive, HTTP_STATUS_OK,
 		b"./web/public/index.html"
 	)
@@ -45,73 +45,6 @@ def json_render_handler (http_receive, request):
 	http_response_render_json (
 		http_receive, HTTP_STATUS_OK,
 		json, json_len
-	)
-
-# GET /json/create
-# test http_response_create_json ()
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def json_create_handler (http_receive, request):
-	json = b"{\"msg\": \"okay\"}"
-	json_len = len (json)
-
-	res = http_response_create_json (
-		HTTP_STATUS_OK, json, json_len
-	)
-
-	http_response_print (res)
-	http_response_send (res, http_receive)
-	http_response_delete (res)
-
-# GET /json/create/key
-# test http_response_create_json ()
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def json_create_key_value_handler (http_receive, request):
-	res = http_response_create_json_key_value (
-		HTTP_STATUS_OK, b"msg", b"okay"
-	)
-
-	http_response_print (res)
-	http_response_send (res, http_receive)
-	http_response_delete (res)
-
-# GET /json/create/message
-# test http_response_json_msg ()
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def json_create_message_handler (http_receive, request):
-	res = http_response_json_msg (
-		HTTP_STATUS_OK, b"okay"
-	)
-
-	http_response_print (res)
-	http_response_send (res, http_receive)
-	http_response_delete (res)
-
-# GET /json/send/message
-# test http_response_json_msg_send ()
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def json_send_message_handler (http_receive, request):
-	http_response_json_msg_send (
-		http_receive, HTTP_STATUS_OK, b"okay"
-	)
-
-# GET /json/create/error
-# test http_response_json_error ()
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def json_create_error_handler (http_receive, request):
-	res = http_response_json_error (
-		HTTP_STATUS_BAD_REQUEST, b"bad request"
-	)
-
-	http_response_print (res)
-	http_response_send (res, http_receive)
-	http_response_delete (res)
-
-# GET /json/send/error
-# test http_response_json_msg_send ()
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def json_send_error_handler (http_receive, request):
-	http_response_json_error_send (
-		http_receive, HTTP_STATUS_BAD_REQUEST, b"bad request"
 	)
 
 def start ():
@@ -143,30 +76,6 @@ def start ():
 	# GET /render/json
 	render_json_route = http_route_create (REQUEST_METHOD_GET, b"render/json", json_render_handler);
 	http_cerver_route_register (http_cerver, render_json_route);
-
-	# GET /json/create
-	json_create_route = http_route_create (REQUEST_METHOD_GET, b"json/create", json_create_handler);
-	http_cerver_route_register (http_cerver, json_create_route);
-
-	# GET /json/create/key
-	json_create_key_value_route = http_route_create (REQUEST_METHOD_GET, b"json/create/key", json_create_key_value_handler);
-	http_cerver_route_register (http_cerver, json_create_key_value_route);
-
-	# GET /json/create/message
-	json_create_message_route = http_route_create (REQUEST_METHOD_GET, b"json/create/message", json_create_message_handler);
-	http_cerver_route_register (http_cerver, json_create_message_route);
-
-	# GET /json/send/message
-	json_send_message_route = http_route_create (REQUEST_METHOD_GET, b"json/send/message", json_send_message_handler);
-	http_cerver_route_register (http_cerver, json_send_message_route);
-
-	# GET /json/create/error
-	json_create_error_route = http_route_create (REQUEST_METHOD_GET, b"json/create/error", json_create_error_handler);
-	http_cerver_route_register (http_cerver, json_create_error_route);
-
-	# GET /json/send/error
-	json_send_error_route = http_route_create (REQUEST_METHOD_GET, b"json/send/error", json_send_error_handler);
-	http_cerver_route_register (http_cerver, json_send_error_route);
 
 	# start
 	cerver_start (web_cerver)

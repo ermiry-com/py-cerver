@@ -1,4 +1,5 @@
-from ctypes import c_char_p, c_uint8, c_void_p, c_uint, c_size_t
+from ctypes import c_void_p, c_char_p, c_size_t
+from ctypes import c_uint8, c_uint, c_int, c_long, c_double, c_bool
 
 import json
 
@@ -8,6 +9,7 @@ from .content import ContentType, HTTP_CONTENT_TYPE_HTML
 from .headers import http_header
 from .status import http_status
 
+# correctly deletes the response and all of its data
 http_response_delete = lib.http_response_delete
 http_response_delete.argtypes = [c_void_p]
 
@@ -192,6 +194,14 @@ def http_send_response (
 		http_response_send (response, http_receive)
 		http_response_delete (response)
 
+# files
+# opens the selected file and sends it back to the client
+# takes care of generating the header based on the file values
+# returns 0 on success, 1 on error
+http_response_send_file = lib.http_response_send_file
+http_response_send_file.argtypes = [c_void_p, http_status, c_char_p]
+http_response_send_file.restype = c_uint8
+
 # render
 # sends the selected text back to the user
 # this methods takes care of generating a repsonse with text/html content type
@@ -207,42 +217,147 @@ http_response_render_json = lib.http_response_render_json
 http_response_render_json.argtypes = [c_void_p, http_status, c_char_p, c_size_t]
 http_response_render_json.restype = c_uint8
 
-# opens the selected file and sends it back to the user
-# this method takes care of generating the header based on the file values
+# videos
+# handles the transmission of a video to the client
 # returns 0 on success, 1 on error
-http_response_render_file = lib.http_response_render_file
-http_response_render_file.argtypes = [c_void_p, http_status, c_char_p]
-http_response_render_file.restype = c_uint8
+http_response_handle_video = lib.http_response_handle_video
+http_response_handle_video.argtypes = [c_void_p, c_char_p]
+http_response_handle_video.restype = c_uint8
 
 # json
+# creates a HTTP response with the defined status code
+# with a custom json message body
+# returns a new HTTP response instance ready to be sent
 http_response_create_json = lib.http_response_create_json
 http_response_create_json.argtypes = [http_status, c_char_p, c_size_t]
 http_response_create_json.restype = c_void_p
 
+# creates a HTTP response with the defined status code and a data (body)
+# with a json message of type { key: value } that is ready to be sent
+# returns a new HTTP response instance
 http_response_create_json_key_value = lib.http_response_create_json_key_value
 http_response_create_json_key_value.argtypes = [http_status, c_char_p, c_char_p]
 http_response_create_json_key_value.restype = c_void_p
 
+# creates a HTTP response with the defined status code
+# with a json body of type { "key": int_value }
+# returns a new HTTP response instance ready to be sent
+http_response_json_int_value = lib.http_response_json_int_value
+http_response_json_int_value.argtypes = [http_status, c_char_p, c_int]
+http_response_json_int_value.restype = c_void_p
+
+# sends a HTTP response with custom status code
+# with a json body of type { "key": int_value }
+# returns 0 on success, 1 on error
+http_response_json_int_value_send = lib.http_response_json_int_value_send
+http_response_json_int_value_send.argtypes = [c_void_p, http_status, c_char_p, c_int]
+http_response_json_int_value_send.restype = c_uint8
+
+# creates a HTTP response with the defined status code
+# with a json body of type { "key": large_int_value }
+# returns a new HTTP response instance ready to be sent
+http_response_json_large_int_value = lib.http_response_json_large_int_value
+http_response_json_large_int_value.argtypes = [http_status, c_char_p, c_long]
+http_response_json_large_int_value.restype = c_void_p
+
+# sends a HTTP response with custom status code
+# with a json body of type { "key": large_int_value }
+# returns 0 on success, 1 on error
+http_response_json_large_int_value_send = lib.http_response_json_large_int_value_send
+http_response_json_large_int_value_send.argtypes = [c_void_p, http_status, c_char_p, c_long]
+http_response_json_large_int_value_send.restype = c_uint8
+
+# creates a HTTP response with the defined status code
+# with a json body of type { "key": double_value }
+# returns a new HTTP response instance ready to be sent
+http_response_json_real_value = lib.http_response_json_real_value
+http_response_json_real_value.argtypes = [http_status, c_char_p, c_double]
+http_response_json_real_value.restype = c_void_p
+
+# sends a HTTP response with custom status code
+# with a json body of type { "key": double_value }
+# returns 0 on success, 1 on error
+http_response_json_real_value_send = lib.http_response_json_real_value_send
+http_response_json_real_value_send.argtypes = [c_void_p, http_status, c_char_p, c_double]
+http_response_json_real_value_send.restype = c_uint8
+
+# creates a HTTP response with the defined status code
+# with a json body of type { "key": bool_value }
+# returns a new HTTP response instance ready to be sent
+http_response_json_bool_value = lib.http_response_json_bool_value
+http_response_json_bool_value.argtypes = [http_status, c_char_p, c_bool]
+http_response_json_bool_value.restype = c_void_p
+
+# sends a HTTP response with custom status code
+# with a json body of type { "key": bool_value }
+# returns 0 on success, 1 on error
+http_response_json_bool_value_send = lib.http_response_json_bool_value_send
+http_response_json_bool_value_send.argtypes = [c_void_p, http_status, c_char_p, c_bool]
+http_response_json_bool_value_send.restype = c_uint8
+
+# creates a HTTP response with the defined status code and a data (body)
+# with a json message of type { msg: "your message" } ready to be sent
+# returns a new HTTP response instance
 http_response_json_msg = lib.http_response_json_msg
 http_response_json_msg.argtypes = [http_status, c_char_p]
 http_response_json_msg.restype = c_void_p
 
+# creates and sends a HTTP json message response
+# with the defined status code & message
+# returns 0 on success, 1 on error
 http_response_json_msg_send = lib.http_response_json_msg_send
 http_response_json_msg_send.argtypes = [c_void_p, http_status, c_char_p]
 http_response_json_msg_send.restype = c_uint8
 
+# creates a HTTP response with the defined status code and a data (body)
+# with a json message of type { error: "your error message" } ready to be sent
+# returns a new HTTP response instance
 http_response_json_error = lib.http_response_json_error
 http_response_json_error.argtypes = [http_status, c_char_p]
 http_response_json_error.restype = c_void_p
 
+# creates and sends a HTTP json error response
+# with the defined status code & message
+# returns 0 on success, 1 on error
 http_response_json_error_send = lib.http_response_json_error_send
 http_response_json_error_send.argtypes = [c_void_p, http_status, c_char_p]
 http_response_json_error_send.restype = c_uint8
 
+# creates a HTTP response with the defined status code and a data (body)
+# with a json meesage of type { key: value } ready to be sent
+# returns a new HTTP response instance
 http_response_json_key_value = lib.http_response_json_key_value
 http_response_json_key_value.argtypes = [http_status, c_char_p, c_char_p]
 http_response_json_key_value.restype = c_void_p
 
+# creates and sends a HTTP custom json response
+# with the defined status code & key-value
+# returns 0 on success, 1 on error
 http_response_json_key_value_send = lib.http_response_json_key_value_send
 http_response_json_key_value_send.argtypes = [c_void_p, http_status, c_char_p, c_char_p]
 http_response_json_key_value_send.restype = c_uint8
+
+# creates a http response with the defined status code
+# and the body with the custom json
+http_response_json_custom = lib.http_response_json_custom
+http_response_json_custom.argtypes = [http_status, c_char_p]
+http_response_json_custom.restype = c_void_p
+
+# creates and sends a http custom json response with the defined status code
+# returns 0 on success, 1 on error
+http_response_json_custom_send = lib.http_response_json_custom_send
+http_response_json_custom_send.argtypes = [c_void_p, http_status, c_char_p]
+http_response_json_custom_send.restype = c_uint8
+
+# creates a http response with the defined status code
+# and the body with a reference to a custom json
+http_response_json_custom_reference = lib.http_response_json_custom_reference
+http_response_json_custom_reference.argtypes = [http_status, c_char_p, c_size_t]
+http_response_json_custom_reference.restype = c_void_p
+
+# creates and sends a http custom json reference response
+# with the defined status code
+# returns 0 on success, 1 on error
+http_response_json_custom_reference_send = lib.http_response_json_custom_reference_send
+http_response_json_custom_reference_send.argtypes = [c_void_p, http_status, c_char_p, c_size_t]
+http_response_json_custom_reference_send.restype = c_uint8

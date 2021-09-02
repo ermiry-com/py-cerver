@@ -1,13 +1,25 @@
 ## General
-- Updated Dockerfiles to use cerver 2.0b-46
+- Updated Dockerfiles to use cerver 2.0b-50
+- Updated custom String type structure definition
+- Added more image files types related methods
 
-## Threads
-- Added base threads cond & mutex methods
-- Added new worker methods bindings
-- Added base custom worker implementation
+## HTTP
+- Added method to get content type value by extension
+- Added base HTTP response handle video implementation
+- Added dedicated method to print full request headers
+- Replaced HTTP response render with send file
+- Added latest HTTP JSON responses methods bindings
 
 ## Examples
-- Updated HTTP example with new worker
+- Removed JSON handlers from main web example
+- Added base web example to showcase JSON methods
+- Added dedicated example public video html source
+- Added base example to showcase HTTP video stream
+- Added base Dockerfile to be used for running examples
+- Added dedicated script to build examples image
 
 ## Tests
-- Update worker integration test to match example
+- Removed JSON methods from main web tests
+- Added dedicated curl method to upload JSON in body
+- Added base dedicated web JSON integration tests
+- Added JSON data files to be used in web tests
