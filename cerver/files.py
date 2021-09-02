@@ -32,6 +32,10 @@ files_image_type_to_string = lib.files_image_type_to_string
 files_image_type_to_string.argtypes = [ImageType]
 files_image_type_to_string.restype = c_char_p
 
+files_image_type_extension = lib.files_image_type_extension
+files_image_type_extension.argtypes = [ImageType]
+files_image_type_extension.restype = c_char_p
+
 # opens the file and returns the file's image type
 files_image_get_type = lib.files_image_get_type
 files_image_get_type.argtypes = [c_char_p]
@@ -42,10 +46,20 @@ files_image_get_type_by_extension = lib.files_image_get_type_by_extension
 files_image_get_type_by_extension.argtypes = [c_char_p]
 files_image_get_type_by_extension.restype = ImageType
 
+# returns true if jpeg magic bytes are in file
+files_image_is_jpeg = lib.files_image_is_jpeg
+files_image_is_jpeg.argtypes = [c_char_p]
+files_image_is_jpeg.restype = c_bool
+
 # returns true if the filename's extension is jpg or jpeg
 files_image_extension_is_jpeg = lib.files_image_extension_is_jpeg
 files_image_extension_is_jpeg.argtypes = [c_char_p]
 files_image_extension_is_jpeg.restype = c_bool
+
+# returns true if png magic bytes are in file
+files_image_is_png = lib.files_image_is_png
+files_image_is_png.argtypes = [c_char_p]
+files_image_is_png.restype = c_bool
 
 # returns true if the filename's extension is png
 files_image_extension_is_png = lib.files_image_extension_is_png
