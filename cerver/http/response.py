@@ -214,6 +214,12 @@ http_response_render_file = lib.http_response_render_file
 http_response_render_file.argtypes = [c_void_p, http_status, c_char_p]
 http_response_render_file.restype = c_uint8
 
+# handles the transmission of a video to the client
+# returns 0 on success, 1 on error
+http_response_handle_video = lib.http_response_handle_video
+http_response_handle_video.argtypes = [c_void_p, c_char_p]
+http_response_handle_video.restype = c_uint8
+
 # json
 http_response_create_json = lib.http_response_create_json
 http_response_create_json.argtypes = [http_status, c_char_p, c_size_t]
