@@ -1,0 +1,21 @@
+version: '3'
+services:
+  api:
+    restart: always
+    image: ermiry/pycerver:examples
+    command: python3 examples/http/videos.py
+    ports:
+      - 5000
+    volumes:
+      - ./data:/home/pycerver/data
+
+  nginx:
+    restart: always
+    image: ermiry/pycerver-nginx:latest
+    ports:
+      - '80:80'
+
+networks:
+  default:
+    external:
+      name: cerver
