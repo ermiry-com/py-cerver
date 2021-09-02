@@ -192,6 +192,14 @@ def http_send_response (
 		http_response_send (response, http_receive)
 		http_response_delete (response)
 
+# files
+# opens the selected file and sends it back to the client
+# takes care of generating the header based on the file values
+# returns 0 on success, 1 on error
+http_response_send_file = lib.http_response_send_file
+http_response_send_file.argtypes = [c_void_p, http_status, c_char_p]
+http_response_send_file.restype = c_uint8
+
 # render
 # sends the selected text back to the user
 # this methods takes care of generating a repsonse with text/html content type
@@ -207,13 +215,7 @@ http_response_render_json = lib.http_response_render_json
 http_response_render_json.argtypes = [c_void_p, http_status, c_char_p, c_size_t]
 http_response_render_json.restype = c_uint8
 
-# opens the selected file and sends it back to the user
-# this method takes care of generating the header based on the file values
-# returns 0 on success, 1 on error
-http_response_render_file = lib.http_response_render_file
-http_response_render_file.argtypes = [c_void_p, http_status, c_char_p]
-http_response_render_file.restype = c_uint8
-
+# videos
 # handles the transmission of a video to the client
 # returns 0 on success, 1 on error
 http_response_handle_video = lib.http_response_handle_video
