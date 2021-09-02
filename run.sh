@@ -45,6 +45,22 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 sudo docker kill $(sudo docker ps -q)
 
+# JSON
+echo "JSON integration test..."
+sudo docker run \
+	-d \
+	--name test --rm \
+	-p 8080:8080 \
+	ermiry/pycerver:local python3 web/responses.py
+
+sleep 2
+
+sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
+
+./test/bin/client/web/json || { exit 1; }
+
+sudo docker kill $(sudo docker ps -q)
+
 # auth
 echo "Web Auth integration test..."
 sudo docker run \
