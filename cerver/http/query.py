@@ -1,4 +1,4 @@
-from ctypes import c_void_p, c_char_p, POINTER
+from ctypes import POINTER, c_void_p, c_char_p
 
 from ..lib import lib
 

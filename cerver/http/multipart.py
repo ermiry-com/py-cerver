@@ -1,4 +1,5 @@
-from ctypes import c_int, c_uint, c_uint32, c_void_p, c_char_p, c_bool, POINTER
+from ctypes import POINTER, c_void_p
+from ctypes import c_int, c_uint, c_uint32, c_char_p, c_bool
 
 from ..lib import lib
 

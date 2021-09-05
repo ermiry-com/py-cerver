@@ -1,13 +1,15 @@
 import json
 
-from ctypes import c_int, c_uint, c_uint8, c_void_p, c_char_p, c_bool, c_size_t, CFUNCTYPE, POINTER, cast
+from ctypes import CFUNCTYPE, POINTER, cast, c_void_p
+from ctypes import c_int, c_uint, c_uint8, c_char_p, c_bool, c_size_t
 
 from ..lib import lib
 
 from ..types.string import String
 
 from ..cerver import CERVER_HANDLER_TYPE_THREADS, cerver_create_web
-from ..cerver import cerver_set_receive_buffer_size, cerver_set_thpool_n_threads, cerver_set_handler_type, cerver_set_reusable_address_flags
+from ..cerver import cerver_set_receive_buffer_size, cerver_set_thpool_n_threads
+from ..cerver import cerver_set_handler_type, cerver_set_reusable_address_flags
 
 from .alg import jwt_alg_t, JWT_ALG_NONE
 from .headers import http_header

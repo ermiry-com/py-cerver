@@ -1,4 +1,4 @@
-from ctypes import c_int, c_uint, c_char_p, c_void_p, CFUNCTYPE
+from ctypes import CFUNCTYPE, c_void_p, c_int, c_uint, c_char_p
 
 from ..lib import lib
 
