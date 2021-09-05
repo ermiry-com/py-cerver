@@ -1,4 +1,5 @@
-from ctypes import c_int, c_uint, c_uint8, c_void_p, c_char_p, c_bool, POINTER, CFUNCTYPE
+from ctypes import POINTER, CFUNCTYPE, c_void_p
+from ctypes import c_int, c_uint, c_uint8, c_char_p, c_bool
 
 import json
 
