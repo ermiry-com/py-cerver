@@ -7,4 +7,4 @@ from .files import *
 from .timer import *
 from .version import *
 
-__version__ = "0.8.3"
+__version__ = "0.8.4"
