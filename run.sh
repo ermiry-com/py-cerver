@@ -173,6 +173,22 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 sudo docker kill $(sudo docker ps -q)
 
+# validation
+echo "Validation integration test..."
+sudo docker run \
+	-d \
+	--name test --rm \
+	-p 8080:8080 \
+	ermiry/pycerver:local python3 web/validation.py
+
+sleep 2
+
+sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
+
+./test/bin/client/web/validation || { exit 1; }
+
+sudo docker kill $(sudo docker ps -q)
+
 # wrapper
 echo "Wrapper integration test..."
 sudo docker run \
