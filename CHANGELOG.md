@@ -1,25 +1,14 @@
 ## General
-- Updated Dockerfiles to use cerver 2.0b-50
-- Updated custom String type structure definition
-- Added more image files types related methods
+- Updated Dockerfiles to use cerver 2.0b-51
 
 ## HTTP
-- Added method to get content type value by extension
-- Added base HTTP response handle video implementation
-- Added dedicated method to print full request headers
-- Replaced HTTP response render with send file
-- Added latest HTTP JSON responses methods bindings
+- Refactored imports in module HTTP sources
+- Added base custom HTTP validation methods
 
 ## Examples
-- Removed JSON handlers from main web example
-- Added base web example to showcase JSON methods
-- Added dedicated example public video html source
-- Added base example to showcase HTTP video stream
-- Added base Dockerfile to be used for running examples
-- Added dedicated script to build examples image
+- Added example to showcase validation methods
 
 ## Tests
-- Removed JSON methods from main web tests
-- Added dedicated curl method to upload JSON in body
-- Added base dedicated web JSON integration tests
-- Added JSON data files to be used in web tests
+- Small updates in dedicated JSON web tests
+- Added more JSON data files to perform requests
+- Added base HTTP validation integration test
