@@ -103,6 +103,9 @@ class Worker ():
 
 		thread_mutex_delete (self.mutex)
 
+	def start_with_state (self, worker_state):
+		return worker_start_with_state (self.worker, worker_state)
+
 	def start (self):
 		return worker_start (self.worker)
 
