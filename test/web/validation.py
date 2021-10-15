@@ -45,7 +45,7 @@ def body_exists_handler (http_receive, request):
 				loaded_json, "value", errors
 			)
 
-			if (len (errors) == 0):
+			if (not errors):
 				http_response_send (none_error, http_receive)
 
 			else:
@@ -72,7 +72,7 @@ def body_value_handler (http_receive, request):
 				loaded_json, "value", 8, 32, errors
 			)
 
-			if (len (errors) == 0):
+			if (not errors):
 				http_response_send (none_error, http_receive)
 
 			else:
@@ -92,7 +92,7 @@ def mparts_exists_handler (http_receive, request):
 
 	value = validate_mparts_exists (request, "value", errors)
 
-	if (len (errors) == 0):
+	if (not errors):
 		http_response_send (none_error, http_receive)
 
 	else:
@@ -105,7 +105,7 @@ def mparts_value_handler (http_receive, request):
 
 	value = validate_mparts_value (request, "value", 8, 32, errors)
 
-	if (len (errors) == 0):
+	if (not errors):
 		http_response_send (none_error, http_receive)
 
 	else:
@@ -118,7 +118,7 @@ def mparts_int_handler (http_receive, request):
 
 	value = validate_mparts_int (request, "value", errors)
 
-	if (len (errors) == 0):
+	if (not errors):
 		http_response_send (none_error, http_receive)
 
 	else:
@@ -133,7 +133,7 @@ def mparts_int_default_handler (http_receive, request):
 		request, "value", 10, errors
 	)
 
-	if (len (errors) == 0):
+	if (not errors):
 		http_response_send (none_error, http_receive)
 
 	else:
@@ -146,7 +146,7 @@ def mparts_float_handler (http_receive, request):
 
 	value = validate_mparts_float (request, "value", errors)
 
-	if (len (errors) == 0):
+	if (not errors):
 		http_response_send (none_error, http_receive)
 
 	else:
@@ -161,7 +161,7 @@ def mparts_float_default_handler (http_receive, request):
 		request, "value", 10.6, errors
 	)
 
-	if (len (errors) == 0):
+	if (not errors):
 		http_response_send (none_error, http_receive)
 
 	else:
@@ -174,7 +174,7 @@ def mparts_bool_handler (http_receive, request):
 
 	value = validate_mparts_bool (request, "value", errors)
 
-	if (len (errors) == 0):
+	if (not errors):
 		http_response_send (none_error, http_receive)
 
 	else:
@@ -189,22 +189,86 @@ def mparts_bool_default_handler (http_receive, request):
 		request, "value", False, errors
 	)
 
-	if (len (errors) == 0):
+	if (not errors):
 		http_response_send (none_error, http_receive)
 
 	else:
 		service_errors_send (http_receive, errors)
 
-# TODO:
-# POST /mparts/file/image
+# POST /mparts/upload
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def mparts_file_image_handler (http_receive, request):
-	pass
+def mparts_upload_handler (http_receive, request):
+	errors = {}
+
+	# http_request_multi_parts_print (request)
+
+	cuc = validate_mparts_exists (request, "cuc", errors)
+	image = validate_mparts_file_exists (request, "image", errors)
+
+	if (not errors):
+		print ("Original: ", image["original"])
+		print ("Generated: ", image["generated"])
+		print ("Saved: ", image["saved"])
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# POST /mparts/filenames
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def mparts_filenames_handler (http_receive, request):
+	errors = {}
+
+	filename = validate_mparts_filename_exists (request, "image", errors)
+	saved_filename = validate_mparts_saved_filename_exists (request, "image", errors)
+
+	if (not errors):
+		print ("filename: ", filename)
+		print ("saved: ", saved_filename)
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# POST /mparts/saved
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def mparts_saved_handler (http_receive, request):
+	errors = {}
+
+	# http_request_multi_parts_print (request)
+
+	cuc = validate_mparts_exists (request, "cuc", errors)
+	if (validate_mparts_saved_file_exists (request, "image", errors)):
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# POST /mparts/image
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def mparts_image_handler (http_receive, request):
+	errors = {}
+
+	http_request_multi_parts_print (request)
+
+	cuc = validate_mparts_exists (request, "cuc", errors)
+
+	image = validate_mparts_file_is_image (request, "image", errors)
+
+	if (not errors):
+		print ("Type: ", image["type"])
+		print ("Original: ", image["original"])
+		print ("Generated: ", image["generated"])
+		print ("Saved: ", image["saved"])
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
 
 def start ():
 	global web_service
 	web_service = cerver_create_web (
-		b"web-cerver", 8080, 10
+		b"web-service", 8080, 10
 	)
 
 	# main configuration
@@ -272,10 +336,25 @@ def start ():
 	http_route_set_modifier (mparts_bool_default_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, mparts_bool_default_route)
 
-	# POST /mparts/file/image
-	mparts_file_image_route = http_route_create (REQUEST_METHOD_POST, b"mparts/file/image", mparts_file_image_handler)
-	http_route_set_modifier (mparts_file_image_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
-	http_cerver_route_register (http_cerver, mparts_file_image_route)
+	# POST /mparts/upload
+	mparts_upload_route = http_route_create (REQUEST_METHOD_POST, b"mparts/upload", mparts_upload_handler)
+	http_route_set_modifier (mparts_upload_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, mparts_upload_route)
+
+	# POST /mparts/filenames
+	mparts_filenames_route = http_route_create (REQUEST_METHOD_POST, b"mparts/filenames", mparts_filenames_handler)
+	http_route_set_modifier (mparts_filenames_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, mparts_filenames_route)
+
+	# POST /mparts/saved
+	mparts_saved_route = http_route_create (REQUEST_METHOD_POST, b"mparts/saved", mparts_saved_handler)
+	http_route_set_modifier (mparts_saved_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, mparts_saved_route)
+
+	# POST /mparts/image
+	mparts_image_route = http_route_create (REQUEST_METHOD_POST, b"mparts/image", mparts_image_handler)
+	http_route_set_modifier (mparts_image_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, mparts_image_route)
 
 	# start
 	cerver_start (web_service)
