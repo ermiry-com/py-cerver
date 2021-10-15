@@ -139,8 +139,9 @@ extern CurlResult curl_upload_two_files (
 extern CurlResult curl_upload_file_with_extra_value (
 	CURL *curl, const char *address,
 	const http_status expected_status,
-	const char *filename,
-	const char *key, const char *value
+	const char *file, const char *filename,
+	const char *key, const char *value,
+	curl_write_data_cb write_cb, char *buffer
 );
 
 #endif
