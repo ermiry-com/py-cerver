@@ -260,26 +260,33 @@ def validate_mparts_saved_file_exists (request, value, errors):
 
 	return result
 
-# TODO: change to return multiple filenames
 def validate_mparts_file_is_image (request, image, errors):
-	result = False
-	img_type = None
+	values = {}
+	
+	mpart = http_request_multi_parts_get (request, image.encode ("utf-8"))
+	if (mpart):
+		if (http_multi_part_is_file (mpart)):
+			saved = http_multi_part_get_saved_filename (mpart)
 
-	# get the image filename
-	filename = http_request_multi_parts_get_saved_filename (
-		request, image.encode ("utf-8")
-	)
+			# validate file and get extension
+			img_type = files_image_get_type (saved)
+			if (img_type == IMAGE_TYPE_PNG or img_type == IMAGE_TYPE_JPEG):
+				values["type"] = img_type
+				original = http_multi_part_get_filename (mpart)
+				values["original"] = original.decode ("utf-8")
+				generated = http_multi_part_get_generated_filename (mpart)
+				if (generated):
+					values["generated"] = generated.decode ("utf-8")
+				
+				values["saved"] = saved.decode ("utf-8")
 
-	if (filename):
-		# validate file and get extension
-		img_type = files_image_get_type (filename)
-		if (img_type == IMAGE_TYPE_PNG or img_type == IMAGE_TYPE_JPEG):
-			result = True
+			else:
+				errors[image] = f"File {image} is not png or jpeg."
 
 		else:
-			errors[image] = f"File {image} is not png or jpeg."
+			errors[image] = f"Field {image} is not a file."
 
 	else:
 		errors[image] = f"File {image} is missing."
 
-	return result, img_type, filename
+	return values
