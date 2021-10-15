@@ -131,6 +131,30 @@ static unsigned int validation_request_form_data_real (
 
 }
 
+static unsigned int validation_request_image (
+	const char *actual_address, const http_status expected_status,
+	const char *field, const char *key, const char *value,
+	char *data_buffer
+) {
+
+	unsigned int retval = 1;
+
+	CURL *curl = curl_easy_init ();
+	if (curl) {
+		retval = curl_upload_file_with_extra_value (
+			curl, actual_address, expected_status,
+			field, "./test/web/img/ermiry.png",
+			key, value,
+			validation_request_all_data_handler, data_buffer
+		);
+
+		curl_easy_cleanup (curl);
+	}
+
+	return retval;
+
+}
+
 static unsigned int validation_request_all_actual (void) {
 
 	unsigned int errors = 0;
@@ -373,8 +397,61 @@ static unsigned int validation_request_all_actual (void) {
 		actual_address, HTTP_STATUS_OK, "value", "hola", data_buffer
 	);
 
-	// POST /mparts/file/image
-	// TODO:
+	// POST /mparts/upload - good
+	(void) printf ("POST /mparts/upload - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/upload", address);
+	errors |= validation_request_image (
+		actual_address, HTTP_STATUS_OK, "image", "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/upload - bad
+	(void) printf ("POST /mparts/upload - bad\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/upload", address);
+	errors |= validation_request_form_data_value (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/filenames - good
+	(void) printf ("POST /mparts/filenames - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/filenames", address);
+	errors |= validation_request_image (
+		actual_address, HTTP_STATUS_OK, "image", "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/filenames - bad
+	(void) printf ("POST /mparts/filenames - bad\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/filenames", address);
+	errors |= validation_request_form_data_value (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/saved - good
+	(void) printf ("POST /mparts/saved - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/saved", address);
+	errors |= validation_request_image (
+		actual_address, HTTP_STATUS_OK, "image", "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/saved - bad
+	(void) printf ("POST /mparts/saved - bad\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/saved", address);
+	errors |= validation_request_form_data_value (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/image - good
+	(void) printf ("POST /mparts/image - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/image", address);
+	errors |= validation_request_image (
+		actual_address, HTTP_STATUS_OK, "image", "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/image - bad
+	(void) printf ("POST /mparts/image - bad\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/image", address);
+	errors |= validation_request_form_data_value (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "cuc", "1001", data_buffer
+	);
 
 	return errors;
 

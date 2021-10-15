@@ -44,7 +44,7 @@ def body_handler (http_receive, request):
 			email = validate_body_value_exists (loaded_json, "email", errors)
 			username = validate_body_value (loaded_json, "username", 1, 32, errors)
 
-			if (len (errors) == 0):
+			if (not errors):
 				http_response_send (none_error, http_receive)
 
 			else:
@@ -56,9 +56,29 @@ def body_handler (http_receive, request):
 	else:
 		http_response_send (bad_request_error, http_receive)
 
-# POST /mparts
+# POST /upload
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def mparts_handler (http_receive, request):
+def upload_handler (http_receive, request):
+	errors = {}
+
+	http_request_multi_parts_print (request)
+
+	cuc = validate_mparts_exists (request, "cuc", errors)
+
+	image = validate_mparts_file_exists (request, "image", errors)
+
+	if (not errors):
+		print ("Original: ", image["original"])
+		print ("Generated: ", image["generated"])
+		print ("Saved: ", image["saved"])
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# POST /image
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def image_handler (http_receive, request):
 	errors = {}
 
 	cuc = validate_mparts_exists (request, "cuc", errors)
@@ -70,7 +90,11 @@ def mparts_handler (http_receive, request):
 
 	test = validate_mparts_bool_with_default (request, "test", False, errors)
 
-	if (len (errors) == 0):
+	if (not errors):
+		print ("Type: ", image["type"])
+		print ("Original: ", image["original"])
+		print ("Generated: ", image["generated"])
+		print ("Saved: ", image["saved"])
 		http_response_send (none_error, http_receive)
 
 	else:
@@ -79,7 +103,7 @@ def mparts_handler (http_receive, request):
 def start ():
 	global web_service
 	web_service = cerver_create_web (
-		b"web-cerver", 8080, 10
+		b"web-service", 8080, 10
 	)
 
 	# main configuration
@@ -103,10 +127,15 @@ def start ():
 	body_route = http_route_create (REQUEST_METHOD_POST, b"body", body_handler)
 	http_cerver_route_register (http_cerver, body_route)
 
-	# POST /body/value
-	mparts_route = http_route_create (REQUEST_METHOD_POST, b"mparts", mparts_handler)
-	http_route_set_modifier (mparts_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
-	http_cerver_route_register (http_cerver, mparts_route)
+	# POST /upload
+	upload_route = http_route_create (REQUEST_METHOD_POST, b"upload", upload_handler)
+	http_route_set_modifier (upload_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, upload_route)
+
+	# POST /image
+	image_route = http_route_create (REQUEST_METHOD_POST, b"image", image_handler)
+	http_route_set_modifier (image_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, image_route)
 
 	# start
 	cerver_start (web_service)

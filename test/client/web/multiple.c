@@ -73,16 +73,18 @@ static unsigned int multiple_request_all_actual (
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
 		HTTP_STATUS_OK,
-		"./test/web/img/ermiry.png",
-		"key", "okay"
+		"file", "./test/web/img/ermiry.png",
+		"key", "okay",
+		multiple_request_all_data_handler, data_buffer
 	);
 
 	// POST /discard - discard
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
 		HTTP_STATUS_BAD_REQUEST,
-		"./test/web/img/ermiry.png",
-		"key", "discard"
+		"file", "./test/web/img/ermiry.png",
+		"key", "discard",
+		multiple_request_all_data_handler, data_buffer
 	);
 
 	return errors;

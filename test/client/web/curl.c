@@ -455,8 +455,9 @@ CurlResult curl_upload_two_files (
 CurlResult curl_upload_file_with_extra_value (
 	CURL *curl, const char *address,
 	const http_status expected_status,
-	const char *filename,
-	const char *key, const char *value
+	const char *file, const char *filename,
+	const char *key, const char *value,
+	curl_write_data_cb write_cb, char *buffer
 ) {
 
 	CurlResult result = CURL_RESULT_NONE;
@@ -467,7 +468,7 @@ CurlResult curl_upload_file_with_extra_value (
 
 	/* Fill in the file upload field */
 	field = curl_mime_addpart (form);
-	(void) curl_mime_name (field, "file");
+	(void) curl_mime_name (field, file);
 	(void) curl_mime_filedata (field, filename);
 
 	/* Fill in the filename field */
@@ -477,6 +478,9 @@ CurlResult curl_upload_file_with_extra_value (
 
 	/* what URL that receives this POST */
 	(void) curl_easy_setopt (curl, CURLOPT_URL, address);
+
+	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, write_cb);
+	curl_easy_setopt (curl, CURLOPT_WRITEDATA, buffer);
 
 	(void) curl_easy_setopt (curl, CURLOPT_MIMEPOST, form);
 
