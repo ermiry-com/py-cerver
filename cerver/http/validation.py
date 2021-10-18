@@ -21,7 +21,11 @@ def validate_body_value_exists (body, value, errors):
 	result = None
 
 	if (value in body):
-		if (len (body[value]) > 0):
+		if (type (body[value]) is str):
+			if (len (body[value]) > 0):
+				result = body[value]
+
+		else:
 			result = body[value]
 
 	if (result is None):
