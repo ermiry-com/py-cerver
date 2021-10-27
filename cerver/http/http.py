@@ -252,86 +252,109 @@ http_cerver_auth_generate_bearer_jwt_json_with_value = lib.http_cerver_auth_gene
 http_cerver_auth_generate_bearer_jwt_json_with_value.argtypes = [c_void_p, c_void_p, c_char_p, c_char_p]
 http_cerver_auth_generate_bearer_jwt_json_with_value.restype = c_uint8
 
-def cerver_auth_http_configuration (
-	http_cerver, jwt_algorithm = JWT_ALG_NONE,
-	priv_key_filename = "None", pub_key_filename = "None"
+def http_cerver_auth_configuration (
+	http_cerver: c_void_p, jwt_algorithm=JWT_ALG_NONE,
+	priv_key_filename=None, pub_key_filename=None
 ):
 	"""
-	Function to configurate the auth algorithm of the service
+	Configurates the HTTP service's auth JWT algorithm and keys
 	# Parameters
 	------------
-	### http_cerver: HttpCerver.
-		Current http_cerver of the api_cerver.
-	### jwt_algorithm: int, optional.
-		Algorithm that will be used. Must be the same as the one was used to create
-		keys.
+	### http_cerver: HttpCerver
+		Reference to a HttpCerver instance.
+	### jwt_algorithm: jwt_alg_t, optional
+		The algorithm that will be used to manage JWTs.
+		Must be the same as the one used to create the keys.
 		Defaults to JWT_ALG_NONE.
 	### priv_key_filename: string, optional.
-		Relative path where private key is allocated.
-		Defaults to "None"
+		The private key filename.
 	### pub_key_filename: string, optional.
-		Relative path where public key is allocated.
-		Defaults to "None"
+		The public key filename.
 	"""
 	http_cerver_auth_set_jwt_algorithm (http_cerver, jwt_algorithm)
-	if jwt_algorithm is not JWT_ALG_NONE:
-		http_cerver_auth_set_jwt_priv_key_filename (http_cerver, priv_key_filename.encode ("utf-8"))
-		http_cerver_auth_set_jwt_pub_key_filename (http_cerver, pub_key_filename.encode ("utf-8"))
+	if (jwt_algorithm != JWT_ALG_NONE):
+		if (priv_key_filename):
+			http_cerver_auth_set_jwt_priv_key_filename (
+				http_cerver, priv_key_filename.encode ("utf-8")
+			)
 
-def http_jwt_sign (values = {}):
+		if (pub_key_filename):
+			http_cerver_auth_set_jwt_pub_key_filename (
+				http_cerver, pub_key_filename.encode ("utf-8")
+			)
+
+def http_jwt_create (values={}):
 	"""
-	Function to sign Bearer JWT (Must be deleted to avoid memory Leak)
+	Creates a HttpJwt instance with custom values.
+	Must be deleted with http_cerver_auth_jwt_delete () to avoid memory leaks
 	# Parameters
 	------------
 	### values: dict, optional
-		values that will go inside Bearer JWT. Defaults to {}.
+		The actual Bearer JWT values. Defaults to {}.
+	# Returns
+	------------
+	Reference to a HttpJwt instance
 	"""
 	http_jwt = http_cerver_auth_jwt_new ()
 	for key in values:
 		if (type (values[key]) == int):
-			http_cerver_auth_jwt_add_value_int (http_jwt, key.encode("utf-8"), int (values[key]))
+			http_cerver_auth_jwt_add_value_int (
+				http_jwt, key.encode ("utf-8"), values[key]
+			)
 		elif (type (values[key]) == bool):
-			http_cerver_auth_jwt_add_value_bool (http_jwt, key.encode ("utf-8"), values[key])
+			http_cerver_auth_jwt_add_value_bool (
+				http_jwt, key.encode ("utf-8"), values[key]
+			)
 		elif (type (values[key]) == str):
-			http_cerver_auth_jwt_add_value (http_jwt, key.encode ("utf-8"), values[key].encode ("utf-8"))
+			http_cerver_auth_jwt_add_value (
+				http_jwt, key.encode ("utf-8"), values[key].encode ("utf-8")
+			)
 
 	return http_jwt
 
 
-def http_jwt_sign_and_send (
-	http_receive, status_code = 200, values = {}
+def http_jwt_create_and_send (
+	http_receive: c_void_p,
+	status_code=HTTP_STATUS_OK,
+	values={}
 ):
 	"""
-	Function to sign and send Bearer JWT
-
+	Creates and sends a Bearer JWT
 	# Parameters
 	------------
-	### http_receive : HttpReceive
-		The receive structure associated with the current request
-	### status_code : int, optional
-		http status code. Defaults to 200.
+	### http_receive: HttpReceive
+		Reference to a HttpReceive instance.
+	### status_code: http_status, optional
+		The HTTP response's status code. Defaults to HTTP_STATUS_OK.
 	### values : dict, optional
-		values that will go inside Bearer JWT. Defaults to {}.
+		The actual Bearer JWT values. Defaults to {}.
 	"""
-	http_jwt = http_jwt_sign (values)
+	http_jwt = http_jwt_create (values)
 	http_cerver_auth_generate_bearer_jwt_json (
 		http_receive_get_cerver (http_receive), http_jwt
 	)
 
-	response = http_response_create (
-		status_code, http_jwt_get_json (http_jwt), http_jwt_get_json_len (http_jwt)
+	http_response_json_custom_reference_send (
+		http_receive, status_code,
+		http_jwt_get_json (http_jwt),
+		http_jwt_get_json_len (http_jwt)
 	)
-
-	http_response_compile (response)
-	http_response_send (response, http_receive)
-	http_response_delete (response)
 
 	http_cerver_auth_jwt_delete (http_jwt)
 
-def http_jwt_token_decode (request):
+def http_jwt_token_decode (request: c_void_p):
+	"""
+	Loads the decoded data from a JWT into a dict
+	# Parameters
+	------------
+	### request: HttpRequest
+		Reference to a HTTP request instance
+	# Returns
+	------------
+	The JWT decoded data as a dict
+	"""
 	json_string = cast (http_request_get_decoded_data (request), c_char_p)
-	result = json.loads (json_string.value.decode ("utf-8"))
-	return result
+	return json.loads (json_string.value.decode ("utf-8"))
 
 # origins
 http_cerver_add_origin_to_whitelist = lib.http_cerver_add_origin_to_whitelist
