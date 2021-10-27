@@ -6,7 +6,7 @@ from cerver import *
 from cerver.http import *
 from cerver.threads import *
 
-web_cerver = None
+web_service = None
 job_queue = None
 
 class Data ():
@@ -16,9 +16,9 @@ class Data ():
 
 # end
 def end (signum, frame):
-	# cerver_stats_print (web_cerver, False, False)
-	http_cerver_all_stats_print (http_cerver_get (web_cerver))
-	cerver_teardown (web_cerver)
+	# cerver_stats_print (web_service, False, False)
+	http_cerver_all_stats_print (http_cerver_get (web_service))
+	cerver_teardown (web_service)
 	cerver_end ()
 	sys.exit ("Done!")
 
@@ -50,26 +50,26 @@ def jobs_handler (http_receive, request):
 	job_handler_wait (job_queue, data, None)
 
 	http_response_json_msg_send (
-		http_receive, HTTP_STATUS_OK, data.result.encode ('utf-8')
+		http_receive, HTTP_STATUS_OK, data.result.encode ("utf-8")
 	)
 
 def start ():
-	global web_cerver
+	global web_service
 	global job_queue
 
-	web_cerver = cerver_create_web (
-		b"web-cerver", 8080, 10
+	web_service = cerver_create_web (
+		b"web-service", 8080, 10
 	)
 
 	# main configuration
-	cerver_set_receive_buffer_size (web_cerver, 4096)
-	cerver_set_thpool_n_threads (web_cerver, 4)
-	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS)
+	cerver_set_receive_buffer_size (web_service, 4096)
+	cerver_set_thpool_n_threads (web_service, 4)
+	cerver_set_handler_type (web_service, CERVER_HANDLER_TYPE_THREADS)
 
-	cerver_set_reusable_address_flags (web_cerver, True)
+	cerver_set_reusable_address_flags (web_service, True)
 
 	# HTTP configuration
-	http_cerver = http_cerver_get (web_cerver)
+	http_cerver = http_cerver_get (web_service)
 
 	# GET /
 	main_route = http_route_create (REQUEST_METHOD_GET, b"/", main_handler)
@@ -86,7 +86,7 @@ def start ():
 	job_queue_start (job_queue)
 
 	# start
-	cerver_start (web_cerver)
+	cerver_start (web_service)
 
 if __name__ == "__main__":
 	signal.signal (signal.SIGINT, end)
