@@ -2,45 +2,42 @@ from .lib import lib
 
 from .utils.log import LOG_TYPE_NONE, cerver_log_both
 
-PYCERVER_VERSION = "0.8.6".encode ("utf-8")
-PYCERVER_VERSION_NAME = "Version 0.8.6".encode ("utf-8")
-PYCERVER_VERSION_DATE = "17/10/2021".encode ("utf-8")
-PYCERVER_VERSION_TIME = "21:44 CST".encode ("utf-8")
-PYCERVER_VERSION_AUTHOR = "Erick Salas".encode ("utf-8")
+PYCERVER_VERSION = "0.8.7"
+PYCERVER_VERSION_NAME = "Version 0.8.7"
+PYCERVER_VERSION_DATE = "26/10/2021"
+PYCERVER_VERSION_TIME = "20:06 CST"
+PYCERVER_VERSION_AUTHOR = "Erick Salas"
+
+version = {
+	"id": PYCERVER_VERSION,
+	"name": PYCERVER_VERSION_NAME,
+	"date": PYCERVER_VERSION_DATE,
+	"time": PYCERVER_VERSION_TIME,
+	"author": PYCERVER_VERSION_AUTHOR
+}
 
 cerver_version_print_full = lib.cerver_version_print_full
 cerver_version_print_version_id = lib.cerver_version_print_version_id
 cerver_version_print_version_name = lib.cerver_version_print_version_name
 
 def pycerver_version_print_full ():
-	cerver_log_both (
-		LOG_TYPE_NONE, LOG_TYPE_NONE,
-		"\nPyCerver Version: %s".encode ("utf-8"),
-		PYCERVER_VERSION_NAME
-	)
+	output = "\nPyCerver Version: {name}\n" \
+		"Release Date: {date} - {time}\n" \
+		"Author: {author}\n".format (**version)
 
 	cerver_log_both (
 		LOG_TYPE_NONE, LOG_TYPE_NONE,
-		"Release Date & time: %s - %s".encode ("utf-8"),
-		PYCERVER_VERSION_DATE, PYCERVER_VERSION_TIME
-	)
-
-	cerver_log_both (
-		LOG_TYPE_NONE, LOG_TYPE_NONE,
-		"Author: %s\n".encode ("utf-8"),
-		PYCERVER_VERSION_AUTHOR
+		output.encode ("utf-8")
 	)
 
 def pycerver_version_print_version_id ():
 	cerver_log_both (
 		LOG_TYPE_NONE, LOG_TYPE_NONE,
-		"\nPyCerver Version ID: %s\n".encode ("utf-8"),
-		PYCERVER_VERSION
+		f"\nPyCerver Version ID: {version.id}\n".encode ("utf-8")
 	)
 
 def pycerver_version_print_version_name ():
 	cerver_log_both (
 		LOG_TYPE_NONE, LOG_TYPE_NONE,
-		"\nPyCerver Version: %s\n".encode ("utf-8"),
-		PYCERVER_VERSION_NAME
+		f"\nPyCerver Version: {version.name}\n".encode ("utf-8")
 	)
