@@ -32,6 +32,7 @@ static unsigned int admin_request_all_actual (
 	char actual_address[ADDRESS_SIZE] = { 0 };
 
 	// GET /
+	(void) printf ("GET /\n");
 	errors |= curl_simple_handle_data (
 		curl, address,
 		HTTP_STATUS_OK,
@@ -39,6 +40,7 @@ static unsigned int admin_request_all_actual (
 	);
 
 	// GET /cerver/info
+	(void) printf ("GET /cerver/info\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/cerver/info", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -47,6 +49,7 @@ static unsigned int admin_request_all_actual (
 	);
 
 	// GET /cerver/stats
+	(void) printf ("GET /cerver/stats\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/cerver/stats", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -55,6 +58,7 @@ static unsigned int admin_request_all_actual (
 	);
 
 	// GET /cerver/stats/filesystems
+	(void) printf ("GET /cerver/stats/filesystems\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/cerver/stats/filesystems", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,

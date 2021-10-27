@@ -84,6 +84,7 @@ static unsigned int auth_request_all_actual (
 	char actual_address[128] = { 0 };
 
 	// GET /test
+	(void) printf ("GET /test\n");
 	(void) snprintf (actual_address, 128, "%s/test", address);
 	errors |= curl_simple_handle_data (
 		curl, address,
@@ -92,6 +93,7 @@ static unsigned int auth_request_all_actual (
 	);
 
 	// GET /auth/token
+	(void) printf ("GET /auth/token\n");
 	(void) snprintf (actual_address, 128, "%s/auth/token", address);
 	errors |= curl_simple_with_auth (
 		curl, actual_address,
@@ -100,9 +102,11 @@ static unsigned int auth_request_all_actual (
 	);
 
 	// POST /auth/custom
+	(void) printf ("POST /auth/custom - success\n");
 	errors |= auth_request_custom_success (data_buffer);
 
 	// POST /auth/custom
+	(void) printf ("POST /auth/custom - bad\n");
 	errors |= auth_request_custom_bad (data_buffer);
 
 	return errors;

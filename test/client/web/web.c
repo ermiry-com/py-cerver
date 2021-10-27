@@ -32,6 +32,7 @@ static unsigned int web_request_all_actual (
 	char actual_address[ADDRESS_SIZE] = { 0 };
 
 	// GET /render
+	(void) printf ("GET /render\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/render", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -40,6 +41,7 @@ static unsigned int web_request_all_actual (
 	);
 
 	// GET /render/text
+	(void) printf ("GET /render/text\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/render/text", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -48,6 +50,7 @@ static unsigned int web_request_all_actual (
 	);
 
 	// GET /render/json
+	(void) printf ("GET /render/json\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/render/json", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,

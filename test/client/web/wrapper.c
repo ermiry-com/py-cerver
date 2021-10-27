@@ -31,6 +31,7 @@ static unsigned int wrapper_request_echo (
 	unsigned int retval = 1;
 
 	// GET /echo
+	(void) printf ("GET /echo\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/echo?value=test", address);
 	retval = curl_simple_handle_data (
 		curl, actual_address,
@@ -56,6 +57,7 @@ static unsigned int wrapper_request_all_actual (
 	char actual_address[ADDRESS_SIZE] = { 0 };
 
 	// GET /
+	(void) printf ("GET /\n");
 	errors |= curl_simple_handle_data (
 		curl, address,
 		HTTP_STATUS_OK,

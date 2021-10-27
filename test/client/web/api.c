@@ -112,6 +112,7 @@ static unsigned int api_request_all_actual (
 	char actual_address[128] = { 0 };
 
 	// GET /api/users
+	(void) printf ("GET /api/users\n");
 	errors |= curl_simple_handle_data (
 		curl, address,
 		HTTP_STATUS_OK,
@@ -119,14 +120,17 @@ static unsigned int api_request_all_actual (
 	);
 
 	// POST api/users/register
+	(void) printf ("POST api/users/register\n");
 	(void) snprintf (actual_address, 128, "%s/register", address);
 	errors |= api_request_register (curl, actual_address);
 
 	// POST api/users/login
+	(void) printf ("POST api/users/login\n");
 	(void) snprintf (actual_address, 128, "%s/login", address);
 	errors |= api_request_login (curl, actual_address, data_buffer);
 
 	// GET api/users/profile
+	(void) printf ("GET api/users/profile\n");
 	(void) snprintf (actual_address, 128, "%s/profile", address);
 	errors |= curl_simple_with_auth (
 		curl, actual_address,

@@ -77,9 +77,11 @@ static unsigned int jobs_request_all_actual (void) {
 	char actual_address[128] = { 0 };
 
 	// GET /
+	(void) printf ("GET /\n");
 	errors |= jobs_request_main (data_buffer);
 
 	// POST /jobs
+	(void) printf ("POST /jobs\n");
 	(void) snprintf (actual_address, 128, "%s/jobs", address);
 	errors |= jobs_request_job (actual_address, data_buffer);
 

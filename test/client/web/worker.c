@@ -30,6 +30,7 @@ static unsigned int worker_request_all_actual (
 	char actual_address[128] = { 0 };
 
 	// GET /
+	(void) printf ("GET /\n");
 	errors |= curl_simple_handle_data (
 		curl, address,
 		HTTP_STATUS_OK,
@@ -37,6 +38,7 @@ static unsigned int worker_request_all_actual (
 	);
 
 	// POST /work
+	(void) printf ("POST /work\n");
 	(void) snprintf (actual_address, 128, "%s/work", address);
 	errors |= curl_post_two_form_values (
 		curl, actual_address,
@@ -47,6 +49,7 @@ static unsigned int worker_request_all_actual (
 	);
 
 	// GET /work/start
+	(void) printf ("GET /work/start\n");
 	(void) snprintf (actual_address, 128, "%s/work/start", address);
 	errors |= curl_full_handle_data (
 		actual_address,
@@ -55,6 +58,7 @@ static unsigned int worker_request_all_actual (
 	);
 
 	// GET /work/stop
+	(void) printf ("GET /work/stop\n");
 	(void) snprintf (actual_address, 128, "%s/work/stop", address);
 	errors |= curl_full_handle_data (
 		actual_address,
@@ -63,6 +67,7 @@ static unsigned int worker_request_all_actual (
 	);
 
 	// GET /work/stop
+	(void) printf ("GET /work/stop\n");
 	(void) snprintf (actual_address, 128, "%s/work/stop", address);
 	errors |= curl_full_handle_data (
 		actual_address,
@@ -71,6 +76,7 @@ static unsigned int worker_request_all_actual (
 	);
 
 	// GET /work/start
+	(void) printf ("GET /work/start\n");
 	(void) snprintf (actual_address, 128, "%s/work/start", address);
 	errors |= curl_full_handle_data (
 		actual_address,
@@ -79,6 +85,7 @@ static unsigned int worker_request_all_actual (
 	);
 
 	// GET /cerver/stats/workers
+	(void) printf ("GET /cerver/stats/workers\n");
 	(void) snprintf (actual_address, 128, "%s/cerver/stats/workers", address);
 	errors |= curl_full_handle_data (
 		actual_address,

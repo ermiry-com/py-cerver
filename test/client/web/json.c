@@ -62,6 +62,7 @@ static unsigned int json_request_all_actual (
 	char actual_address[ADDRESS_SIZE] = { 0 };
 
 	// GET /json
+	(void) printf ("GET /json\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -70,17 +71,20 @@ static unsigned int json_request_all_actual (
 	);
 
 	// POST /json
+	(void) printf ("POST /json\n");
 	errors |= json_request_post_json (
 		actual_address, data_buffer, "./test/data/small.json"
 	);
 
 	// POST /json/big
+	(void) printf ("POST /json/big\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/big", address);
 	errors |= json_request_post_json (
 		actual_address, data_buffer, "./test/data/big.json"
 	);
 
 	// GET /json/create
+	(void) printf ("GET /json/create\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/create", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -89,6 +93,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/int
+	(void) printf ("GET /json/int\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/int", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -97,6 +102,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/int/create
+	(void) printf ("GET /json/int/create\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/int/create", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -105,6 +111,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/large
+	(void) printf ("GET /json/large\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/large", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -113,6 +120,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/large/create
+	(void) printf ("GET /json/large/create\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/large/create", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -121,6 +129,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/real
+	(void) printf ("GET /json/real\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/real", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -129,6 +138,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/real/create
+	(void) printf ("GET /json/real/create\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/real/create", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -137,6 +147,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/bool
+	(void) printf ("GET /json/bool\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/bool", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -145,6 +156,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/bool/create
+	(void) printf ("GET /json/bool/create\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/bool/create", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -153,6 +165,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/msg
+	(void) printf ("GET /json/msg\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/msg", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -161,6 +174,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/msg/create
+	(void) printf ("GET /json/msg/create\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/msg/create", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -169,6 +183,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/error
+	(void) printf ("GET /json/error\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/error", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -177,6 +192,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/error/create
+	(void) printf ("GET /json/error/create\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/error/create", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -185,6 +201,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/key
+	(void) printf ("GET /json/key\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/key", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -193,6 +210,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/custom
+	(void) printf ("GET /json/custom\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/custom", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -201,6 +219,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/custom/create
+	(void) printf ("GET /json/custom/create\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/custom/create", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -209,6 +228,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/reference
+	(void) printf ("GET /json/reference\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/reference", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -217,6 +237,7 @@ static unsigned int json_request_all_actual (
 	);
 
 	// GET /json/reference/create
+	(void) printf ("GET /json/reference/create\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/reference/create", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
