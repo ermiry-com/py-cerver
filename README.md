@@ -24,11 +24,11 @@ bash development.sh
 
 ``` bash
 sudo docker run \
-	-it \
-	--name pycerver --rm \
-	-p 8080:8080 \
-	-v /home/ermiry/Documents/py-cerver:/home/pycerver \
-	ermiry/pycerver:development /bin/bash
+  -it \
+  --name pycerver --rm \
+  -p 8080:8080 \
+  -v /home/ermiry/Documents/py-cerver:/home/pycerver \
+  ermiry/pycerver:development /bin/bash
 ```
 
 2. Handle **pycerver** module
