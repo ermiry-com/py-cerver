@@ -97,6 +97,26 @@ cerver_set_reusable_address_flags.argtypes = [c_void_p, c_bool]
 cerver_set_app_handlers = lib.cerver_set_app_handlers
 cerver_set_app_handlers.argtypes = [c_void_p, c_void_p, c_void_p]
 
+# update
+class CerverUpdate (Structure):
+	_fields_ = [
+		("cerver", c_void_p),
+		("args", c_void_p)
+	]
+
+CerverUpdateCb = CFUNCTYPE (None, c_void_p)
+CerverUpdateDelete = CFUNCTYPE (c_void_p, c_void_p)
+
+cerver_set_update = lib.cerver_set_update
+cerver_set_update.argtypes = [
+	c_void_p, CerverUpdateCb, c_void_p, CerverUpdateDelete, c_uint
+]
+
+cerver_set_update_interval = lib.cerver_set_update_interval
+cerver_set_update_interval.argtypes = [
+	c_void_p, CerverUpdateCb, c_void_p, CerverUpdateDelete, c_uint
+]
+
 # start
 cerver_start = lib.cerver_start
 cerver_start.argtypes = [c_void_p]
