@@ -7,17 +7,18 @@ from ..lib import lib
 
 from ..types.string import String
 
-from ..cerver import CERVER_HANDLER_TYPE_THREADS, cerver_create_web
+from ..cerver import CERVER_HANDLER_TYPE_THREADS, cerver_set_alias, cerver_create_web
 from ..cerver import cerver_set_receive_buffer_size, cerver_set_thpool_n_threads
 from ..cerver import cerver_set_handler_type, cerver_set_reusable_address_flags
 
 from .alg import jwt_alg_t, JWT_ALG_NONE
 from .headers import http_header
-from .request import http_request_get_decoded_data
+from .request import RequestMethod, http_request_get_decoded_data
 from .response import http_response_create, http_response_compile, http_response_send, http_response_delete
-from .route import HttpRouteAuthType, HTTP_ROUTE_AUTH_TYPE_BEARER
+from .route import HttpHandler, HttpRouteAuthType, HTTP_ROUTE_AUTH_TYPE_NONE, HTTP_ROUTE_AUTH_TYPE_BEARER
 from .route import HttpDecodeData, HttpDeleteDecoded, AuthenticationHandler
 from .route import http_route_create, http_route_child_add, http_route_set_auth, http_route_set_decode_data_into_json
+from .status import http_status, HTTP_STATUS_OK
 
 # types
 CatchAllHandler = CFUNCTYPE (None, c_void_p, c_void_p)
@@ -31,16 +32,17 @@ http_cerver_get = lib.http_cerver_get
 http_cerver_get.argtypes = [c_void_p]
 http_cerver_get.restype = c_void_p
 
-def cerver_main_http_configuration (
-	port = 8080, connection_queue = 10,
-	buffer_size = 4096, n_threads = 4,
-	handler_type = CERVER_HANDLER_TYPE_THREADS,
-	reusable_address_flags = True
-):
+def http_cerver_configuration (
+	name: str, port=8080, connection_queue=10,
+	buffer_size=4096, n_threads=4,
+	reusable_address_flags=True
+) -> c_void_p:
 	"""
-	Function to create an api_cerver with custom configuration
+	Creates a HTTP cerver with custom configuration
 	# Parameters
 	------------
+	### name: str
+		The name of the HTTP service, used for internal values.
 	### port: int, optional
 		Port where service will be exposed. Defaults to 8080.
 	### connection_queue: int, optional
@@ -48,23 +50,27 @@ def cerver_main_http_configuration (
 	### buffer_size: int, optional
 		Defaults to 4096.
 	### n_threads: int, optional
-		Number of concurrent requests that service will be able to receive.
+		Number of concurrent requests that service will be able to handle
 		Defaults to 4.
-	### handler_type: int, optional
-		Defaults to CERVER_HANDLER_TYPE_THREADS.
 	### reusable_address_flags: bool, optional
 		Defaults to True.
+	# Returns
+	------------
+	Reference to the created Cerver instance
 	"""
-	http_cerver = cerver_create_web (
-		"api-cerver".encode ("utf-8"),
-		port,
-		connection_queue
+	service_name = f"{name}-service"
+	service = cerver_create_web (
+		service_name.encode ("utf-8"), port, connection_queue
 	)
-	cerver_set_receive_buffer_size (http_cerver, buffer_size)
-	cerver_set_thpool_n_threads (http_cerver, n_threads)
-	cerver_set_handler_type (http_cerver, handler_type)
-	cerver_set_reusable_address_flags (http_cerver, reusable_address_flags)
-	return http_cerver
+
+	cerver_set_alias (service, name.encode ("utf-8"))
+
+	cerver_set_receive_buffer_size (service, buffer_size)
+	cerver_set_thpool_n_threads (service, n_threads)
+	cerver_set_handler_type (service, CERVER_HANDLER_TYPE_THREADS)
+	cerver_set_reusable_address_flags (service, reusable_address_flags)
+
+	return service
 
 # public
 http_static_path_set_auth = lib.http_static_path_set_auth
