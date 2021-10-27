@@ -101,68 +101,76 @@ http_cerver_set_not_found_route = lib.http_cerver_set_not_found_route
 http_cerver_set_not_found_route.argtypes = [c_void_p, NotFoundHandler]
 
 def http_create_route (
-	request_method, route_name, handler,
-	main_route = None, http_cerver = None
-):
+	http_cerver: c_void_p, request_method: RequestMethod,
+	route_path: str, handler: HttpHandler,
+	auth_method=HTTP_ROUTE_AUTH_TYPE_NONE
+) -> c_void_p:
 	"""
-	Function to create and register a route
+	Creates and registers a new HTTP route
 	# Parameters
 	------------
-	### request_method: int.
-		Route method that will be required.
-	### route_name: str.
-		Name of the route that will be used.
-	### handler: func().
-		Function where requests to this route will fall.
-	### main_route: c_void_p, optional.
-		Main route where this route will be added.
-		If is_main is False this variable must be not None.
-		Defaults to None.
-	### http_cerver: HttpCerver, optional.
-		http_cerver created in this service.
-		If main_route is None, this variable must be not None.
-		Defaults to None.
+	### http_cerver: HttpCerver
+		Reference to a HttpCerver instance.
+	### request_method: RequestMethod
+		The method this route will handle (GET, POST, ...)
+	### route_path: str
+		The actual route path.
+	### handler: CFUNCTYPE (None, c_void_p, c_void_p)
+		The callback handler method.
+	### auth_method: HttpRouteAuthType, optional
+		How the route will handle authentication.
+	# Returns
+	------------
+	Reference to the registered HttpRoute instance
 	"""
-	route = http_route_create (request_method, route_name.encode ("utf-8"), handler)
-	if main_route is None:
-		http_cerver_route_register (http_cerver, route)
-	else:
-		http_route_child_add (main_route, route)
+	route = http_route_create (
+		request_method, route_path.encode ("utf-8"), handler
+	)
+
+	if (auth_method != HTTP_ROUTE_AUTH_TYPE_NONE):
+		http_route_set_auth (route, auth_method)
+		http_route_set_decode_data_into_json (route)
+
+	# register main route to HTTP cerver
+	http_cerver_route_register (http_cerver, route)
+
 	return route
 
-def http_create_secure_route (
-	request_method, route_name, handler,
-	main_route, http_cerver = None, secure_method = HTTP_ROUTE_AUTH_TYPE_BEARER
-):
+def http_create_child_route (
+	parent: c_void_p, request_method: RequestMethod,
+	route_path: str, handler: HttpHandler,
+	auth_method=HTTP_ROUTE_AUTH_TYPE_NONE
+) -> c_void_p:
 	"""
-	Function to create and register a secure route
+	Creates and registers a child route to a parent
 	# Parameters
 	------------
-	### request_method: int.
-		Route method that will be required.
-	### route_name: str.
-		Name of the route that will be used.
-	### handler: func().
-		Function where requests to this route will fall.
-	### main_route: c_void_p, optional.
-		Main route where this route will be added.
-		Defaults to None.
-	### http_cerver: HttpCerver, optional.
-		http_cerver created in this service.
-		If main_route is None, this variable must be not None.
-		Defaults to None.
-	### secure_method: int, optional.
-		Secure method that route will manage to get token information
-		Defaults to HTTP_ROUTE_AUTH_TYPE_BEARER.
+	### parent: HttpRoute
+		The parent HTTP route instance
+	### request_method: RequestMethod.
+		The method this route will handler (GET, POST, ...)
+	### route_path: str
+		The actual route path.
+	### handler: CFUNCTYPE (None, c_void_p, c_void_p)
+		The callback handler method.
+	### auth_method: HttpRouteAuthType, optional
+		How the route will handle authentication.
+	# Returns
+	------------
+	Reference to the child HttpRoute instance
 	"""
-	route = http_route_create (request_method, route_name.encode ("utf-8"), handler)
-	http_route_set_auth (route, secure_method)
-	http_route_set_decode_data_into_json (route)
-	if main_route is None:
-		http_cerver_route_register (http_cerver, route)
-	else:
-		http_route_child_add (main_route, route)
-	return route
+	child = http_route_create (
+		request_method, route_path.encode ("utf-8"), handler
+	)
+	
+	if (auth_method != HTTP_ROUTE_AUTH_TYPE_NONE):
+		http_route_set_auth (child, auth_method)
+		http_route_set_decode_data_into_json (child)
+
+	# register child route to its parent
+	http_route_child_add (parent, child)
+
+	return child
 
 # uploads
 http_cerver_set_uploads_path = lib.http_cerver_set_uploads_path
