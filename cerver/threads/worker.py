@@ -85,7 +85,7 @@ class Worker ():
 	def __init__ (self, name, work):
 		self.worker = worker_create ()
 		worker_set_reference (self.worker, self)
-		worker_set_name (self.worker, name.encode ('utf-8'))
+		worker_set_name (self.worker, name.encode ("utf-8"))
 		worker_set_work (self.worker, work)
 		worker_set_remove_reference (self.worker, worker_remove_reference)
 
