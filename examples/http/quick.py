@@ -4,11 +4,11 @@ import ctypes
 from cerver import *
 from cerver.http import *
 
-web_cerver = None
+web_service = None
 
 def end (signum, frame):
-	http_cerver_all_stats_print (http_cerver_get (web_cerver))
-	cerver_teardown (web_cerver)
+	http_cerver_all_stats_print (http_cerver_get (web_service))
+	cerver_teardown (web_service)
 	cerver_end ()
 	sys.exit ("Done!")
 
@@ -24,24 +24,24 @@ def test_handler (http_receive, request):
 	http_response_delete (response)
 
 def start ():
-	global web_cerver
-	web_cerver = cerver_create_web (
-		b"web-cerver", 8080, 10
+	global web_service
+	web_service = cerver_create_web (
+		b"web-service", 8080, 10
 	)
 
 	# main configuration
-	cerver_set_thpool_n_threads (web_cerver, 4)
-	cerver_set_handler_type (web_cerver, CERVER_HANDLER_TYPE_THREADS)
+	cerver_set_thpool_n_threads (web_service, 4)
+	cerver_set_handler_type (web_service, CERVER_HANDLER_TYPE_THREADS)
 
 	# HTTP configuration
-	http_cerver = http_cerver_get (web_cerver)
+	http_cerver = http_cerver_get (web_service)
 
 	# GET /test
 	test_route = http_route_create (REQUEST_METHOD_GET, b"test", test_handler)
 	http_cerver_route_register (http_cerver, test_route)
 
 	# start
-	cerver_start (web_cerver)
+	cerver_start (web_service)
 
 if __name__ == "__main__":
 	signal.signal (signal.SIGINT, end)

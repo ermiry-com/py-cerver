@@ -7,17 +7,19 @@ from ..lib import lib
 
 from ..types.string import String
 
-from ..cerver import CERVER_HANDLER_TYPE_THREADS, cerver_create_web
+from ..cerver import CERVER_HANDLER_TYPE_THREADS, cerver_set_alias, cerver_create_web
 from ..cerver import cerver_set_receive_buffer_size, cerver_set_thpool_n_threads
 from ..cerver import cerver_set_handler_type, cerver_set_reusable_address_flags
 
 from .alg import jwt_alg_t, JWT_ALG_NONE
 from .headers import http_header
-from .request import http_request_get_decoded_data
-from .response import http_response_create, http_response_compile, http_response_send, http_response_delete
-from .route import HttpRouteAuthType, HTTP_ROUTE_AUTH_TYPE_BEARER
+from .request import RequestMethod, http_request_get_decoded_data
+from .response import http_response_json_custom_reference_send
+from .route import HttpHandler, HttpRouteAuthType, HTTP_ROUTE_AUTH_TYPE_NONE
 from .route import HttpDecodeData, HttpDeleteDecoded, AuthenticationHandler
-from .route import http_route_create, http_route_child_add, http_route_set_auth, http_route_set_decode_data_into_json
+from .route import http_route_create, http_route_child_add, http_route_set_auth
+from .route import http_route_set_decode_data_into_json
+from .status import http_status, HTTP_STATUS_OK
 
 # types
 CatchAllHandler = CFUNCTYPE (None, c_void_p, c_void_p)
@@ -31,16 +33,17 @@ http_cerver_get = lib.http_cerver_get
 http_cerver_get.argtypes = [c_void_p]
 http_cerver_get.restype = c_void_p
 
-def cerver_main_http_configuration (
-	port = 8080, connection_queue = 10,
-	buffer_size = 4096, n_threads = 4,
-	handler_type = CERVER_HANDLER_TYPE_THREADS,
-	reusable_address_flags = True
-):
+def http_cerver_configuration (
+	name: str, port=8080, connection_queue=10,
+	buffer_size=4096, n_threads=4,
+	reusable_address_flags=True
+) -> c_void_p:
 	"""
-	Function to create an api_cerver with custom configuration
+	Creates a HTTP cerver with custom configuration
 	# Parameters
 	------------
+	### name: str
+		The name of the HTTP service, used for internal values.
 	### port: int, optional
 		Port where service will be exposed. Defaults to 8080.
 	### connection_queue: int, optional
@@ -48,23 +51,27 @@ def cerver_main_http_configuration (
 	### buffer_size: int, optional
 		Defaults to 4096.
 	### n_threads: int, optional
-		Number of concurrent requests that service will be able to receive.
+		Number of concurrent requests that service will be able to handle
 		Defaults to 4.
-	### handler_type: int, optional
-		Defaults to CERVER_HANDLER_TYPE_THREADS.
 	### reusable_address_flags: bool, optional
 		Defaults to True.
+	# Returns
+	------------
+	Reference to the created Cerver instance
 	"""
-	http_cerver = cerver_create_web (
-		"api-cerver".encode ("utf-8"),
-		port,
-		connection_queue
+	service_name = f"{name}-service"
+	service = cerver_create_web (
+		service_name.encode ("utf-8"), port, connection_queue
 	)
-	cerver_set_receive_buffer_size (http_cerver, buffer_size)
-	cerver_set_thpool_n_threads (http_cerver, n_threads)
-	cerver_set_handler_type (http_cerver, handler_type)
-	cerver_set_reusable_address_flags (http_cerver, reusable_address_flags)
-	return http_cerver
+
+	cerver_set_alias (service, name.encode ("utf-8"))
+
+	cerver_set_receive_buffer_size (service, buffer_size)
+	cerver_set_thpool_n_threads (service, n_threads)
+	cerver_set_handler_type (service, CERVER_HANDLER_TYPE_THREADS)
+	cerver_set_reusable_address_flags (service, reusable_address_flags)
+
+	return service
 
 # public
 http_static_path_set_auth = lib.http_static_path_set_auth
@@ -95,68 +102,76 @@ http_cerver_set_not_found_route = lib.http_cerver_set_not_found_route
 http_cerver_set_not_found_route.argtypes = [c_void_p, NotFoundHandler]
 
 def http_create_route (
-	request_method, route_name, handler,
-	main_route = None, http_cerver = None
-):
+	http_cerver: c_void_p, request_method: RequestMethod,
+	route_path: str, handler: HttpHandler,
+	auth_method=HTTP_ROUTE_AUTH_TYPE_NONE
+) -> c_void_p:
 	"""
-	Function to create and register a route
+	Creates and registers a new HTTP route
 	# Parameters
 	------------
-	### request_method: int.
-		Route method that will be required.
-	### route_name: str.
-		Name of the route that will be used.
-	### handler: func().
-		Function where requests to this route will fall.
-	### main_route: c_void_p, optional.
-		Main route where this route will be added.
-		If is_main is False this variable must be not None.
-		Defaults to None.
-	### http_cerver: HttpCerver, optional.
-		http_cerver created in this service.
-		If main_route is None, this variable must be not None.
-		Defaults to None.
+	### http_cerver: HttpCerver
+		Reference to a HttpCerver instance.
+	### request_method: RequestMethod
+		The method this route will handle (GET, POST, ...)
+	### route_path: str
+		The actual route path.
+	### handler: CFUNCTYPE (None, c_void_p, c_void_p)
+		The callback handler method.
+	### auth_method: HttpRouteAuthType, optional
+		How the route will handle authentication.
+	# Returns
+	------------
+	Reference to the registered HttpRoute instance
 	"""
-	route = http_route_create (request_method, route_name.encode ("utf-8"), handler)
-	if main_route is None:
-		http_cerver_route_register (http_cerver, route)
-	else:
-		http_route_child_add (main_route, route)
+	route = http_route_create (
+		request_method, route_path.encode ("utf-8"), handler
+	)
+
+	if (auth_method != HTTP_ROUTE_AUTH_TYPE_NONE):
+		http_route_set_auth (route, auth_method)
+		http_route_set_decode_data_into_json (route)
+
+	# register main route to HTTP cerver
+	http_cerver_route_register (http_cerver, route)
+
 	return route
 
-def http_create_secure_route (
-	request_method, route_name, handler,
-	main_route, http_cerver = None, secure_method = HTTP_ROUTE_AUTH_TYPE_BEARER
-):
+def http_create_child_route (
+	parent: c_void_p, request_method: RequestMethod,
+	route_path: str, handler: HttpHandler,
+	auth_method=HTTP_ROUTE_AUTH_TYPE_NONE
+) -> c_void_p:
 	"""
-	Function to create and register a secure route
+	Creates and registers a child route to a parent
 	# Parameters
 	------------
-	### request_method: int.
-		Route method that will be required.
-	### route_name: str.
-		Name of the route that will be used.
-	### handler: func().
-		Function where requests to this route will fall.
-	### main_route: c_void_p, optional.
-		Main route where this route will be added.
-		Defaults to None.
-	### http_cerver: HttpCerver, optional.
-		http_cerver created in this service.
-		If main_route is None, this variable must be not None.
-		Defaults to None.
-	### secure_method: int, optional.
-		Secure method that route will manage to get token information
-		Defaults to HTTP_ROUTE_AUTH_TYPE_BEARER.
+	### parent: HttpRoute
+		The parent HTTP route instance
+	### request_method: RequestMethod.
+		The method this route will handler (GET, POST, ...)
+	### route_path: str
+		The actual route path.
+	### handler: CFUNCTYPE (None, c_void_p, c_void_p)
+		The callback handler method.
+	### auth_method: HttpRouteAuthType, optional
+		How the route will handle authentication.
+	# Returns
+	------------
+	Reference to the child HttpRoute instance
 	"""
-	route = http_route_create (request_method, route_name.encode ("utf-8"), handler)
-	http_route_set_auth (route, secure_method)
-	http_route_set_decode_data_into_json (route)
-	if main_route is None:
-		http_cerver_route_register (http_cerver, route)
-	else:
-		http_route_child_add (main_route, route)
-	return route
+	child = http_route_create (
+		request_method, route_path.encode ("utf-8"), handler
+	)
+	
+	if (auth_method != HTTP_ROUTE_AUTH_TYPE_NONE):
+		http_route_set_auth (child, auth_method)
+		http_route_set_decode_data_into_json (child)
+
+	# register child route to its parent
+	http_route_child_add (parent, child)
+
+	return child
 
 # uploads
 http_cerver_set_uploads_path = lib.http_cerver_set_uploads_path
@@ -238,86 +253,109 @@ http_cerver_auth_generate_bearer_jwt_json_with_value = lib.http_cerver_auth_gene
 http_cerver_auth_generate_bearer_jwt_json_with_value.argtypes = [c_void_p, c_void_p, c_char_p, c_char_p]
 http_cerver_auth_generate_bearer_jwt_json_with_value.restype = c_uint8
 
-def cerver_auth_http_configuration (
-	http_cerver, jwt_algorithm = JWT_ALG_NONE,
-	priv_key_filename = "None", pub_key_filename = "None"
+def http_cerver_auth_configuration (
+	http_cerver: c_void_p, jwt_algorithm=JWT_ALG_NONE,
+	priv_key_filename=None, pub_key_filename=None
 ):
 	"""
-	Function to configurate the auth algorithm of the service
+	Configurates the HTTP service's auth JWT algorithm and keys
 	# Parameters
 	------------
-	### http_cerver: HttpCerver.
-		Current http_cerver of the api_cerver.
-	### jwt_algorithm: int, optional.
-		Algorithm that will be used. Must be the same as the one was used to create
-		keys.
+	### http_cerver: HttpCerver
+		Reference to a HttpCerver instance.
+	### jwt_algorithm: jwt_alg_t, optional
+		The algorithm that will be used to manage JWTs.
+		Must be the same as the one used to create the keys.
 		Defaults to JWT_ALG_NONE.
 	### priv_key_filename: string, optional.
-		Relative path where private key is allocated.
-		Defaults to "None"
+		The private key filename.
 	### pub_key_filename: string, optional.
-		Relative path where public key is allocated.
-		Defaults to "None"
+		The public key filename.
 	"""
 	http_cerver_auth_set_jwt_algorithm (http_cerver, jwt_algorithm)
-	if jwt_algorithm is not JWT_ALG_NONE:
-		http_cerver_auth_set_jwt_priv_key_filename (http_cerver, priv_key_filename.encode ("utf-8"))
-		http_cerver_auth_set_jwt_pub_key_filename (http_cerver, pub_key_filename.encode ("utf-8"))
+	if (jwt_algorithm != JWT_ALG_NONE):
+		if (priv_key_filename):
+			http_cerver_auth_set_jwt_priv_key_filename (
+				http_cerver, priv_key_filename.encode ("utf-8")
+			)
 
-def http_jwt_sign (values = {}):
+		if (pub_key_filename):
+			http_cerver_auth_set_jwt_pub_key_filename (
+				http_cerver, pub_key_filename.encode ("utf-8")
+			)
+
+def http_jwt_create (values={}):
 	"""
-	Function to sign Bearer JWT (Must be deleted to avoid memory Leak)
+	Creates a HttpJwt instance with custom values.
+	Must be deleted with http_cerver_auth_jwt_delete () to avoid memory leaks
 	# Parameters
 	------------
 	### values: dict, optional
-		values that will go inside Bearer JWT. Defaults to {}.
+		The actual Bearer JWT values. Defaults to {}.
+	# Returns
+	------------
+	Reference to a HttpJwt instance
 	"""
 	http_jwt = http_cerver_auth_jwt_new ()
 	for key in values:
 		if (type (values[key]) == int):
-			http_cerver_auth_jwt_add_value_int (http_jwt, key.encode("utf-8"), int (values[key]))
+			http_cerver_auth_jwt_add_value_int (
+				http_jwt, key.encode ("utf-8"), values[key]
+			)
 		elif (type (values[key]) == bool):
-			http_cerver_auth_jwt_add_value_bool (http_jwt, key.encode ("utf-8"), values[key])
+			http_cerver_auth_jwt_add_value_bool (
+				http_jwt, key.encode ("utf-8"), values[key]
+			)
 		elif (type (values[key]) == str):
-			http_cerver_auth_jwt_add_value (http_jwt, key.encode ("utf-8"), values[key].encode ("utf-8"))
+			http_cerver_auth_jwt_add_value (
+				http_jwt, key.encode ("utf-8"), values[key].encode ("utf-8")
+			)
 
 	return http_jwt
 
 
-def http_jwt_sign_and_send (
-	http_receive, status_code = 200, values = {}
+def http_jwt_create_and_send (
+	http_receive: c_void_p,
+	status_code=HTTP_STATUS_OK,
+	values={}
 ):
 	"""
-	Function to sign and send Bearer JWT
-
+	Creates and sends a Bearer JWT
 	# Parameters
 	------------
-	### http_receive : HttpReceive
-		The receive structure associated with the current request
-	### status_code : int, optional
-		http status code. Defaults to 200.
+	### http_receive: HttpReceive
+		Reference to a HttpReceive instance.
+	### status_code: http_status, optional
+		The HTTP response's status code. Defaults to HTTP_STATUS_OK.
 	### values : dict, optional
-		values that will go inside Bearer JWT. Defaults to {}.
+		The actual Bearer JWT values. Defaults to {}.
 	"""
-	http_jwt = http_jwt_sign (values)
+	http_jwt = http_jwt_create (values)
 	http_cerver_auth_generate_bearer_jwt_json (
 		http_receive_get_cerver (http_receive), http_jwt
 	)
 
-	response = http_response_create (
-		status_code, http_jwt_get_json (http_jwt), http_jwt_get_json_len (http_jwt)
+	http_response_json_custom_reference_send (
+		http_receive, status_code,
+		http_jwt_get_json (http_jwt),
+		http_jwt_get_json_len (http_jwt)
 	)
-
-	http_response_compile (response)
-	http_response_send (response, http_receive)
-	http_response_delete (response)
 
 	http_cerver_auth_jwt_delete (http_jwt)
 
-def http_jwt_token_decode (request):
+def http_jwt_token_decode (request: c_void_p):
+	"""
+	Loads the decoded data from a JWT into a dict
+	# Parameters
+	------------
+	### request: HttpRequest
+		Reference to a HTTP request instance
+	# Returns
+	------------
+	The JWT decoded data as a dict
+	"""
 	json_string = cast (http_request_get_decoded_data (request), c_char_p)
-	result = json.loads (json_string.value.decode ("utf-8"))
-	return result
+	return json.loads (json_string.value.decode ("utf-8"))
 
 # origins
 http_cerver_add_origin_to_whitelist = lib.http_cerver_add_origin_to_whitelist

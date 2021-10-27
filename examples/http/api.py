@@ -10,13 +10,13 @@ from cerver.http import *
 
 from users import *
 
-api_cerver = None
+web_service = None
 
 # end
 def end (signum, frame):
-	# cerver_stats_print (api_cerver, False, False)
-	http_cerver_all_stats_print (http_cerver_get (api_cerver))
-	cerver_teardown (api_cerver)
+	# cerver_stats_print (web_service, False, False)
+	http_cerver_all_stats_print (http_cerver_get (web_service))
+	cerver_teardown (web_service)
 	cerver_end ()
 	sys.exit ("Done!")
 
@@ -82,10 +82,10 @@ def users_login_handler (http_receive, request):
 			if user.password == password.contents.str:
 				http_jwt = http_cerver_auth_jwt_new ();
 				http_cerver_auth_jwt_add_value_int (http_jwt, b"iat", int (time.time ()))
-				http_cerver_auth_jwt_add_value (http_jwt, b"id", user.id.encode ('utf-8'))
+				http_cerver_auth_jwt_add_value (http_jwt, b"id", user.id.encode ("utf-8"))
 				http_cerver_auth_jwt_add_value (http_jwt, b"name", user.name)
 				http_cerver_auth_jwt_add_value (http_jwt, b"username", user.username)
-				http_cerver_auth_jwt_add_value (http_jwt, b"role", user.role.encode ('utf-8'))
+				http_cerver_auth_jwt_add_value (http_jwt, b"role", user.role.encode ("utf-8"))
 
 				http_cerver_auth_generate_bearer_jwt_json (http_receive_get_cerver (http_receive), http_jwt)
 
@@ -134,7 +134,7 @@ def users_profile_handler (http_receive, request):
 	message = "%s profile!" % (user.username)
 
 	response = http_response_json_msg (
-		HTTP_STATUS_OK, message.encode ('utf-8')
+		HTTP_STATUS_OK, message.encode ("utf-8")
 	)
 
 	http_response_print (response)
@@ -143,20 +143,20 @@ def users_profile_handler (http_receive, request):
 		
 
 def start ():
-	global api_cerver
-	api_cerver = cerver_create_web (
+	global web_service
+	web_service = cerver_create_web (
 		b"api-cerver", 8080, 10
 	)
 
 	# main configuration
-	cerver_set_receive_buffer_size (api_cerver, 4096);
-	cerver_set_thpool_n_threads (api_cerver, 4);
-	cerver_set_handler_type (api_cerver, CERVER_HANDLER_TYPE_THREADS);
+	cerver_set_receive_buffer_size (web_service, 4096);
+	cerver_set_thpool_n_threads (web_service, 4);
+	cerver_set_handler_type (web_service, CERVER_HANDLER_TYPE_THREADS);
 
-	cerver_set_reusable_address_flags (api_cerver, True);
+	cerver_set_reusable_address_flags (web_service, True);
 
 	# HTTP configuration
-	http_cerver = http_cerver_get (api_cerver)
+	http_cerver = http_cerver_get (web_service)
 
 	http_cerver_auth_set_jwt_algorithm (http_cerver, JWT_ALG_RS256)
 	http_cerver_auth_set_jwt_priv_key_filename (http_cerver, b"keys/key.key")
@@ -181,7 +181,7 @@ def start ():
 	http_route_child_add (users_route, users_profile_route);
 
 	# start
-	cerver_start (api_cerver)
+	cerver_start (web_service)
 
 if __name__ == "__main__":
 	signal.signal (signal.SIGINT, end)

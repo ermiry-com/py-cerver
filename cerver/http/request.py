@@ -124,15 +124,15 @@ http_request_get_body_values = lib.http_request_get_body_values
 http_request_get_body_values.argtypes = [c_void_p]
 http_request_get_body_values.restype = c_void_p
 
-def http_get_params_list (request) -> list:
+def http_get_params_list (request: c_void_p) -> list:
 	"""
-	Method to get all request's params as a list
+	Gets all the HTTP request's params as a list
 	# Parameters
 	------------
 	### request: HttpRequest
 		Reference to a HTTP request instance
 	# Returns
-	-----------
+	------------
 	The HTTP request's params as a list
 	"""
 	params = []
@@ -150,30 +150,37 @@ def http_get_params_list (request) -> list:
 
 	return params
 
-def http_request_get_query_value (values, query_name):
+def http_request_get_query_value (
+	values: c_void_p, query_name: str
+) -> str:
 	"""
-	Method to get a query param from request
+	Gets a query param from request
 	# Parameters
 	------------
 	### values: DoubleList <KeyValuePair>
 		Key-value pairs parsed from x-www-form-urlencoded data or query params
 	### query_name: string
 		The key used to find a matching value
+	# Returns
+	------------
+	The matching query value for the supplied key
 	"""
 	value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
 	return value.contents.str.decode ("utf-8")
 
-def http_request_get_body_json (request):
+def http_request_get_body_json (request: c_void_p) -> dict:
 	"""
-	Method to get body in a dictionary
+	Gets the HTTP request's JSON body as a dictionary
 	# Parameters
 	------------
 	### request: HttpRequest
 		Reference to a HTTP request instance
+	# Returns
+	------------
+	A dict with the HTTP request's JSON body
 	"""
 	body_str = http_request_get_body (request)
-	body = json.loads (body_str.contents.str.decode ("utf-8"))
-	return body
+	return json.loads (body_str.contents.str.decode ("utf-8"))
 
 # headers
 http_request_headers_print = lib.http_request_headers_print

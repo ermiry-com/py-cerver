@@ -39,6 +39,7 @@ static unsigned int multiple_request_all_actual (
 	// );
 
 	// POST /multiple
+	(void) printf ("POST /multiple\n");
 	(void) snprintf (actual_address, 128, "%s/multiple", address);
 	errors |= curl_upload_two_files (
 		curl, actual_address,
@@ -69,6 +70,7 @@ static unsigned int multiple_request_all_actual (
 	// );
 
 	// POST /discard - keep
+	(void) printf ("POST /discard - keep\n");
 	(void) snprintf (actual_address, 128, "%s/discard", address);
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
@@ -79,6 +81,7 @@ static unsigned int multiple_request_all_actual (
 	);
 
 	// POST /discard - discard
+	(void) printf ("POST /discard - discard\n");
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
 		HTTP_STATUS_BAD_REQUEST,

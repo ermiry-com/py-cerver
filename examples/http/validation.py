@@ -23,7 +23,7 @@ def end (signum, frame):
 	sys.exit ("Done!")
 
 def service_errors_send (http_receive, errors):
-	json_errors = json.dumps (errors).encode ('utf-8')
+	json_errors = json.dumps (errors).encode ("utf-8")
 
 	http_response_render_json (
 		http_receive, HTTP_STATUS_BAD_REQUEST,

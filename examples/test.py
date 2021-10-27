@@ -28,7 +28,7 @@ def start ():
 	global my_cerver
 	my_cerver = cerver_create (
 		CERVER_TYPE_CUSTOM,
-		"my-cerver".encode ('utf-8'),
+		"my-cerver".encode ("utf-8"),
 		7000,
 		PROTOCOL_TCP,
 		False,

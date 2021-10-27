@@ -26,7 +26,7 @@ def start ():
 	global ping_cerver
 	ping_cerver = cerver_create (
 		CERVER_TYPE_CUSTOM,
-		"ping-cerver".encode ('utf-8'),
+		"ping-cerver".encode ("utf-8"),
 		7000,
 		PROTOCOL_TCP,
 		False,

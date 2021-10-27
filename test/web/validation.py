@@ -24,7 +24,7 @@ def end (signum, frame):
 	sys.exit ("Done!")
 
 def service_errors_send (http_receive, errors):
-	json_errors = json.dumps (errors).encode ('utf-8')
+	json_errors = json.dumps (errors).encode ("utf-8")
 
 	http_response_render_json (
 		http_receive, HTTP_STATUS_BAD_REQUEST,
@@ -42,6 +42,33 @@ def body_exists_handler (http_receive, request):
 			loaded_json = json.loads (body_json.contents.str)
 
 			value = validate_body_value_exists (
+				loaded_json, "value", errors
+			)
+
+			if (not errors):
+				http_response_send (none_error, http_receive)
+
+			else:
+				service_errors_send (http_receive, errors)
+
+		except Exception as e:
+			print (e)
+			http_response_send (bad_request_error, http_receive)
+
+	else:
+		http_response_send (bad_request_error, http_receive)
+
+# POST /body/exists/int
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def body_exists_int_handler (http_receive, request):
+	errors = {}
+
+	body_json = http_request_get_body (request)
+	if (body_json is not None):
+		try:
+			loaded_json = json.loads (body_json.contents.str)
+
+			value = validate_body_int_value_exists (
 				loaded_json, "value", errors
 			)
 
@@ -291,6 +318,10 @@ def start ():
 	# POST /body/exists
 	exists_route = http_route_create (REQUEST_METHOD_POST, b"body/exists", body_exists_handler)
 	http_cerver_route_register (http_cerver, exists_route)
+
+	# POST /body/exists/int
+	exists_int_route = http_route_create (REQUEST_METHOD_POST, b"body/exists/int", body_exists_int_handler)
+	http_cerver_route_register (http_cerver, exists_int_route)
 
 	# POST /body/value
 	value_route = http_route_create (REQUEST_METHOD_POST, b"body/value", body_value_handler)

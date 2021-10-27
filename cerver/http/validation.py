@@ -33,6 +33,18 @@ def validate_body_value_exists (body, value, errors):
 
 	return result
 
+def validate_body_int_value_exists (body, value, errors):
+	result = None
+
+	if (value in body):
+		if (type (body[value]) == int):
+			result = body[value]
+
+	if (result is None):
+		errors[value] = f'Field {value} is required.'
+
+	return result
+
 def validate_body_value (body, value, min_len, max_len, errors):
 	result = None
 
@@ -267,7 +279,7 @@ def validate_mparts_saved_file_exists (request, value, errors):
 
 def validate_mparts_file_is_image (request, image, errors):
 	values = None
-	
+
 	mpart = http_request_multi_parts_get (request, image.encode ("utf-8"))
 	if (mpart):
 		if (http_multi_part_is_file (mpart)):
@@ -283,7 +295,7 @@ def validate_mparts_file_is_image (request, image, errors):
 				generated = http_multi_part_get_generated_filename (mpart)
 				if (generated):
 					values["generated"] = generated.decode ("utf-8")
-				
+
 				values["saved"] = saved.decode ("utf-8")
 
 			else:

@@ -30,6 +30,7 @@ static unsigned int upload_request_all_actual (
 	char actual_address[128] = { 0 };
 
 	// GET /test
+	(void) printf ("GET /test\n");
 	(void) snprintf (actual_address, 128, "%s/test", address);
 	errors |= curl_simple_handle_data (
 		curl, actual_address,
@@ -38,6 +39,7 @@ static unsigned int upload_request_all_actual (
 	);
 
 	// POST /upload
+	(void) printf ("POST /upload\n");
 	(void) snprintf (actual_address, 128, "%s/upload", address);
 	errors |= curl_upload_file (
 		curl, actual_address,
@@ -57,6 +59,7 @@ static unsigned int upload_request_all_actual (
 	// );
 
 	// POST /iter/good
+	(void) printf ("POST /iter/good\n");
 	(void) snprintf (actual_address, 128, "%s/iter/good", address);
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
@@ -70,6 +73,7 @@ static unsigned int upload_request_all_actual (
 	static const char *json = { "{ \"key\": \"value\" }" };
 	const size_t json_len = strlen (json);
 
+	(void) printf ("POST /iter/empty\n");
 	(void) snprintf (actual_address, 128, "%s/iter/empty", address);
 	errors |= curl_simple_post (
 		curl, actual_address,
@@ -78,6 +82,7 @@ static unsigned int upload_request_all_actual (
 	);
 
 	// POST /discard - keep
+	(void) printf ("POST /discard - keep\n");
 	(void) snprintf (actual_address, 128, "%s/discard", address);
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
@@ -88,6 +93,7 @@ static unsigned int upload_request_all_actual (
 	);
 
 	// POST /discard - discard
+	(void) printf ("POST /discard - discard\n");
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
 		HTTP_STATUS_BAD_REQUEST,
