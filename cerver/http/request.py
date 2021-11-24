@@ -154,7 +154,7 @@ def http_request_get_query_value (
 	values: c_void_p, query_name: str
 ) -> str:
 	"""
-	Gets a query param from request
+	Gets a query param from the HTTP request
 	# Parameters
 	------------
 	### values: DoubleList <KeyValuePair>
@@ -165,8 +165,35 @@ def http_request_get_query_value (
 	------------
 	The matching query value for the supplied key
 	"""
+	result = None
+
 	value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
-	return value.contents.str.decode ("utf-8")
+	if (value):
+		result = value.contents.str.decode ("utf-8")
+
+	return result
+
+def http_request_get_int_query_value (
+	values: c_void_p, query_name: str
+) -> int:
+	result = None
+
+	value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (value):
+		result = int (value.contents.str.decode ("utf-8"))
+
+	return result
+
+def http_request_get_float_query_value (
+	values: c_void_p, query_name: str
+) -> float:
+	result = None
+
+	value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (value):
+		result = float (value.contents.str.decode ("utf-8"))
+
+	return result
 
 def http_request_get_body_json (request: c_void_p) -> dict:
 	"""
