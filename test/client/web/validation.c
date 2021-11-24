@@ -184,6 +184,28 @@ static unsigned int validation_request_all_actual (void) {
 		actual_address, HTTP_STATUS_BAD_REQUEST, "./test/data/missing.json", data_buffer
 	);
 
+	/*** body exists ignore size ***/
+	// POST /body/exists/ignore - good
+	(void) printf ("POST /body/exists/ignore - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/body/exists/ignore", address);
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/good.json", data_buffer
+	);
+
+	// POST /body/exists/ignore - empty
+	(void) printf ("POST /body/exists/ignore - empty\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/body/exists/ignore", address);
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "./test/data/empty.json", data_buffer
+	);
+
+	// POST /body/exists/ignore - missing
+	(void) printf ("POST /body/exists/ignore - missing\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/body/exists/ignore", address);
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/missing.json", data_buffer
+	);
+
 	/*** body int exists ***/
 	// POST /body/exists/int - good
 	(void) printf ("POST /body/exists/int - good\n");
@@ -209,6 +231,35 @@ static unsigned int validation_request_all_actual (void) {
 	// POST /body/exists/int - wrong
 	(void) printf ("POST /body/exists/int - wrong\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/body/exists/int", address);
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "./test/data/good.json", data_buffer
+	);
+
+	/*** body float exists ***/
+	// POST /body/exists/float - good
+	(void) printf ("POST /body/exists/float - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/body/exists/float", address);
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/float.json", data_buffer
+	);
+
+	// POST /body/exists/float - empty
+	(void) printf ("POST /body/exists/float - empty\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/body/exists/float", address);
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "./test/data/empty.json", data_buffer
+	);
+
+	// POST /body/exists/float - missing
+	(void) printf ("POST /body/exists/float - missing\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/body/exists/float", address);
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "./test/data/missing.json", data_buffer
+	);
+
+	// POST /body/exists/float - wrong
+	(void) printf ("POST /body/exists/float - wrong\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/body/exists/float", address);
 	errors |= validation_request_post_json (
 		actual_address, HTTP_STATUS_BAD_REQUEST, "./test/data/good.json", data_buffer
 	);
@@ -464,6 +515,20 @@ static unsigned int validation_request_all_actual (void) {
 	// POST /mparts/saved - bad
 	(void) printf ("POST /mparts/saved - bad\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/saved", address);
+	errors |= validation_request_form_data_value (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/complete - good
+	(void) printf ("POST /mparts/complete - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/complete", address);
+	errors |= validation_request_image (
+		actual_address, HTTP_STATUS_OK, "image", "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/complete - bad
+	(void) printf ("POST /mparts/complete - bad\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/complete", address);
 	errors |= validation_request_form_data_value (
 		actual_address, HTTP_STATUS_BAD_REQUEST, "cuc", "1001", data_buffer
 	);
