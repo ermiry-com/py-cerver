@@ -301,6 +301,32 @@ def validate_mparts_saved_file_exists (request, value, errors):
 
 	return result
 
+def validate_mparts_file_complete (request, value, errors):
+	values = None
+
+	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
+	if (mpart):
+		if (http_multi_part_is_file (mpart)):
+			values = {}
+
+			saved = http_multi_part_get_saved_filename (mpart)
+
+			original = http_multi_part_get_filename (mpart)
+			values["original"] = original.decode ("utf-8")
+			generated = http_multi_part_get_generated_filename (mpart)
+			if (generated):
+				values["generated"] = generated.decode ("utf-8")
+
+			values["saved"] = saved.decode ("utf-8")
+
+		else:
+			errors[value] = f"Field {value} is not a file."
+
+	else:
+		errors[value] = f"File {value} is missing."
+
+	return values
+
 def validate_mparts_file_is_image (request, image, errors):
 	values = None
 
@@ -311,7 +337,7 @@ def validate_mparts_file_is_image (request, image, errors):
 
 			# validate file and get extension
 			img_type = files_image_get_type (saved)
-			if (img_type == IMAGE_TYPE_PNG or img_type == IMAGE_TYPE_JPEG):
+			if ((img_type == IMAGE_TYPE_PNG) or (img_type == IMAGE_TYPE_JPEG)):
 				values = {}
 				values["type"] = img_type
 				original = http_multi_part_get_filename (mpart)
