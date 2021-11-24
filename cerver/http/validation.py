@@ -33,15 +33,15 @@ def validate_body_value_exists (body, value, errors):
 
 	return result
 
-def validate_body_int_value_exists (body, value, errors):
+def validate_body_string_value_exists_ignore_size (body, value, errors):
 	result = None
 
 	if (value in body):
-		if (type (body[value]) == int):
+		if (type (body[value]) is str):
 			result = body[value]
 
 	if (result is None):
-		errors[value] = f'Field {value} is required.'
+		errors[value] = f"Field {value} is required."
 
 	return result
 
@@ -51,7 +51,7 @@ def validate_body_value (body, value, min_len, max_len, errors):
 	found = validate_body_value_exists (body, value, errors)
 	if (found):
 		value_len = len (found)
-		if (value_len >= min_len and value_len <= max_len):
+		if ((value_len >= min_len) and (value_len <= max_len)):
 			result = found
 
 		else:
@@ -59,6 +59,30 @@ def validate_body_value (body, value, min_len, max_len, errors):
 				"Field {0} must be between {1} and {2} characters long."
 				.format	(value, min_len, max_len)
 			)
+
+	return result
+
+def validate_body_int_value_exists (body, value, errors):
+	result = None
+
+	if (value in body):
+		if (type (body[value]) == int):
+			result = body[value]
+
+	if (result is None):
+		errors[value] = f"Field {value} is required."
+
+	return result
+
+def validate_body_float_value_exists (body, value, errors):
+	result = None
+
+	if (value in body):
+		if (type (body[value]) == float):
+			result = body[value]
+
+	if (result is None):
+		errors[value] = f"Field {value} is required."
 
 	return result
 
@@ -277,6 +301,32 @@ def validate_mparts_saved_file_exists (request, value, errors):
 
 	return result
 
+def validate_mparts_file_complete (request, value, errors):
+	values = None
+
+	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
+	if (mpart):
+		if (http_multi_part_is_file (mpart)):
+			values = {}
+
+			saved = http_multi_part_get_saved_filename (mpart)
+
+			original = http_multi_part_get_filename (mpart)
+			values["original"] = original.decode ("utf-8")
+			generated = http_multi_part_get_generated_filename (mpart)
+			if (generated):
+				values["generated"] = generated.decode ("utf-8")
+
+			values["saved"] = saved.decode ("utf-8")
+
+		else:
+			errors[value] = f"Field {value} is not a file."
+
+	else:
+		errors[value] = f"File {value} is missing."
+
+	return values
+
 def validate_mparts_file_is_image (request, image, errors):
 	values = None
 
@@ -287,7 +337,7 @@ def validate_mparts_file_is_image (request, image, errors):
 
 			# validate file and get extension
 			img_type = files_image_get_type (saved)
-			if (img_type == IMAGE_TYPE_PNG or img_type == IMAGE_TYPE_JPEG):
+			if ((img_type == IMAGE_TYPE_PNG) or (img_type == IMAGE_TYPE_JPEG)):
 				values = {}
 				values["type"] = img_type
 				original = http_multi_part_get_filename (mpart)

@@ -31,17 +31,50 @@ def service_errors_send (http_receive, errors):
 		json_errors, len (json_errors)
 	)
 
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def service_catch_all_handler (http_receive, request):
+	http_send_response (
+		http_receive, HTTP_STATUS_NOT_FOUND, {"error": "Not found!"}
+	)
+
 # POST /body/exists
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def body_exists_handler (http_receive, request):
 	errors = {}
 
 	body_json = http_request_get_body (request)
-	if (body_json is not None):
+	if (body_json):
 		try:
 			loaded_json = json.loads (body_json.contents.str)
 
 			value = validate_body_value_exists (
+				loaded_json, "value", errors
+			)
+
+			if (not errors):
+				http_response_send (none_error, http_receive)
+
+			else:
+				service_errors_send (http_receive, errors)
+
+		except Exception as e:
+			print (e)
+			http_response_send (bad_request_error, http_receive)
+
+	else:
+		http_response_send (bad_request_error, http_receive)
+
+# POST /body/exists/ignore
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def body_exists_ignore_handler (http_receive, request):
+	errors = {}
+
+	body_json = http_request_get_body (request)
+	if (body_json):
+		try:
+			loaded_json = json.loads (body_json.contents.str)
+
+			value = validate_body_string_value_exists_ignore_size (
 				loaded_json, "value", errors
 			)
 
@@ -64,11 +97,38 @@ def body_exists_int_handler (http_receive, request):
 	errors = {}
 
 	body_json = http_request_get_body (request)
-	if (body_json is not None):
+	if (body_json):
 		try:
 			loaded_json = json.loads (body_json.contents.str)
 
 			value = validate_body_int_value_exists (
+				loaded_json, "value", errors
+			)
+
+			if (not errors):
+				http_response_send (none_error, http_receive)
+
+			else:
+				service_errors_send (http_receive, errors)
+
+		except Exception as e:
+			print (e)
+			http_response_send (bad_request_error, http_receive)
+
+	else:
+		http_response_send (bad_request_error, http_receive)
+
+# POST /body/exists/float
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def body_exists_float_handler (http_receive, request):
+	errors = {}
+
+	body_json = http_request_get_body (request)
+	if (body_json):
+		try:
+			loaded_json = json.loads (body_json.contents.str)
+
+			value = validate_body_float_value_exists (
 				loaded_json, "value", errors
 			)
 
@@ -91,7 +151,7 @@ def body_value_handler (http_receive, request):
 	errors = {}
 
 	body_json = http_request_get_body (request)
-	if (body_json is not None):
+	if (body_json):
 		try:
 			loaded_json = json.loads (body_json.contents.str)
 
@@ -271,6 +331,26 @@ def mparts_saved_handler (http_receive, request):
 	else:
 		service_errors_send (http_receive, errors)
 
+# POST /mparts/complete
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def mparts_complete_handler (http_receive, request):
+	errors = {}
+
+	http_request_multi_parts_print (request)
+
+	cuc = validate_mparts_exists (request, "cuc", errors)
+
+	complete = validate_mparts_file_complete (request, "image", errors)
+
+	if (not errors):
+		print ("Original: ", complete["original"])
+		print ("Generated: ", complete["generated"])
+		print ("Saved: ", complete["saved"])
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
 # POST /mparts/image
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def mparts_image_handler (http_receive, request):
@@ -319,9 +399,17 @@ def start ():
 	exists_route = http_route_create (REQUEST_METHOD_POST, b"body/exists", body_exists_handler)
 	http_cerver_route_register (http_cerver, exists_route)
 
+	# POST /body/exists/ignore
+	exists_ignore_route = http_route_create (REQUEST_METHOD_POST, b"body/exists/ignore", body_exists_ignore_handler)
+	http_cerver_route_register (http_cerver, exists_ignore_route)
+
 	# POST /body/exists/int
 	exists_int_route = http_route_create (REQUEST_METHOD_POST, b"body/exists/int", body_exists_int_handler)
 	http_cerver_route_register (http_cerver, exists_int_route)
+
+	# POST /body/exists/float
+	exists_float_route = http_route_create (REQUEST_METHOD_POST, b"body/exists/float", body_exists_float_handler)
+	http_cerver_route_register (http_cerver, exists_float_route)
 
 	# POST /body/value
 	value_route = http_route_create (REQUEST_METHOD_POST, b"body/value", body_value_handler)
@@ -382,10 +470,18 @@ def start ():
 	http_route_set_modifier (mparts_saved_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, mparts_saved_route)
 
+	# POST /mparts/complete
+	mparts_complete_route = http_route_create (REQUEST_METHOD_POST, b"mparts/complete", mparts_complete_handler)
+	http_route_set_modifier (mparts_complete_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, mparts_complete_route)
+
 	# POST /mparts/image
 	mparts_image_route = http_route_create (REQUEST_METHOD_POST, b"mparts/image", mparts_image_handler)
 	http_route_set_modifier (mparts_image_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, mparts_image_route)
+
+	# add a catch all route
+	http_cerver_set_catch_all_route (http_cerver, service_catch_all_handler)
 
 	# start
 	cerver_start (web_service)

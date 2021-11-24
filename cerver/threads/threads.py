@@ -1,6 +1,12 @@
-from ctypes import c_void_p
+from ctypes import CFUNCTYPE, c_void_p, c_size_t
 
 from ..lib import lib
+
+ThreadWork = CFUNCTYPE (None, c_void_p)
+
+thread_create_detached = lib.thread_create_detached
+thread_create_detached.argtypes = [ThreadWork, c_void_p]
+thread_create_detached.restype = c_size_t
 
 thread_mutex_new = lib.thread_mutex_new
 thread_mutex_new.restype = c_void_p
