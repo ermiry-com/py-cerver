@@ -33,15 +33,15 @@ def validate_body_value_exists (body, value, errors):
 
 	return result
 
-def validate_body_int_value_exists (body, value, errors):
+def validate_body_string_value_exists_ignore_size (body, value, errors):
 	result = None
 
 	if (value in body):
-		if (type (body[value]) == int):
+		if (type (body[value]) is str):
 			result = body[value]
 
 	if (result is None):
-		errors[value] = f'Field {value} is required.'
+		errors[value] = f"Field {value} is required."
 
 	return result
 
@@ -51,7 +51,7 @@ def validate_body_value (body, value, min_len, max_len, errors):
 	found = validate_body_value_exists (body, value, errors)
 	if (found):
 		value_len = len (found)
-		if (value_len >= min_len and value_len <= max_len):
+		if ((value_len >= min_len) and (value_len <= max_len)):
 			result = found
 
 		else:
