@@ -62,6 +62,30 @@ def validate_body_value (body, value, min_len, max_len, errors):
 
 	return result
 
+def validate_body_int_value_exists (body, value, errors):
+	result = None
+
+	if (value in body):
+		if (type (body[value]) == int):
+			result = body[value]
+
+	if (result is None):
+		errors[value] = f"Field {value} is required."
+
+	return result
+
+def validate_body_float_value_exists (body, value, errors):
+	result = None
+
+	if (value in body):
+		if (type (body[value]) == float):
+			result = body[value]
+
+	if (result is None):
+		errors[value] = f"Field {value} is required."
+
+	return result
+
 def validate_body_value_with_default (body, value, default, errors):
 	result = default
 
