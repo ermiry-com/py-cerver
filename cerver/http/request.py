@@ -1,5 +1,5 @@
-from ctypes import POINTER, CFUNCTYPE, c_void_p
-from ctypes import c_int, c_uint, c_uint8, c_char_p, c_bool
+from ctypes import POINTER, CFUNCTYPE, c_void_p, c_char_p
+from ctypes import c_int, c_uint, c_uint8, c_size_t, c_bool
 
 import json
 
@@ -55,6 +55,14 @@ http_request_get_param_at_idx.restype = POINTER (String)
 http_request_get_header = lib.http_request_get_header
 http_request_get_header.argtypes = [c_void_p, http_header]
 http_request_get_header.restype = POINTER (String)
+
+http_request_get_custom_headers_count = lib.http_request_get_custom_headers_count
+http_request_get_custom_headers_count.argtypes = [c_void_p]
+http_request_get_custom_headers_count.restype = c_size_t
+
+http_request_get_custom_header = lib.http_request_get_custom_header
+http_request_get_custom_header.argtypes = [c_void_p, c_char_p]
+http_request_get_custom_header.restype = c_char_p
 
 http_request_get_content_type = lib.http_request_get_content_type
 http_request_get_content_type.argtypes = [c_void_p]
