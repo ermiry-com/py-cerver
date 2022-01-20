@@ -91,7 +91,7 @@ HTTP_HEADER_SEC_WEBSOCKET_VERSION = 52
 HTTP_HEADER_DATE = 53
 HTTP_HEADER_UPGRADE = 54
 
-HTTP_HEADER_INVALID = 53
+HTTP_HEADER_UNDEFINED = 53
 
 http_header_string = lib.http_header_string
 http_header_string.argtypes = [http_header]
