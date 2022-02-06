@@ -10,7 +10,7 @@
 
 #include "curl.h"
 
-#define ADDRESS_SIZE				128
+#define ADDRESS_SIZE				1024
 
 #define REQUEST_FORM_VALUE_SIZE		32
 
@@ -161,6 +161,311 @@ static unsigned int validation_request_all_actual (void) {
 
 	char data_buffer[4096] = { 0 };
 	char actual_address[ADDRESS_SIZE] = { 0 };
+
+	/*** query exists ***/
+	// GET /query/exists - good
+	(void) printf ("GET /query/exists - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/exists?value=test", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/exists - bad
+	(void) printf ("GET /query/exists - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/exists?hola=test", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/exists - missing
+	(void) printf ("GET /query/exists - missing\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/exists", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	/*** query value ***/
+	// GET /query/value - good
+	(void) printf ("GET /query/value - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/value?value=thisisatest", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/value - bad
+	(void) printf ("GET /query/value - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/value?hola=test", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/value - smaller
+	(void) printf ("GET /query/value - smaller\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/value?value=test", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/value - larger
+	(void) printf ("GET /query/value - larger\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/value?value=ga1OtzDlyjfRLILuHZEYKVNxg1AS5g03vlhYGF8DRpdviWe5mqdoPY85CuAvlRlxMhCnAW4tE8cslFzYorHF0iAHhjJPKMSNV5xFW0TkvGDqRzIJc5mGeaRSTOWsnGtxxXPSgkkIGHMm2vTWfcd3OhPmZewPpkxeyE2wgFL07s6nflTCp36TbYj4YlRpQw", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	/*** query int ***/
+	// GET /query/int - good
+	(void) printf ("GET /query/int - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int?value=78", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int - missing
+	(void) printf ("GET /query/int - missing\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int?test=78", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int - bad
+	(void) printf ("GET /query/int - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int?value=test", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int/default - good
+	(void) printf ("GET /query/int/default - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/default?value=78", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int/default - missing
+	(void) printf ("GET /query/int/default - missing\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/default", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int/default - bad
+	(void) printf ("GET /query/int/default - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/default?value=hola", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	/*** query float ***/
+	// GET /query/float - good
+	(void) printf ("GET /query/float - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/float?value=8.78", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/float - missing
+	(void) printf ("GET /query/float - missing\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/float?hola=8.78", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/float - bad
+	(void) printf ("GET /query/float - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/float?hola=test", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/float/default - good
+	(void) printf ("GET /query/float/default - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/float/default?value=9.89", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/float/default - missing
+	(void) printf ("GET /query/float/default - missing\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/float/default", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/float/default - bad
+	(void) printf ("GET /query/float/default - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/float/default?value=hola", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	/*** query bool ***/
+	// GET /query/bool - good
+	(void) printf ("GET /query/bool - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/bool?value=True", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/bool - missing
+	(void) printf ("GET /query/bool - missing\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/bool", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/bool - bad
+	(void) printf ("GET /query/bool - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/bool?value=hola", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/bool/default - good
+	(void) printf ("GET /query/bool/default - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/bool/default?value=True", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/bool/default - missing
+	(void) printf ("GET /query/bool/default - missing\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/bool/default", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/bool/default - bad
+	(void) printf ("GET /query/bool/default - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/bool/default?value=hola", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
 
 	/*** body exists ***/
 	// POST /body/exists - good

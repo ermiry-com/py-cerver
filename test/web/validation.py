@@ -37,6 +37,128 @@ def service_catch_all_handler (http_receive, request):
 		http_receive, HTTP_STATUS_NOT_FOUND, {"error": "Not found!"}
 	)
 
+# GET /query/exists
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_exists_handler (http_receive, request):
+	errors = {}
+
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_exists (query_params, "value", errors)
+
+	if (not errors):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# GET /query/value
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_value_handler (http_receive, request):
+	errors = {}
+
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_value (query_params, "value", 8, 32, errors)
+
+	if (not errors):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# GET /query/int
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_int_handler (http_receive, request):
+	errors = {}
+
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_int_value (query_params, "value", errors)
+
+	if (not errors):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# GET /query/int/default
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_int_default_handler (http_receive, request):
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_int_value_with_default (query_params, "value", 10)
+
+	if (value is not None):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		http_response_send (bad_request_error, http_receive)
+
+# GET /query/float
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_float_handler (http_receive, request):
+	errors = {}
+
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_float_value (query_params, "value", errors)
+
+	if (not errors):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# GET /query/float/default
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_float_default_handler (http_receive, request):
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_float_value_with_default (query_params, "value", 5.78)
+
+	if (value is not None):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		http_response_send (bad_request_error, http_receive)
+
+# GET /query/bool
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_bool_handler (http_receive, request):
+	errors = {}
+
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_bool_value (query_params, "value", errors)
+
+	if (not errors):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# GET /query/bool/default
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_bool_default_handler (http_receive, request):
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_bool_value_with_default (query_params, "value", False)
+
+	if (value is not None):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		http_response_send (bad_request_error, http_receive)
+
 # POST /body/exists
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def body_exists_handler (http_receive, request):
@@ -214,17 +336,14 @@ def mparts_int_handler (http_receive, request):
 # POST /mparts/int/default
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def mparts_int_default_handler (http_receive, request):
-	errors = {}
+	value = validate_mparts_int_with_default (request, "value", 10)
 
-	value = validate_mparts_int_with_default (
-		request, "value", 10, errors
-	)
-
-	if (not errors):
+	if (value is not None):
+		print (value)
 		http_response_send (none_error, http_receive)
 
 	else:
-		service_errors_send (http_receive, errors)
+		http_response_send (bad_request_error, http_receive)
 
 # POST /mparts/float
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
@@ -242,17 +361,14 @@ def mparts_float_handler (http_receive, request):
 # POST /mparts/float/default
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def mparts_float_default_handler (http_receive, request):
-	errors = {}
+	value = validate_mparts_float_with_default (request, "value", 10.6)
 
-	value = validate_mparts_float_with_default (
-		request, "value", 10.6, errors
-	)
-
-	if (not errors):
+	if (value is not None):
+		print (value)
 		http_response_send (none_error, http_receive)
 
 	else:
-		service_errors_send (http_receive, errors)
+		http_response_send (bad_request_error, http_receive)
 
 # POST /mparts/bool
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
@@ -270,17 +386,14 @@ def mparts_bool_handler (http_receive, request):
 # POST /mparts/bool/default
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def mparts_bool_default_handler (http_receive, request):
-	errors = {}
+	value = validate_mparts_bool_with_default (request, "value", False)
 
-	value = validate_mparts_bool_with_default (
-		request, "value", False, errors
-	)
-
-	if (not errors):
+	if (value is not None):
+		print (value)
 		http_response_send (none_error, http_receive)
 
 	else:
-		service_errors_send (http_receive, errors)
+		http_response_send (bad_request_error, http_receive)
 
 # POST /mparts/upload
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
@@ -372,29 +485,48 @@ def mparts_image_handler (http_receive, request):
 	else:
 		service_errors_send (http_receive, errors)
 
-def start ():
-	global web_service
-	web_service = cerver_create_web (
-		b"web-service", 8080, 10
-	)
+def service_set_query_routes (http_cerver):
+	# GET /query/exists
+	query_exists_route = http_route_create (REQUEST_METHOD_GET, b"query/exists", query_exists_handler)
+	http_route_set_modifier (query_exists_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, query_exists_route)
 
-	# main configuration
-	cerver_set_alias (web_service, b"web")
+	# GET /query/value
+	query_value_route = http_route_create (REQUEST_METHOD_GET, b"query/value", query_value_handler)
+	http_route_set_modifier (query_value_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, query_value_route)
 
-	cerver_set_receive_buffer_size (web_service, 4096)
-	cerver_set_thpool_n_threads (web_service, 4)
-	cerver_set_handler_type (web_service, CERVER_HANDLER_TYPE_THREADS)
+	# GET /query/int
+	query_int_route = http_route_create (REQUEST_METHOD_GET, b"query/int", query_int_handler)
+	http_route_set_modifier (query_int_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, query_int_route)
 
-	cerver_set_reusable_address_flags (web_service, True)
+	# GET /query/int/default
+	query_int_default_route = http_route_create (REQUEST_METHOD_GET, b"query/int/default", query_int_default_handler)
+	http_route_set_modifier (query_int_default_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, query_int_default_route)
 
-	# HTTP configuration
-	http_cerver = http_cerver_get (web_service)
+	# GET /query/float
+	query_float_route = http_route_create (REQUEST_METHOD_GET, b"query/float", query_float_handler)
+	http_route_set_modifier (query_float_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, query_float_route)
 
-	files_create_dir (b"uploads", 0o777)
-	http_cerver_set_uploads_path (http_cerver, b"uploads")
+	# GET /query/float/default
+	query_float_default_route = http_route_create (REQUEST_METHOD_GET, b"query/float/default", query_float_default_handler)
+	http_route_set_modifier (query_float_default_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, query_float_default_route)
 
-	http_cerver_set_default_uploads_filename_generator (http_cerver)
+	# GET /query/bool
+	query_bool_route = http_route_create (REQUEST_METHOD_GET, b"query/bool", query_bool_handler)
+	http_route_set_modifier (query_bool_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, query_bool_route)
 
+	# GET /query/bool/default
+	query_bool_default_route = http_route_create (REQUEST_METHOD_GET, b"query/bool/default", query_bool_default_handler)
+	http_route_set_modifier (query_bool_default_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, query_bool_default_route)
+
+def service_set_body_routes (http_cerver):
 	# POST /body/exists
 	exists_route = http_route_create (REQUEST_METHOD_POST, b"body/exists", body_exists_handler)
 	http_cerver_route_register (http_cerver, exists_route)
@@ -415,6 +547,7 @@ def start ():
 	value_route = http_route_create (REQUEST_METHOD_POST, b"body/value", body_value_handler)
 	http_cerver_route_register (http_cerver, value_route)
 
+def service_set_mparts_routes (http_cerver):
 	# POST /mparts/exists
 	mparts_exists_route = http_route_create (REQUEST_METHOD_POST, b"mparts/exists", mparts_exists_handler)
 	http_route_set_modifier (mparts_exists_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
@@ -479,6 +612,33 @@ def start ():
 	mparts_image_route = http_route_create (REQUEST_METHOD_POST, b"mparts/image", mparts_image_handler)
 	http_route_set_modifier (mparts_image_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, mparts_image_route)
+
+def start ():
+	global web_service
+	web_service = cerver_create_web (
+		b"web-service", 8080, 10
+	)
+
+	# main configuration
+	cerver_set_alias (web_service, b"web")
+
+	cerver_set_receive_buffer_size (web_service, 4096)
+	cerver_set_thpool_n_threads (web_service, 4)
+	cerver_set_handler_type (web_service, CERVER_HANDLER_TYPE_THREADS)
+
+	cerver_set_reusable_address_flags (web_service, True)
+
+	# HTTP configuration
+	http_cerver = http_cerver_get (web_service)
+
+	files_create_dir (b"uploads", 0o777)
+	http_cerver_set_uploads_path (http_cerver, b"uploads")
+
+	http_cerver_set_default_uploads_filename_generator (http_cerver)
+
+	service_set_query_routes (http_cerver)
+	service_set_body_routes (http_cerver)
+	service_set_mparts_routes (http_cerver)
 
 	# add a catch all route
 	http_cerver_set_catch_all_route (http_cerver, service_catch_all_handler)
