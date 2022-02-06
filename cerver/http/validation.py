@@ -10,10 +10,143 @@ from .multipart import http_multi_part_is_file
 from .multipart import http_multi_part_get_filename
 from .multipart import http_multi_part_get_generated_filename
 from .multipart import http_multi_part_get_saved_filename
+from .request import http_query_pairs_get_value
 from .request import http_request_multi_parts_get
 from .request import http_request_multi_parts_get_value
 from .request import http_request_multi_parts_get_filename
 from .request import http_request_multi_parts_get_saved_filename
+
+def validate_query_exists (
+	values: c_void_p, query_name: str, errors: dict
+) -> str:
+	result = None
+
+	found = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (found):
+		query_value = found.contents.str.decode ("utf-8")
+		if (len (query_value) > 0):
+			result = query_value
+
+	if (result is None):
+		errors[query_name] = f"Field {query_name} is required."
+
+	return result
+
+def validate_query_value (
+	values: c_void_p, query_name: str, min_len: int, max_len: int, errors: dict
+) -> str:
+	result = None
+
+	found = validate_query_exists (values, query_name, errors)
+	if (found):
+		value_len = len (found)
+		if ((value_len >= min_len) and (value_len <= max_len)):
+			result = found
+
+		else:
+			errors[query_name] = (
+				"Field {0} must be between {1} and {2} characters long."
+				.format	(query_name, min_len, max_len)
+			)
+
+	return result
+
+def validate_query_int_value (
+	values: c_void_p, query_name: str, errors: dict
+) -> int:
+	result = None
+
+	found = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (found):
+		try:
+			result = int (found.contents.str.decode ("utf-8"))
+		except ValueError:
+			errors[query_name] = f"Field {query_name} is invalid."
+
+	else:
+		errors[query_name] = f"Field {query_name} is required."
+
+	return result
+
+def validate_query_int_value_with_default (
+	values: c_void_p, query_name: str, default: int
+) -> int:
+	result = default
+
+	found = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (found):
+		try:
+			result = int (found.contents.str.decode ("utf-8"))
+		except ValueError:
+			pass
+
+	return result
+
+def validate_query_float_value (
+	values: c_void_p, query_name: str, errors: dict
+) -> float:
+	result = None
+
+	found = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (found):
+		try:
+			result = float (found.contents.str.decode ("utf-8"))
+		except ValueError:
+			errors[query_name] = f"Field {query_name} is invalid."
+
+	else:
+		errors[query_name] = f"Field {query_name} is required."
+
+	return result
+
+def validate_query_float_value_with_default (
+	values: c_void_p, query_name: str, default: float
+) -> float:
+	result = default
+
+	found = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (found):
+		try:
+			result = float (found.contents.str.decode ("utf-8"))
+		except ValueError:
+			pass
+
+	return result
+
+def validate_query_bool_value (
+	values: c_void_p, query_name: str, errors: dict
+) -> bool:
+	result = None
+
+	found = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (found):
+		try:
+			result = bool (
+				distutils.util.strtobool (found.contents.str.decode ("utf-8"))
+			)
+		except ValueError:
+			errors[query_name] = f"Field {query_name} is invalid."
+
+	else:
+		errors[query_name] = f"Field {query_name} is required."
+
+	return result
+
+def validate_query_bool_value_with_default (
+	values: c_void_p, query_name: str, default: bool
+) -> bool:
+	result = default
+
+	found = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (found):
+		try:
+			result = bool (
+				distutils.util.strtobool (found.contents.str.decode ("utf-8"))
+			)
+		except ValueError:
+			pass
+
+	return result
 
 def validate_body_required_keys (values, body):
 	if not all (k in body for k in values):
