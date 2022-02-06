@@ -1,3 +1,5 @@
+from ctypes import c_void_p
+
 import distutils.util
 
 from ..files import file_exists
@@ -17,7 +19,7 @@ def validate_body_required_keys (values, body):
 	if not all (k in body for k in values):
 		raise Exception ("Missing key(s) in body")
 
-def validate_body_value_exists (body, value, errors):
+def validate_body_value_exists (body: dict, value: str, errors: dict):
 	result = None
 
 	if (value in body):
@@ -33,7 +35,9 @@ def validate_body_value_exists (body, value, errors):
 
 	return result
 
-def validate_body_string_value_exists_ignore_size (body, value, errors):
+def validate_body_string_value_exists_ignore_size (
+	body: dict, value: str, errors: dict
+):
 	result = None
 
 	if (value in body):
@@ -45,7 +49,9 @@ def validate_body_string_value_exists_ignore_size (body, value, errors):
 
 	return result
 
-def validate_body_value (body, value, min_len, max_len, errors):
+def validate_body_value (
+	body: dict, value: str, min_len: int, max_len: int, errors: dict
+):
 	result = None
 
 	found = validate_body_value_exists (body, value, errors)
@@ -62,7 +68,9 @@ def validate_body_value (body, value, min_len, max_len, errors):
 
 	return result
 
-def validate_body_int_value_exists (body, value, errors):
+def validate_body_int_value_exists (
+	body: dict, value: str, errors: dict
+) -> int:
 	result = None
 
 	if (value in body):
@@ -74,7 +82,9 @@ def validate_body_int_value_exists (body, value, errors):
 
 	return result
 
-def validate_body_float_value_exists (body, value, errors):
+def validate_body_float_value_exists (
+	body: dict, value: str, errors: dict
+) -> float:
 	result = None
 
 	if (value in body):
@@ -86,7 +96,7 @@ def validate_body_float_value_exists (body, value, errors):
 
 	return result
 
-def validate_body_value_with_default (body, value, default, errors):
+def validate_body_value_with_default (body: dict, value: str, default: dict):
 	result = default
 
 	if (value in body):
@@ -94,7 +104,7 @@ def validate_body_value_with_default (body, value, default, errors):
 
 	return result
 
-def validate_mparts_exists (request, value, errors):
+def validate_mparts_exists (request: c_void_p, value: str, errors: dict):
 	result = None
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -108,13 +118,15 @@ def validate_mparts_exists (request, value, errors):
 
 	return result
 
-def validate_mparts_value (request, value, min_len, max_len, errors):
+def validate_mparts_value (
+	request: c_void_p, value: str, min_len: int, max_len: int, errors: dict
+):
 	result = None
 
 	found = validate_mparts_exists (request, value, errors)
 	if (found):
 		value_len = len (found)
-		if (value_len >= min_len and value_len <= max_len):
+		if ((value_len >= min_len) and (value_len <= max_len)):
 			result = found
 
 		else:
@@ -125,7 +137,9 @@ def validate_mparts_value (request, value, min_len, max_len, errors):
 
 	return result
 
-def validate_mparts_value_with_default (request, value, default, errors):
+def validate_mparts_value_with_default (
+	request: c_void_p, value: str, default: str
+):
 	result = default
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -134,7 +148,7 @@ def validate_mparts_value_with_default (request, value, default, errors):
 
 	return result
 
-def validate_mparts_int (request, value, errors):
+def validate_mparts_int (request: c_void_p, value: str, errors: dict) -> int:
 	result = None
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -151,8 +165,8 @@ def validate_mparts_int (request, value, errors):
 	return result
 
 def validate_mparts_int_with_default (
-	request, value, default, errors
-):
+	request: c_void_p, value: str, default: int
+) -> int:
 	result = default
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -165,7 +179,9 @@ def validate_mparts_int_with_default (
 
 	return result
 
-def validate_mparts_float (request, value, errors):
+def validate_mparts_float (
+	request: c_void_p, value: str, errors: dict
+) -> float:
 	result = None
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -182,8 +198,8 @@ def validate_mparts_float (request, value, errors):
 	return result
 
 def validate_mparts_float_with_default (
-	request, value, default, errors
-):
+	request: c_void_p, value: str, default: float
+) -> float:
 	result = default
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -196,7 +212,9 @@ def validate_mparts_float_with_default (
 
 	return result
 
-def validate_mparts_bool (request, value, errors):
+def validate_mparts_bool (
+	request: c_void_p, value: str, errors: dict
+) -> bool:
 	result = None
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -213,8 +231,8 @@ def validate_mparts_bool (request, value, errors):
 	return result
 
 def validate_mparts_bool_with_default (
-	request, value, default, errors
-):
+	request: c_void_p, value: str, default: bool
+) -> bool:
 	result = default
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -227,7 +245,9 @@ def validate_mparts_bool_with_default (
 
 	return result
 
-def validate_mparts_file_exists (request, value, errors):
+def validate_mparts_file_exists (
+	request: c_void_p, value: str, errors: dict
+) -> dict:
 	values = None
 
 	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
@@ -252,7 +272,9 @@ def validate_mparts_file_exists (request, value, errors):
 
 	return values
 
-def validate_mparts_filename_exists (request, value, errors):
+def validate_mparts_filename_exists (
+	request: c_void_p, value: str, errors: dict
+) -> str:
 	result = None
 
 	# get the value filename
@@ -268,7 +290,9 @@ def validate_mparts_filename_exists (request, value, errors):
 
 	return result
 
-def validate_mparts_saved_filename_exists (request, value, errors):
+def validate_mparts_saved_filename_exists (
+	request: c_void_p, value: str, errors: dict
+) -> str:
 	result = None
 
 	# get the value filename
@@ -284,7 +308,9 @@ def validate_mparts_saved_filename_exists (request, value, errors):
 
 	return result
 
-def validate_mparts_saved_file_exists (request, value, errors):
+def validate_mparts_saved_file_exists (
+	request: c_void_p, value: str, errors: dict
+) -> str:
 	result = None
 
 	# get the value filename
@@ -301,7 +327,9 @@ def validate_mparts_saved_file_exists (request, value, errors):
 
 	return result
 
-def validate_mparts_file_complete (request, value, errors):
+def validate_mparts_file_complete (
+	request: c_void_p, value: str, errors: dict
+) -> dict:
 	values = None
 
 	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
@@ -327,7 +355,9 @@ def validate_mparts_file_complete (request, value, errors):
 
 	return values
 
-def validate_mparts_file_is_image (request, image, errors):
+def validate_mparts_file_is_image (
+	request: c_void_p, image: str, errors: dict
+) -> dict:
 	values = None
 
 	mpart = http_request_multi_parts_get (request, image.encode ("utf-8"))
