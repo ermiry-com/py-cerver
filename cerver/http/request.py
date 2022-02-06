@@ -1,6 +1,7 @@
 from ctypes import POINTER, CFUNCTYPE, c_void_p, c_char_p
 from ctypes import c_int, c_uint, c_uint8, c_size_t, c_bool
 
+import distutils.util
 import json
 
 from ..lib import lib
@@ -200,6 +201,17 @@ def http_request_get_float_query_value (
 	value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
 	if (value):
 		result = float (value.contents.str.decode ("utf-8"))
+
+	return result
+
+def http_request_get_bool_query_value (
+	values: c_void_p, query_name: str
+) -> bool:
+	result = None
+
+	value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (value):
+		result = bool (distutils.util.strtobool (value.contents.str.decode ("utf-8")))
 
 	return result
 

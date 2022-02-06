@@ -9,14 +9,17 @@
 #include <cerver/cerver.h>
 #include <cerver/handler.h>
 
+#include <cerver/http/auth.h>
 #include <cerver/http/http.h>
 #include <cerver/http/request.h>
 #include <cerver/http/response.h>
+
 #include <cerver/http/json/json.h>
+
 #include <cerver/http/jwt/alg.h>
 
-#include <cerver/utils/utils.h>
 #include <cerver/utils/log.h>
+#include <cerver/utils/utils.h>
 
 #include "users.h"
 

@@ -1,4 +1,4 @@
-ARG CERVER_VERSION=2.0b-53
+ARG CERVER_VERSION=2.0b-55
 
 ARG RUNTIME_DEPS='libssl1.1'
 
@@ -29,6 +29,6 @@ COPY --from=builder /opt/cerver/cerver-${CERVER_VERSION}/include/cerver /usr/loc
 
 # pycerver
 WORKDIR /home/pycerver
-RUN pip install --no-cache-dir pycerver==0.8.9
+RUN pip install --no-cache-dir pycerver==0.9
 
 CMD ["/bin/bash"]

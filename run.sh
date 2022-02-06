@@ -45,6 +45,22 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 sudo docker kill $(sudo docker ps -q)
 
+# query
+echo "Query integration test..."
+sudo docker run \
+	-d \
+	--name test --rm \
+	-p 8080:8080 \
+	ermiry/pycerver:local python3 web/query.py
+
+sleep 2
+
+sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
+
+./test/bin/client/web/query || { exit 1; }
+
+sudo docker kill $(sudo docker ps -q)
+
 # JSON
 echo "JSON integration test..."
 sudo docker run \
@@ -90,6 +106,22 @@ sleep 2
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./test/bin/client/web/api || { exit 1; }
+
+sudo docker kill $(sudo docker ps -q)
+
+# multi
+echo "Multi integration test..."
+sudo docker run \
+	-d \
+	--name test --rm \
+	-p 8080:8080 \
+	ermiry/pycerver:local python3 web/multi.py
+
+sleep 2
+
+sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
+
+./test/bin/client/web/multi || { exit 1; }
 
 sudo docker kill $(sudo docker ps -q)
 

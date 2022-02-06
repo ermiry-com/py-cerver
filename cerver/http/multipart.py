@@ -11,6 +11,10 @@ MULTI_PART_TYPE_NONE = 0
 MULTI_PART_TYPE_FILE = 1
 MULTI_PART_TYPE_VALUE = 2
 
+http_multi_part_is_not_empty = lib.http_multi_part_is_not_empty
+http_multi_part_is_not_empty.argtypes = [c_void_p]
+http_multi_part_is_not_empty.restype = c_bool
+
 http_multi_part_get_type = lib.http_multi_part_get_type
 http_multi_part_get_type.argtypes = [c_void_p]
 http_multi_part_get_type.restype = MultiPartType
