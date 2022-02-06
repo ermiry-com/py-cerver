@@ -85,10 +85,10 @@ def image_handler (http_receive, request):
 
 	image = validate_mparts_file_is_image (request, "image", errors)
 
-	n_refris = validate_mparts_int_with_default (request, "n_refris", 0, errors)
-	n_puertas = validate_mparts_int_with_default (request, "n_puertas", 0, errors)
+	n_refris = validate_mparts_int_with_default (request, "n_refris", 0)
+	n_puertas = validate_mparts_int_with_default (request, "n_puertas", 0)
 
-	test = validate_mparts_bool_with_default (request, "test", False, errors)
+	test = validate_mparts_bool_with_default (request, "test", False)
 
 	if (not errors):
 		print ("Type: ", image["type"])
