@@ -27,6 +27,13 @@ def validate_query_exists (
 		if (len (query_value) > 0):
 			result = query_value
 
+	return result
+
+def validate_query_exists (
+	values: c_void_p, query_name: str, errors: dict
+) -> str:
+	result = validate_query_exists_internal (values, query_name)
+
 	if (result is None):
 		errors[query_name] = f"Field {query_name} is required."
 
@@ -48,6 +55,16 @@ def validate_query_value (
 				"Field {0} must be between {1} and {2} characters long."
 				.format	(query_name, min_len, max_len)
 			)
+
+	return result
+
+def validate_query_value_with_default (
+	values: c_void_p, query_name: str, default: str
+):
+	result = validate_query_exists_internal (values, query_name)
+
+	if (result is None):
+		result = default
 
 	return result
 
