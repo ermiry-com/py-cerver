@@ -10,6 +10,7 @@ from ..types.string import String
 
 from .content import ContentType
 from .headers import http_header
+from .multipart import http_multi_part_get_file
 from .query import http_query_pairs_get_value
 
 RequestMethod = c_int
@@ -260,6 +261,17 @@ http_request_multi_parts_get_filename.restype = c_char_p
 http_request_multi_parts_get_saved_filename = lib.http_request_multi_parts_get_saved_filename
 http_request_multi_parts_get_saved_filename.argtypes = [c_void_p, c_char_p]
 http_request_multi_parts_get_saved_filename.restype = c_char_p
+
+def http_request_multi_parts_get_file (
+	request: c_void_p, value: str
+) -> dict:
+	values = None
+
+	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
+	if (mpart):
+		values = http_multi_part_get_file (mpart)
+
+	return values
 
 http_request_multi_parts_iter_start = lib.http_request_multi_parts_iter_start
 http_request_multi_parts_iter_start.argtypes = [c_void_p]
