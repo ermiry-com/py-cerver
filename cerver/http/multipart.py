@@ -65,6 +65,22 @@ http_multi_part_get_saved_filename_len = lib.http_multi_part_get_saved_filename_
 http_multi_part_get_saved_filename_len.argtypes = [c_void_p]
 http_multi_part_get_saved_filename_len.restype = c_int
 
+def http_multi_part_get_file (mpart: c_void_p) -> dict:
+	values = {}
+
+	if (http_multi_part_is_file (mpart)):
+		original = http_multi_part_get_filename (mpart)
+		values["original"] = original.decode ("utf-8")
+
+		generated = http_multi_part_get_generated_filename (mpart)
+		if (generated):
+			values["generated"] = generated.decode ("utf-8")
+
+		saved = http_multi_part_get_saved_filename (mpart)
+		values["saved"] = saved.decode ("utf-8")
+
+	return values
+
 http_multi_part_get_moved_file = lib.http_multi_part_get_moved_file
 http_multi_part_get_moved_file.argtypes = [c_void_p]
 http_multi_part_get_moved_file.restype = c_bool
