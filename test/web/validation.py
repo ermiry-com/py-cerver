@@ -26,7 +26,7 @@ def end (signum, frame):
 def service_errors_send (http_receive, errors):
 	json_errors = json.dumps (errors).encode ("utf-8")
 
-	http_response_render_json (
+	http_response_json_custom_reference_send (
 		http_receive, HTTP_STATUS_BAD_REQUEST,
 		json_errors, len (json_errors)
 	)
@@ -68,6 +68,20 @@ def query_value_handler (http_receive, request):
 
 	else:
 		service_errors_send (http_receive, errors)
+
+# GET /query/value/default
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_value_default_handler (http_receive, request):
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_value_with_default (query_params, "value", "hola")
+
+	if (value is not None):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		http_response_send (bad_request_error, http_receive)
 
 # GET /query/int
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
@@ -333,6 +347,21 @@ def mparts_int_handler (http_receive, request):
 	else:
 		service_errors_send (http_receive, errors)
 
+# POST /mparts/int/validate
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def mparts_int_validate_handler (http_receive, request):
+	errors = {}
+
+	value = validate_mparts_int_value (
+		request, "value", lambda x: x > 0, errors
+	)
+
+	if (not errors):
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
 # POST /mparts/int/default
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def mparts_int_default_handler (http_receive, request):
@@ -351,6 +380,21 @@ def mparts_float_handler (http_receive, request):
 	errors = {}
 
 	value = validate_mparts_float (request, "value", errors)
+
+	if (not errors):
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# POST /mparts/float/validate
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def mparts_float_validate_handler (http_receive, request):
+	errors = {}
+
+	value = validate_mparts_float_value (
+		request, "value", lambda x: x < 18.7, errors
+	)
 
 	if (not errors):
 		http_response_send (none_error, http_receive)
@@ -485,45 +529,62 @@ def mparts_image_handler (http_receive, request):
 	else:
 		service_errors_send (http_receive, errors)
 
+# POST /mparts/image/optional
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def mparts_image_optional_handler (http_receive, request):
+	errors = {}
+
+	cuc = validate_mparts_exists (request, "cuc", errors)
+
+	image = validate_mparts_optional_file_is_image (request, "image", errors)
+
+	if (not errors):
+		if (image):
+			print ("Type: ", image["type"])
+			print ("Original: ", image["original"])
+			print ("Generated: ", image["generated"])
+			print ("Saved: ", image["saved"])
+
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
 def service_set_query_routes (http_cerver):
 	# GET /query/exists
 	query_exists_route = http_route_create (REQUEST_METHOD_GET, b"query/exists", query_exists_handler)
-	http_route_set_modifier (query_exists_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, query_exists_route)
 
 	# GET /query/value
 	query_value_route = http_route_create (REQUEST_METHOD_GET, b"query/value", query_value_handler)
-	http_route_set_modifier (query_value_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, query_value_route)
+
+	# GET /query/value/default
+	query_value_default_route = http_route_create (REQUEST_METHOD_GET, b"query/value/default", query_value_default_handler)
+	http_cerver_route_register (http_cerver, query_value_default_route)
 
 	# GET /query/int
 	query_int_route = http_route_create (REQUEST_METHOD_GET, b"query/int", query_int_handler)
-	http_route_set_modifier (query_int_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, query_int_route)
 
 	# GET /query/int/default
 	query_int_default_route = http_route_create (REQUEST_METHOD_GET, b"query/int/default", query_int_default_handler)
-	http_route_set_modifier (query_int_default_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, query_int_default_route)
 
 	# GET /query/float
 	query_float_route = http_route_create (REQUEST_METHOD_GET, b"query/float", query_float_handler)
-	http_route_set_modifier (query_float_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, query_float_route)
 
 	# GET /query/float/default
 	query_float_default_route = http_route_create (REQUEST_METHOD_GET, b"query/float/default", query_float_default_handler)
-	http_route_set_modifier (query_float_default_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, query_float_default_route)
 
 	# GET /query/bool
 	query_bool_route = http_route_create (REQUEST_METHOD_GET, b"query/bool", query_bool_handler)
-	http_route_set_modifier (query_bool_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, query_bool_route)
 
 	# GET /query/bool/default
 	query_bool_default_route = http_route_create (REQUEST_METHOD_GET, b"query/bool/default", query_bool_default_handler)
-	http_route_set_modifier (query_bool_default_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, query_bool_default_route)
 
 def service_set_body_routes (http_cerver):
@@ -563,6 +624,11 @@ def service_set_mparts_routes (http_cerver):
 	http_route_set_modifier (mparts_int_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, mparts_int_route)
 
+	# POST /mparts/int/validate
+	mparts_int_validate_route = http_route_create (REQUEST_METHOD_POST, b"mparts/int/validate", mparts_int_validate_handler)
+	http_route_set_modifier (mparts_int_validate_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, mparts_int_validate_route)
+
 	# POST /mparts/int/default
 	mparts_int_default_route = http_route_create (REQUEST_METHOD_POST, b"mparts/int/default", mparts_int_default_handler)
 	http_route_set_modifier (mparts_int_default_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
@@ -572,6 +638,11 @@ def service_set_mparts_routes (http_cerver):
 	mparts_float_route = http_route_create (REQUEST_METHOD_POST, b"mparts/float", mparts_float_handler)
 	http_route_set_modifier (mparts_float_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, mparts_float_route)
+
+	# POST /mparts/float/validate
+	mparts_float_validate_route = http_route_create (REQUEST_METHOD_POST, b"mparts/float/validate", mparts_float_validate_handler)
+	http_route_set_modifier (mparts_float_validate_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, mparts_float_validate_route)
 
 	# POST /mparts/float/default
 	mparts_float_default_route = http_route_create (REQUEST_METHOD_POST, b"mparts/float/default", mparts_float_default_handler)
@@ -612,6 +683,11 @@ def service_set_mparts_routes (http_cerver):
 	mparts_image_route = http_route_create (REQUEST_METHOD_POST, b"mparts/image", mparts_image_handler)
 	http_route_set_modifier (mparts_image_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, mparts_image_route)
+
+	# POST /mparts/image/optional
+	mparts_image_optional_route = http_route_create (REQUEST_METHOD_POST, b"mparts/image/optional", mparts_image_optional_handler)
+	http_route_set_modifier (mparts_image_optional_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, mparts_image_optional_route)
 
 def start ():
 	global web_service
