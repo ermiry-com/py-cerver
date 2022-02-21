@@ -248,6 +248,42 @@ static unsigned int validation_request_all_actual (void) {
 		validation_request_all_data_handler, data_buffer
 	);
 
+	// GET /query/value/default - good
+	(void) printf ("GET /query/value/default - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/value/default?value=test", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/value/default - missing
+	(void) printf ("GET /query/value/default - missing\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/value/default", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/value/default - bad
+	(void) printf ("GET /query/value/default - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/value/default?hola=value", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
 	/*** query int ***/
 	// GET /query/int - good
 	(void) printf ("GET /query/int - good\n");
@@ -313,7 +349,7 @@ static unsigned int validation_request_all_actual (void) {
 	(void) printf ("GET /query/int/default - bad\n");
 	(void) snprintf (
 		actual_address, ADDRESS_SIZE,
-		"%s/query/int/default?value=hola", address
+		"%s/query/int/default?hola=value", address
 	);
 
 	errors |= curl_full_handle_data (
@@ -386,7 +422,7 @@ static unsigned int validation_request_all_actual (void) {
 	(void) printf ("GET /query/float/default - bad\n");
 	(void) snprintf (
 		actual_address, ADDRESS_SIZE,
-		"%s/query/float/default?value=hola", address
+		"%s/query/float/default?hola=value", address
 	);
 
 	errors |= curl_full_handle_data (
@@ -675,6 +711,34 @@ static unsigned int validation_request_all_actual (void) {
 		actual_address, HTTP_STATUS_BAD_REQUEST, "value", "hola", data_buffer
 	);
 
+	// POST /mparts/int/validate - good
+	(void) printf ("POST /mparts/int/validate - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/int/validate", address);
+	errors |= validation_request_form_data_int (
+		actual_address, HTTP_STATUS_OK, "value", 8, data_buffer
+	);
+
+	// POST /mparts/int/validate - missing
+	(void) printf ("POST /mparts/int/validate - missing\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/int/validate", address);
+	errors |= validation_request_form_data_int (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "hola", 18, data_buffer
+	);
+
+	// POST /mparts/int/validate - bad
+	(void) printf ("POST /mparts/int/validate - bad\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/int/validate", address);
+	errors |= validation_request_form_data_int (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "value", 0, data_buffer
+	);
+
+	// POST /mparts/int/validate - bad type
+	(void) printf ("POST /mparts/int/validate - bad type\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/int/validate", address);
+	errors |= validation_request_form_data_value (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "value", "hola", data_buffer
+	);
+
 	// POST /mparts/int/default - good
 	(void) printf ("POST /mparts/int/default - good\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/int/default", address);
@@ -689,8 +753,8 @@ static unsigned int validation_request_all_actual (void) {
 		actual_address, HTTP_STATUS_OK, "hola", 18, data_buffer
 	);
 
-	// POST /mparts/int/default - bad
-	(void) printf ("POST /mparts/int/default - bad\n");
+	// POST /mparts/int/default - bad type
+	(void) printf ("POST /mparts/int/default - bad type\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/int/default", address);
 	errors |= validation_request_form_data_value (
 		actual_address, HTTP_STATUS_OK, "value", "hola", data_buffer
@@ -718,22 +782,50 @@ static unsigned int validation_request_all_actual (void) {
 		actual_address, HTTP_STATUS_BAD_REQUEST, "value", "hola", data_buffer
 	);
 
+	// POST /mparts/float/validate - good
+	(void) printf ("POST /mparts/float/validate - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/float/validate", address);
+	errors |= validation_request_form_data_real (
+		actual_address, HTTP_STATUS_OK, "value", 8.98, data_buffer
+	);
+
+	// POST /mparts/float/validate - missing
+	(void) printf ("POST /mparts/float/validate - missing\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/float/validate", address);
+	errors |= validation_request_form_data_real (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "hola", 6.76, data_buffer
+	);
+
+	// POST /mparts/float/validate - bad
+	(void) printf ("POST /mparts/float/validate - bad\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/float/validate", address);
+	errors |= validation_request_form_data_real (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "value", 18.98, data_buffer
+	);
+
+	// POST /mparts/float/validate - bad type
+	(void) printf ("POST /mparts/float/validate - bad type\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/float/validate", address);
+	errors |= validation_request_form_data_value (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "value", "hola", data_buffer
+	);
+
 	// POST /mparts/float/default - good
 	(void) printf ("POST /mparts/float/default - good\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/float/default", address);
-	errors |= validation_request_form_data_int (
+	errors |= validation_request_form_data_real (
 		actual_address, HTTP_STATUS_OK, "value", 18.98, data_buffer
 	);
 
 	// POST /mparts/float/default - missing
 	(void) printf ("POST /mparts/float/default - missing\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/float/default", address);
-	errors |= validation_request_form_data_int (
+	errors |= validation_request_form_data_real (
 		actual_address, HTTP_STATUS_OK, "hola", 18.98, data_buffer
 	);
 
-	// POST /mparts/float/default - bad
-	(void) printf ("POST /mparts/float/default - bad\n");
+	// POST /mparts/float/default - bad type
+	(void) printf ("POST /mparts/float/default - bad type\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/float/default", address);
 	errors |= validation_request_form_data_value (
 		actual_address, HTTP_STATUS_OK, "value", "hola", data_buffer
@@ -845,11 +937,25 @@ static unsigned int validation_request_all_actual (void) {
 		actual_address, HTTP_STATUS_OK, "image", "cuc", "1001", data_buffer
 	);
 
-	// POST /mparts/image - bad
-	(void) printf ("POST /mparts/image - bad\n");
+	// POST /mparts/image - missing
+	(void) printf ("POST /mparts/image - missing\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/image", address);
 	errors |= validation_request_form_data_value (
 		actual_address, HTTP_STATUS_BAD_REQUEST, "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/image/optional - good
+	(void) printf ("POST /mparts/image/optional - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/image/optional", address);
+	errors |= validation_request_image (
+		actual_address, HTTP_STATUS_OK, "image", "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/image/optional - missing
+	(void) printf ("POST /mparts/image/optional - missing\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/image/optional", address);
+	errors |= validation_request_form_data_value (
+		actual_address, HTTP_STATUS_OK, "cuc", "1001", data_buffer
 	);
 
 	return errors;

@@ -1,23 +1,25 @@
 from ctypes import c_void_p
+from typing import Any, Callable
 
 import distutils.util
 
 from ..files import file_exists
-from ..files import IMAGE_TYPE_PNG, IMAGE_TYPE_JPEG
+from ..files import IMAGE_TYPE_NONE, IMAGE_TYPE_PNG, IMAGE_TYPE_JPEG
 from ..files import files_image_get_type
 
 from .multipart import http_multi_part_is_file
 from .multipart import http_multi_part_get_filename
 from .multipart import http_multi_part_get_generated_filename
 from .multipart import http_multi_part_get_saved_filename
+from .multipart import http_multi_part_get_file
 from .request import http_query_pairs_get_value
 from .request import http_request_multi_parts_get
 from .request import http_request_multi_parts_get_value
 from .request import http_request_multi_parts_get_filename
 from .request import http_request_multi_parts_get_saved_filename
 
-def validate_query_exists (
-	values: c_void_p, query_name: str, errors: dict
+def validate_query_exists_internal (
+	values: c_void_p, query_name: str
 ) -> str:
 	result = None
 
@@ -26,6 +28,13 @@ def validate_query_exists (
 		query_value = found.contents.str.decode ("utf-8")
 		if (len (query_value) > 0):
 			result = query_value
+
+	return result
+
+def validate_query_exists (
+	values: c_void_p, query_name: str, errors: dict
+) -> str:
+	result = validate_query_exists_internal (values, query_name)
 
 	if (result is None):
 		errors[query_name] = f"Field {query_name} is required."
@@ -48,6 +57,16 @@ def validate_query_value (
 				"Field {0} must be between {1} and {2} characters long."
 				.format	(query_name, min_len, max_len)
 			)
+
+	return result
+
+def validate_query_value_with_default (
+	values: c_void_p, query_name: str, default: str
+):
+	result = validate_query_exists_internal (values, query_name)
+
+	if (result is None):
+		result = default
 
 	return result
 
@@ -297,6 +316,22 @@ def validate_mparts_int (request: c_void_p, value: str, errors: dict) -> int:
 
 	return result
 
+def validate_mparts_int_value (
+	request: c_void_p, value: str,
+	validation: Callable [[int], bool], errors: dict
+) -> int:
+	result = None
+
+	actual_value = validate_mparts_int (request, value, errors)
+	if (actual_value is not None):
+		if (validation (actual_value)):
+			result = actual_value
+
+		else:
+			errors[value] = f"Failed to validate field {value}."
+
+	return result
+
 def validate_mparts_int_with_default (
 	request: c_void_p, value: str, default: int
 ) -> int:
@@ -327,6 +362,22 @@ def validate_mparts_float (
 
 	else:
 		errors[value] = f"Field {value} is required."
+
+	return result
+
+def validate_mparts_float_value (
+	request: c_void_p, value: str,
+	validation: Callable [[float], bool], errors: dict
+):
+	result = None
+
+	actual_value = validate_mparts_float (request, value, errors)
+	if (actual_value is not None):
+		if (validation (actual_value)):
+			result = actual_value
+
+		else:
+			errors[value] = f"Failed to validate field {value}."
 
 	return result
 
@@ -388,14 +439,7 @@ def validate_mparts_file_exists (
 		if (http_multi_part_is_file (mpart)):
 			saved = http_multi_part_get_saved_filename (mpart)
 			if (file_exists (saved)):
-				values = {}
-				original = http_multi_part_get_filename (mpart)
-				values["original"] = original.decode ("utf-8")
-				generated = http_multi_part_get_generated_filename (mpart)
-				if (generated):
-					values["generated"] = generated.decode ("utf-8")
-
-				values["saved"] = saved.decode ("utf-8")
+				values = http_multi_part_get_file (mpart)
 
 		else:
 			errors[value] = f"Field {value} is not a file."
@@ -467,26 +511,31 @@ def validate_mparts_file_complete (
 
 	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
 	if (mpart):
-		if (http_multi_part_is_file (mpart)):
-			values = {}
-
-			saved = http_multi_part_get_saved_filename (mpart)
-
-			original = http_multi_part_get_filename (mpart)
-			values["original"] = original.decode ("utf-8")
-			generated = http_multi_part_get_generated_filename (mpart)
-			if (generated):
-				values["generated"] = generated.decode ("utf-8")
-
-			values["saved"] = saved.decode ("utf-8")
-
-		else:
+		values = http_multi_part_get_file (mpart)
+		if (not values):
 			errors[value] = f"Field {value} is not a file."
 
 	else:
 		errors[value] = f"File {value} is missing."
 
 	return values
+
+def validate_file_is_image (
+	filename: Any, field: str, errors: dict
+) -> int:
+	result = IMAGE_TYPE_NONE
+
+	if (type (filename) == str):
+		filename = filename.encode ("utf-8")
+
+	img_type = files_image_get_type (filename)
+	if ((img_type == IMAGE_TYPE_PNG) or (img_type == IMAGE_TYPE_JPEG)):
+		result = img_type
+
+	else:
+		errors[field] = f"File {field} is not png or jpeg."
+
+	return result
 
 def validate_mparts_file_is_image (
 	request: c_void_p, image: str, errors: dict
@@ -499,17 +548,10 @@ def validate_mparts_file_is_image (
 			saved = http_multi_part_get_saved_filename (mpart)
 
 			# validate file and get extension
-			img_type = files_image_get_type (saved)
-			if ((img_type == IMAGE_TYPE_PNG) or (img_type == IMAGE_TYPE_JPEG)):
-				values = {}
+			img_type = validate_file_is_image (saved, image, errors)
+			if (img_type):
+				values = http_multi_part_get_file (mpart)
 				values["type"] = img_type
-				original = http_multi_part_get_filename (mpart)
-				values["original"] = original.decode ("utf-8")
-				generated = http_multi_part_get_generated_filename (mpart)
-				if (generated):
-					values["generated"] = generated.decode ("utf-8")
-
-				values["saved"] = saved.decode ("utf-8")
 
 			else:
 				errors[image] = f"File {image} is not png or jpeg."
@@ -519,5 +561,23 @@ def validate_mparts_file_is_image (
 
 	else:
 		errors[image] = f"File {image} is missing."
+
+	return values
+
+def validate_mparts_optional_file_is_image (
+	request: c_void_p, image: str, errors: dict
+) -> dict:
+	values = {}
+
+	mpart = http_request_multi_parts_get (request, image.encode ("utf-8"))
+	if (mpart):
+		if (http_multi_part_is_file (mpart)):
+			saved = http_multi_part_get_saved_filename (mpart)
+
+			# validate file and get extension
+			img_type = validate_file_is_image (saved, image, errors)
+			if (img_type):
+				values = http_multi_part_get_file (mpart)
+				values["type"] = img_type
 
 	return values
