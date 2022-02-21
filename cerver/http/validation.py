@@ -314,6 +314,22 @@ def validate_mparts_int (request: c_void_p, value: str, errors: dict) -> int:
 
 	return result
 
+def validate_mparts_int_value (
+	request: c_void_p, value: str,
+	validation: Callable [[int], bool], errors: dict
+) -> int:
+	result = None
+
+	actual_value = validate_mparts_int (request, value, errors)
+	if (actual_value is not None):
+		if (validation (actual_value)):
+			result = actual_value
+
+		else:
+			errors[value] = f"Failed to validate field {value}."
+
+	return result
+
 def validate_mparts_int_with_default (
 	request: c_void_p, value: str, default: int
 ) -> int:
@@ -344,6 +360,22 @@ def validate_mparts_float (
 
 	else:
 		errors[value] = f"Field {value} is required."
+
+	return result
+
+def validate_mparts_float_value (
+	request: c_void_p, value: str,
+	validation: Callable [[float], bool], errors: dict
+):
+	result = None
+
+	actual_value = validate_mparts_float (request, value, errors)
+	if (actual_value is not None):
+		if (validation (actual_value)):
+			result = actual_value
+
+		else:
+			errors[value] = f"Failed to validate field {value}."
 
 	return result
 
