@@ -567,7 +567,7 @@ def validate_mparts_file_is_image (
 def validate_mparts_optional_file_is_image (
 	request: c_void_p, image: str, errors: dict
 ) -> dict:
-	values = {}
+	values = None
 
 	mpart = http_request_multi_parts_get (request, image.encode ("utf-8"))
 	if (mpart):

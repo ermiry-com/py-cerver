@@ -1,9 +1,3 @@
 ## HTTP
-- Added multi-part method to get file's values in a dictionary
-- Added HTTP request method to quickly get file's values
-- Added custom query value with default validation method
-- Added base mparts validations with extra condition
-- Added custom optional image file validation method
-
-## Tests
-- Updated validation integration tests with latest methods
+- Added http_cerver_auth_generate_bearer_jwt () binding
+- Returning None instead of empty dict in optional image

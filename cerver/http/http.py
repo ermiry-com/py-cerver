@@ -245,6 +245,10 @@ http_cerver_auth_jwt_add_value_bool.argtypes = [c_void_p, c_char_p, c_bool]
 http_cerver_auth_jwt_add_value_int = lib.http_cerver_auth_jwt_add_value_int
 http_cerver_auth_jwt_add_value_int.argtypes = [c_void_p, c_char_p, c_int]
 
+http_cerver_auth_generate_bearer_jwt = lib.http_cerver_auth_generate_bearer_jwt
+http_cerver_auth_generate_bearer_jwt.argtypes = [c_void_p, c_void_p]
+http_cerver_auth_generate_bearer_jwt.restype = c_uint8
+
 http_cerver_auth_generate_bearer_jwt_json = lib.http_cerver_auth_generate_bearer_jwt_json
 http_cerver_auth_generate_bearer_jwt_json.argtypes = [c_void_p, c_void_p]
 http_cerver_auth_generate_bearer_jwt_json.restype = c_uint8
