@@ -450,7 +450,21 @@ def validate_mparts_bool_with_default (
 
 	return result
 
-def validate_mparts_optional_file (request: c_void_p, value: str):
+def validate_mparts_file (request: c_void_p, value: str, errors: dict) -> dict:
+	values = None
+
+	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
+	if (mpart):
+		values = http_multi_part_get_file (mpart)
+		if (not values):
+			errors[value] = f"Field {value} is not a file."
+
+	else:
+		errors[value] = f"File {value} is missing."
+
+	return values
+
+def validate_mparts_optional_file (request: c_void_p, value: str) -> dict:
 	values = None
 
 	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
@@ -533,22 +547,6 @@ def validate_mparts_saved_file_exists (
 		errors[value] = f"File {value} is missing."
 
 	return result
-
-def validate_mparts_file_complete (
-	request: c_void_p, value: str, errors: dict
-) -> dict:
-	values = None
-
-	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
-	if (mpart):
-		values = http_multi_part_get_file (mpart)
-		if (not values):
-			errors[value] = f"Field {value} is not a file."
-
-	else:
-		errors[value] = f"File {value} is missing."
-
-	return values
 
 def validate_file_is_image (
 	filename: Any, field: str, errors: dict
