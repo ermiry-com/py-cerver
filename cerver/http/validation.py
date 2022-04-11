@@ -167,10 +167,6 @@ def validate_query_bool_value_with_default (
 
 	return result
 
-def validate_body_required_keys (values, body):
-	if not all (k in body for k in values):
-		raise Exception ("Missing key(s) in body")
-
 def validate_body_value_exists (body: dict, value: str, errors: dict) -> Any:
 	result = None
 
