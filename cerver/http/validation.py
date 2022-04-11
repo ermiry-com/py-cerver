@@ -61,8 +61,8 @@ def validate_query_value (
 	return result
 
 def validate_query_value_with_default (
-	values: c_void_p, query_name: str, default: str
-):
+	values: c_void_p, query_name: str, default: Any
+) -> Any:
 	result = validate_query_exists_internal (values, query_name)
 
 	if (result is None):
@@ -171,7 +171,7 @@ def validate_body_required_keys (values, body):
 	if not all (k in body for k in values):
 		raise Exception ("Missing key(s) in body")
 
-def validate_body_value_exists (body: dict, value: str, errors: dict):
+def validate_body_value_exists (body: dict, value: str, errors: dict) -> Any:
 	result = None
 
 	if (value in body):
@@ -189,7 +189,7 @@ def validate_body_value_exists (body: dict, value: str, errors: dict):
 
 def validate_body_string_value_exists_ignore_size (
 	body: dict, value: str, errors: dict
-):
+) -> str:
 	result = None
 
 	if (value in body):
@@ -203,7 +203,7 @@ def validate_body_string_value_exists_ignore_size (
 
 def validate_body_value (
 	body: dict, value: str, min_len: int, max_len: int, errors: dict
-):
+) -> str:
 	result = None
 
 	found = validate_body_value_exists (body, value, errors)
@@ -220,7 +220,7 @@ def validate_body_value (
 
 	return result
 
-def validate_body_value_optional (body: dict, value: str):
+def validate_body_value_optional (body: dict, value: str) -> Any:
 	result = None
 
 	if (value in body):
@@ -228,7 +228,9 @@ def validate_body_value_optional (body: dict, value: str):
 
 	return result
 
-def validate_body_value_with_default (body: dict, value: str, default: Any):
+def validate_body_value_with_default (
+	body: dict, value: str, default: Any
+) -> Any:
 	result = default
 
 	if (value in body):
@@ -269,7 +271,9 @@ def validate_body_float_value_exists (
 
 	return result
 
-def validate_body_value_with_default (body: dict, value: str, default: Any):
+def validate_body_value_with_default (
+	body: dict, value: str, default: Any
+) -> Any:
 	result = default
 
 	if (value in body):
@@ -277,7 +281,7 @@ def validate_body_value_with_default (body: dict, value: str, default: Any):
 
 	return result
 
-def validate_mparts_exists (request: c_void_p, value: str, errors: dict):
+def validate_mparts_exists (request: c_void_p, value: str, errors: dict) -> str:
 	result = None
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -293,7 +297,7 @@ def validate_mparts_exists (request: c_void_p, value: str, errors: dict):
 
 def validate_mparts_value (
 	request: c_void_p, value: str, min_len: int, max_len: int, errors: dict
-):
+) -> str:
 	result = None
 
 	found = validate_mparts_exists (request, value, errors)
@@ -312,7 +316,7 @@ def validate_mparts_value (
 
 def validate_mparts_value_with_default (
 	request: c_void_p, value: str, default: Any
-):
+) -> Any:
 	result = default
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -389,7 +393,7 @@ def validate_mparts_float (
 def validate_mparts_float_value (
 	request: c_void_p, value: str,
 	validation: Callable [[float], bool], errors: dict
-):
+) -> float:
 	result = None
 
 	actual_value = validate_mparts_float (request, value, errors)
