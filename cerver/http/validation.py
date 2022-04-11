@@ -450,6 +450,15 @@ def validate_mparts_bool_with_default (
 
 	return result
 
+def validate_mparts_optional_file (request: c_void_p, value: str):
+	values = None
+
+	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
+	if (mpart):
+		values = http_multi_part_get_file (mpart)
+
+	return values
+
 def validate_mparts_file_exists (
 	request: c_void_p, value: str, errors: dict
 ) -> dict:
