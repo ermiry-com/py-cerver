@@ -220,6 +220,27 @@ def validate_body_value (
 
 	return result
 
+def validate_body_value_optional (body: dict, value: str):
+	result = None
+
+	if (value in body):
+		result = body[value]
+
+	return result
+
+def validate_body_value_with_default (body: dict, value: str, default: Any):
+	result = default
+
+	if (value in body):
+		if (type (body[value]) is str):
+			if (len (body[value]) > 0):
+				result = body[value]
+
+		else:
+			result = body[value]
+
+	return result
+
 def validate_body_int_value_exists (
 	body: dict, value: str, errors: dict
 ) -> int:
