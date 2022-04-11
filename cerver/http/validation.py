@@ -269,7 +269,7 @@ def validate_body_float_value_exists (
 
 	return result
 
-def validate_body_value_with_default (body: dict, value: str, default: dict):
+def validate_body_value_with_default (body: dict, value: str, default: Any):
 	result = default
 
 	if (value in body):
@@ -311,7 +311,7 @@ def validate_mparts_value (
 	return result
 
 def validate_mparts_value_with_default (
-	request: c_void_p, value: str, default: str
+	request: c_void_p, value: str, default: Any
 ):
 	result = default
 
