@@ -308,6 +308,59 @@ def body_value_handler (http_receive, request):
 	else:
 		http_response_send (bad_request_error, http_receive)
 
+# POST /body/value/optional
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def body_value_optional_handler (http_receive, request):
+	errors = {}
+
+	body_json = http_request_get_body (request)
+	if (body_json):
+		try:
+			loaded_json = json.loads (body_json.contents.str)
+
+			value = validate_body_value_optional (
+				loaded_json, "value"
+			)
+
+			if (value):
+				print (type (value))
+				print (value)
+
+			http_response_send (none_error, http_receive)
+
+		except Exception as e:
+			print (e)
+			http_response_send (bad_request_error, http_receive)
+
+	else:
+		http_response_send (bad_request_error, http_receive)
+
+# POST /body/value/default
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def body_value_with_default_handler (http_receive, request):
+	errors = {}
+
+	body_json = http_request_get_body (request)
+	if (body_json):
+		try:
+			loaded_json = json.loads (body_json.contents.str)
+
+			value = validate_body_value_with_default (
+				loaded_json, "value", "default"
+			)
+
+			print (type (value))
+			print (value)
+
+			http_response_send (none_error, http_receive)
+
+		except Exception as e:
+			print (e)
+			http_response_send (bad_request_error, http_receive)
+
+	else:
+		http_response_send (bad_request_error, http_receive)
+
 # POST /mparts/exists
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def mparts_exists_handler (http_receive, request):
@@ -439,6 +492,48 @@ def mparts_bool_default_handler (http_receive, request):
 	else:
 		http_response_send (bad_request_error, http_receive)
 
+# POST /mparts/file
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def mparts_file_handler (http_receive, request):
+	errors = {}
+
+	http_request_multi_parts_print (request)
+
+	cuc = validate_mparts_exists (request, "cuc", errors)
+
+	file = validate_mparts_file (request, "file", errors)
+
+	if (not errors):
+		print ("Original: ", file["original"])
+		print ("Generated: ", file["generated"])
+		print ("Saved: ", file["saved"])
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# POST /mparts/file/optional
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def mparts_optional_file_handler (http_receive, request):
+	errors = {}
+
+	http_request_multi_parts_print (request)
+
+	cuc = validate_mparts_exists (request, "cuc", errors)
+
+	file = validate_mparts_optional_file (request, "file")
+
+	if (not errors):
+		if (file):
+			print ("Original: ", file["original"])
+			print ("Generated: ", file["generated"])
+			print ("Saved: ", file["saved"])
+
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
 # POST /mparts/upload
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def mparts_upload_handler (http_receive, request):
@@ -483,26 +578,6 @@ def mparts_saved_handler (http_receive, request):
 
 	cuc = validate_mparts_exists (request, "cuc", errors)
 	if (validate_mparts_saved_file_exists (request, "image", errors)):
-		http_response_send (none_error, http_receive)
-
-	else:
-		service_errors_send (http_receive, errors)
-
-# POST /mparts/complete
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def mparts_complete_handler (http_receive, request):
-	errors = {}
-
-	http_request_multi_parts_print (request)
-
-	cuc = validate_mparts_exists (request, "cuc", errors)
-
-	complete = validate_mparts_file_complete (request, "image", errors)
-
-	if (not errors):
-		print ("Original: ", complete["original"])
-		print ("Generated: ", complete["generated"])
-		print ("Saved: ", complete["saved"])
 		http_response_send (none_error, http_receive)
 
 	else:
@@ -608,6 +683,14 @@ def service_set_body_routes (http_cerver):
 	value_route = http_route_create (REQUEST_METHOD_POST, b"body/value", body_value_handler)
 	http_cerver_route_register (http_cerver, value_route)
 
+	# POST /body/value/optional
+	optional_value_route = http_route_create (REQUEST_METHOD_POST, b"body/value/optional", body_value_optional_handler)
+	http_cerver_route_register (http_cerver, optional_value_route)
+
+	# POST /body/value/default
+	default_value_route = http_route_create (REQUEST_METHOD_POST, b"body/value/default", body_value_with_default_handler)
+	http_cerver_route_register (http_cerver, default_value_route)
+
 def service_set_mparts_routes (http_cerver):
 	# POST /mparts/exists
 	mparts_exists_route = http_route_create (REQUEST_METHOD_POST, b"mparts/exists", mparts_exists_handler)
@@ -659,6 +742,16 @@ def service_set_mparts_routes (http_cerver):
 	http_route_set_modifier (mparts_bool_default_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, mparts_bool_default_route)
 
+	# POST /mparts/file
+	mparts_file_route = http_route_create (REQUEST_METHOD_POST, b"mparts/file", mparts_file_handler)
+	http_route_set_modifier (mparts_file_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, mparts_file_route)
+
+	# POST /mparts/file/optional
+	mparts_file_optional_route = http_route_create (REQUEST_METHOD_POST, b"mparts/file/optional", mparts_optional_file_handler)
+	http_route_set_modifier (mparts_file_optional_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
+	http_cerver_route_register (http_cerver, mparts_file_optional_route)
+
 	# POST /mparts/upload
 	mparts_upload_route = http_route_create (REQUEST_METHOD_POST, b"mparts/upload", mparts_upload_handler)
 	http_route_set_modifier (mparts_upload_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
@@ -673,11 +766,6 @@ def service_set_mparts_routes (http_cerver):
 	mparts_saved_route = http_route_create (REQUEST_METHOD_POST, b"mparts/saved", mparts_saved_handler)
 	http_route_set_modifier (mparts_saved_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
 	http_cerver_route_register (http_cerver, mparts_saved_route)
-
-	# POST /mparts/complete
-	mparts_complete_route = http_route_create (REQUEST_METHOD_POST, b"mparts/complete", mparts_complete_handler)
-	http_route_set_modifier (mparts_complete_route, HTTP_ROUTE_MODIFIER_MULTI_PART)
-	http_cerver_route_register (http_cerver, mparts_complete_route)
 
 	# POST /mparts/image
 	mparts_image_route = http_route_create (REQUEST_METHOD_POST, b"mparts/image", mparts_image_handler)

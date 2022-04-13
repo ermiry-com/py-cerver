@@ -643,6 +643,58 @@ static unsigned int validation_request_all_actual (void) {
 		actual_address, HTTP_STATUS_BAD_REQUEST, "./test/data/user.json", data_buffer
 	);
 
+	/*** body value optional ***/
+	// POST /body/value/optional - good
+	(void) printf ("POST /body/value/optional - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/body/value/optional", address);
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/good.json", data_buffer
+	);
+
+	// POST /body/value/optional - empty
+	(void) printf ("POST /body/value/optional - empty\n");
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/empty.json", data_buffer
+	);
+
+	// POST /body/value/optional - missing
+	(void) printf ("POST /body/value/optional - missing\n");
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/missing.json", data_buffer
+	);
+
+	// POST /body/value/optional - wrong
+	(void) printf ("POST /body/value/optional - wrong\n");
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/user.json", data_buffer
+	);
+
+	/*** body value default ***/
+	// POST /body/value/default - good
+	(void) printf ("POST /body/value/default - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/body/value/default", address);
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/good.json", data_buffer
+	);
+
+	// POST /body/value/default - empty
+	(void) printf ("POST /body/value/default - empty\n");
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/empty.json", data_buffer
+	);
+
+	// POST /body/value/default - missing
+	(void) printf ("POST /body/value/default - missing\n");
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/missing.json", data_buffer
+	);
+
+	// POST /body/value/default - wrong
+	(void) printf ("POST /body/value/default - wrong\n");
+	errors |= validation_request_post_json (
+		actual_address, HTTP_STATUS_OK, "./test/data/user.json", data_buffer
+	);
+
 	/*** mparts exists ***/
 	// POST /mparts/exists - good
 	(void) printf ("POST /mparts/exists - good\n");
@@ -874,6 +926,34 @@ static unsigned int validation_request_all_actual (void) {
 		actual_address, HTTP_STATUS_OK, "value", "hola", data_buffer
 	);
 
+	// POST /mparts/file - good
+	(void) printf ("POST /mparts/file - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/file", address);
+	errors |= validation_request_image (
+		actual_address, HTTP_STATUS_OK, "file", "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/file - bad
+	(void) printf ("POST /mparts/file - bad\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/file", address);
+	errors |= validation_request_form_data_value (
+		actual_address, HTTP_STATUS_BAD_REQUEST, "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/file/optional - good
+	(void) printf ("POST /mparts/file/optional - good\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/file/optional", address);
+	errors |= validation_request_image (
+		actual_address, HTTP_STATUS_OK, "file", "cuc", "1001", data_buffer
+	);
+
+	// POST /mparts/file/optional - bad
+	(void) printf ("POST /mparts/file/optional - bad\n");
+	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/file/optional", address);
+	errors |= validation_request_form_data_value (
+		actual_address, HTTP_STATUS_OK, "cuc", "1001", data_buffer
+	);
+
 	// POST /mparts/upload - good
 	(void) printf ("POST /mparts/upload - good\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/upload", address);
@@ -912,20 +992,6 @@ static unsigned int validation_request_all_actual (void) {
 	// POST /mparts/saved - bad
 	(void) printf ("POST /mparts/saved - bad\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/saved", address);
-	errors |= validation_request_form_data_value (
-		actual_address, HTTP_STATUS_BAD_REQUEST, "cuc", "1001", data_buffer
-	);
-
-	// POST /mparts/complete - good
-	(void) printf ("POST /mparts/complete - good\n");
-	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/complete", address);
-	errors |= validation_request_image (
-		actual_address, HTTP_STATUS_OK, "image", "cuc", "1001", data_buffer
-	);
-
-	// POST /mparts/complete - bad
-	(void) printf ("POST /mparts/complete - bad\n");
-	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/mparts/complete", address);
 	errors |= validation_request_form_data_value (
 		actual_address, HTTP_STATUS_BAD_REQUEST, "cuc", "1001", data_buffer
 	);

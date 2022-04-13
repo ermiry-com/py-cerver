@@ -61,8 +61,8 @@ def validate_query_value (
 	return result
 
 def validate_query_value_with_default (
-	values: c_void_p, query_name: str, default: str
-):
+	values: c_void_p, query_name: str, default: Any
+) -> Any:
 	result = validate_query_exists_internal (values, query_name)
 
 	if (result is None):
@@ -167,11 +167,7 @@ def validate_query_bool_value_with_default (
 
 	return result
 
-def validate_body_required_keys (values, body):
-	if not all (k in body for k in values):
-		raise Exception ("Missing key(s) in body")
-
-def validate_body_value_exists (body: dict, value: str, errors: dict):
+def validate_body_value_exists (body: dict, value: str, errors: dict) -> Any:
 	result = None
 
 	if (value in body):
@@ -189,7 +185,7 @@ def validate_body_value_exists (body: dict, value: str, errors: dict):
 
 def validate_body_string_value_exists_ignore_size (
 	body: dict, value: str, errors: dict
-):
+) -> str:
 	result = None
 
 	if (value in body):
@@ -203,7 +199,7 @@ def validate_body_string_value_exists_ignore_size (
 
 def validate_body_value (
 	body: dict, value: str, min_len: int, max_len: int, errors: dict
-):
+) -> str:
 	result = None
 
 	found = validate_body_value_exists (body, value, errors)
@@ -217,6 +213,29 @@ def validate_body_value (
 				"Field {0} must be between {1} and {2} characters long."
 				.format	(value, min_len, max_len)
 			)
+
+	return result
+
+def validate_body_value_optional (body: dict, value: str) -> Any:
+	result = None
+
+	if (value in body):
+		result = body[value]
+
+	return result
+
+def validate_body_value_with_default (
+	body: dict, value: str, default: Any
+) -> Any:
+	result = default
+
+	if (value in body):
+		if (type (body[value]) is str):
+			if (len (body[value]) > 0):
+				result = body[value]
+
+		else:
+			result = body[value]
 
 	return result
 
@@ -248,7 +267,9 @@ def validate_body_float_value_exists (
 
 	return result
 
-def validate_body_value_with_default (body: dict, value: str, default: dict):
+def validate_body_value_with_default (
+	body: dict, value: str, default: Any
+) -> Any:
 	result = default
 
 	if (value in body):
@@ -256,7 +277,7 @@ def validate_body_value_with_default (body: dict, value: str, default: dict):
 
 	return result
 
-def validate_mparts_exists (request: c_void_p, value: str, errors: dict):
+def validate_mparts_exists (request: c_void_p, value: str, errors: dict) -> str:
 	result = None
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -272,7 +293,7 @@ def validate_mparts_exists (request: c_void_p, value: str, errors: dict):
 
 def validate_mparts_value (
 	request: c_void_p, value: str, min_len: int, max_len: int, errors: dict
-):
+) -> str:
 	result = None
 
 	found = validate_mparts_exists (request, value, errors)
@@ -290,8 +311,8 @@ def validate_mparts_value (
 	return result
 
 def validate_mparts_value_with_default (
-	request: c_void_p, value: str, default: str
-):
+	request: c_void_p, value: str, default: Any
+) -> Any:
 	result = default
 
 	found = http_request_multi_parts_get_value (request, value.encode ("utf-8"))
@@ -368,7 +389,7 @@ def validate_mparts_float (
 def validate_mparts_float_value (
 	request: c_void_p, value: str,
 	validation: Callable [[float], bool], errors: dict
-):
+) -> float:
 	result = None
 
 	actual_value = validate_mparts_float (request, value, errors)
@@ -428,6 +449,29 @@ def validate_mparts_bool_with_default (
 			pass
 
 	return result
+
+def validate_mparts_file (request: c_void_p, value: str, errors: dict) -> dict:
+	values = None
+
+	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
+	if (mpart):
+		values = http_multi_part_get_file (mpart)
+		if (not values):
+			errors[value] = f"Field {value} is not a file."
+
+	else:
+		errors[value] = f"File {value} is missing."
+
+	return values
+
+def validate_mparts_optional_file (request: c_void_p, value: str) -> dict:
+	values = None
+
+	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
+	if (mpart):
+		values = http_multi_part_get_file (mpart)
+
+	return values
 
 def validate_mparts_file_exists (
 	request: c_void_p, value: str, errors: dict
@@ -503,22 +547,6 @@ def validate_mparts_saved_file_exists (
 		errors[value] = f"File {value} is missing."
 
 	return result
-
-def validate_mparts_file_complete (
-	request: c_void_p, value: str, errors: dict
-) -> dict:
-	values = None
-
-	mpart = http_request_multi_parts_get (request, value.encode ("utf-8"))
-	if (mpart):
-		values = http_multi_part_get_file (mpart)
-		if (not values):
-			errors[value] = f"Field {value} is not a file."
-
-	else:
-		errors[value] = f"File {value} is missing."
-
-	return values
 
 def validate_file_is_image (
 	filename: Any, field: str, errors: dict
