@@ -21,8 +21,6 @@ HttpHandler = CFUNCTYPE (None, c_void_p, c_void_p)
 HttpDecodeData = CFUNCTYPE (c_void_p, c_void_p)
 HttpDeleteDecoded = CFUNCTYPE (None, c_void_p)
 
-AuthenticationHandler = CFUNCTYPE (c_uint, c_void_p, c_void_p)
-
 RouteDeleteCustom = CFUNCTYPE (None, c_void_p)
 
 http_route_create = lib.http_route_create
@@ -48,7 +46,7 @@ http_route_set_decode_data_into_json = lib.http_route_set_decode_data_into_json
 http_route_set_decode_data_into_json.argtypes = [c_void_p]
 
 http_route_set_authentication_handler = lib.http_route_set_authentication_handler
-http_route_set_authentication_handler.argtypes = [c_void_p, AuthenticationHandler]
+http_route_set_authentication_handler.argtypes = [c_void_p, c_void_p]
 
 http_route_get_custom_data = lib.http_route_get_custom_data
 http_route_get_custom_data.argtypes = [c_void_p]
