@@ -18,7 +18,6 @@ from .response import http_response_json_custom_reference_send
 from .route import HttpHandler
 from .route import HttpRouteAuthType, HTTP_ROUTE_AUTH_TYPE_NONE
 from .route import HttpDecodeData, HttpDeleteDecoded
-from .route import RouteDeleteCustom
 from .route import http_route_create, http_route_child_add, http_route_set_auth
 from .route import http_route_set_decode_data_into_json
 from .status import http_status, HTTP_STATUS_OK
@@ -423,7 +422,7 @@ http_cerver_admin_routes_set_custom_data = lib.http_cerver_admin_routes_set_cust
 http_cerver_admin_routes_set_custom_data.argtypes = [c_void_p, c_void_p]
 
 http_cerver_admin_routes_set_delete_custom_data = lib.http_cerver_admin_routes_set_delete_custom_data
-http_cerver_admin_routes_set_delete_custom_data.argtypes = [c_void_p, RouteDeleteCustom]
+http_cerver_admin_routes_set_delete_custom_data.argtypes = [c_void_p, c_void_p]
 
 http_cerver_enable_admin_cors_headers = lib.http_cerver_enable_admin_cors_headers
 http_cerver_enable_admin_cors_headers.argtypes = [c_void_p, c_bool]

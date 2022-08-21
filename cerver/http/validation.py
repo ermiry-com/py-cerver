@@ -216,7 +216,7 @@ def validate_body_value (
 
 	return result
 
-def validate_body_value_optional (body: dict, value: str) -> Any:
+def validate_body_value_optional (body: dict, value: Any) -> Any:
 	result = None
 
 	if (value in body):
@@ -264,16 +264,6 @@ def validate_body_float_value_exists (
 
 	if (result is None):
 		errors[value] = f"Field {value} is required."
-
-	return result
-
-def validate_body_value_with_default (
-	body: dict, value: str, default: Any
-) -> Any:
-	result = default
-
-	if (value in body):
-		result = body[value]
 
 	return result
 

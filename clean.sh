@@ -8,3 +8,8 @@ make clean
 
 # remove uploads path
 sudo rm -r uploads
+
+# remove generated build
+sudo rm -r build
+sudo rm -r dist
+sudo rm -r pycerver.egg-info
