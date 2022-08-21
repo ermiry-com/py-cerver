@@ -122,6 +122,12 @@ http_response_create = lib.http_response_create
 http_response_create.argtypes = [http_status, c_void_p, c_size_t]
 http_response_create.restype = c_void_p
 
+# uses the exiting response's values to correctly
+# create a HTTP header in a continuos buffer
+# ready to be sent by the response
+http_response_compile_header = lib.http_response_compile_header
+http_response_compile_header.argtypes = [c_void_p]
+
 # merges the response header and the data into the final response
 # returns 0 on success, 1 on error
 http_response_compile = lib.http_response_compile
