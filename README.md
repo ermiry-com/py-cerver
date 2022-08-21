@@ -1,4 +1,4 @@
-![Cerver Banner](./images/banner.png)
+![Cerver Banner](https://ermiry.com/api/images/cerver/banner.png)
 
 PyCerver is a pure Python wrapper around the [cerver](https://cerver.ermiry.com) framework. It uses the built-in ctypes module to interface with cerver, and provides simple Python classes and wrappers for common cerver functionality. You can check the original project's source code [here](https://github.com/ermiry/cerver)!
 
