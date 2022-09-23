@@ -99,6 +99,42 @@ def query_int_handler (http_receive, request):
 	else:
 		service_errors_send (http_receive, errors)
 
+# GET /query/int/limit
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_int_limit_handler (http_receive, request):
+	errors = {}
+
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_int_limit_value (
+		query_params, "value", 10, 20, errors
+	)
+
+	if (not errors):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
+# GET /query/int/validate
+@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
+def query_int_validate_handler (http_receive, request):
+	errors = {}
+
+	query_params = http_request_get_query_params (request)
+
+	value = validate_query_int_actual_value (
+		query_params, "value", lambda x: x > 0, errors
+	)
+
+	if (not errors):
+		print (value)
+		http_response_send (none_error, http_receive)
+
+	else:
+		service_errors_send (http_receive, errors)
+
 # GET /query/int/default
 @ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
 def query_int_default_handler (http_receive, request):
@@ -641,6 +677,14 @@ def service_set_query_routes (http_cerver):
 	# GET /query/int
 	query_int_route = http_route_create (REQUEST_METHOD_GET, b"query/int", query_int_handler)
 	http_cerver_route_register (http_cerver, query_int_route)
+
+	# GET /query/int/limit
+	query_int_limit = http_route_create (REQUEST_METHOD_GET, b"query/int/limit", query_int_limit_handler)
+	http_cerver_route_register (http_cerver, query_int_limit)
+
+	# GET /query/int/validate
+	query_int_validate = http_route_create (REQUEST_METHOD_GET, b"query/int/validate", query_int_validate_handler)
+	http_cerver_route_register (http_cerver, query_int_validate)
 
 	# GET /query/int/default
 	query_int_default_route = http_route_create (REQUEST_METHOD_GET, b"query/int/default", query_int_default_handler)
