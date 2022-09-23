@@ -87,6 +87,34 @@ def validate_query_int_value (
 
 	return result
 
+def validate_query_int_limit_value (
+	values: c_void_p, query_name: str,
+	min_value: int, max_value: int, errors: dict
+):
+	result = None
+
+	value = validate_query_int_value (values, query_name, errors)
+	if (value is not None):
+		result = min_value if (value < min_value) else max_value if (value > max_value) else value
+
+	return result
+
+def validate_query_int_actual_value (
+	values: c_void_p, query_name: str,
+	validation: Callable [[int], bool], errors: dict
+):
+	result = None
+
+	actual_value = validate_query_int_value (values, query_name, errors)
+	if (actual_value is not None):
+		if (validation (actual_value)):
+			result = actual_value
+
+		else:
+			errors[query_name] = f"Failed to validate field {query_name} value."
+
+	return result
+
 def validate_query_int_value_with_default (
 	values: c_void_p, query_name: str, default: int
 ) -> int:
