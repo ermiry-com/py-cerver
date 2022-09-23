@@ -9,6 +9,7 @@ from ..lib import lib
 from ..types.string import String
 
 from .content import ContentType
+from .headers import HTTP_HEADER_CONTENT_TYPE
 from .headers import http_header
 from .multipart import http_multi_part_get_file
 from .query import http_query_pairs_get_value
@@ -74,9 +75,29 @@ http_request_get_content_type_string = lib.http_request_get_content_type_string
 http_request_get_content_type_string.argtypes = [c_void_p]
 http_request_get_content_type_string.restype = POINTER (String)
 
-http_request_content_type_is_json = lib.http_request_content_type_is_json
-http_request_content_type_is_json.argtypes = [c_void_p]
-http_request_content_type_is_json.restype = c_bool
+def http_request_content_type_is_json (request: c_void_p):
+	result = False
+
+	content_header = http_request_get_header (request, HTTP_HEADER_CONTENT_TYPE)
+
+	if (content_header):
+		actual_header: str = content_header.contents.str.decode ("utf-8")
+		if ("application/json" in actual_header.lower ()):
+			result = True
+
+	return result
+
+def http_request_content_type_is_multi_part (request: c_void_p):
+	result = False
+
+	content_header = http_request_get_header (request, HTTP_HEADER_CONTENT_TYPE)
+
+	if (content_header):
+		actual_header: str = content_header.contents.str.decode ("utf-8")
+		if ("multipart/form-data" in actual_header.lower ()):
+			result = True
+
+	return result
 
 http_request_get_decoded_data = lib.http_request_get_decoded_data
 http_request_get_decoded_data.argtypes = [c_void_p]
