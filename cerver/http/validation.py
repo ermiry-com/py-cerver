@@ -60,6 +60,23 @@ def validate_query_value (
 
 	return result
 
+def validate_query_value_with_cast (
+	values: c_void_p, query_name: str, cast: Callable [[str], Any], errors: dict
+):
+	result = None
+
+	found = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
+	if (found):
+		try:
+			query_value = found.contents.str.decode ("utf-8")
+
+			result = cast (query_value)
+
+		except:
+			errors[query_name] = f"Field {query_name} is invalid."
+
+	return result
+
 def validate_query_value_with_default (
 	values: c_void_p, query_name: str, default: Any
 ) -> Any:
