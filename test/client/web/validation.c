@@ -321,6 +321,116 @@ static unsigned int validation_request_all_actual (void) {
 		validation_request_all_data_handler, data_buffer
 	);
 
+	/*** query int limit ***/
+	// GET /query/int/limit - good
+	(void) printf ("GET /query/int/limit - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/limit?value=12", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int/limit - min
+	(void) printf ("GET /query/int/limit - min\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/limit?value=8", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int/limit - max
+	(void) printf ("GET /query/int/limit - max\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/limit?value=72", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int/limit - missing
+	(void) printf ("GET /query/int/limit - missing\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/limit?test=78", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int/limit - bad
+	(void) printf ("GET /query/int/limit - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/limit?value=test", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	/*** query int validate ***/
+	// GET /query/int/validate - good
+	(void) printf ("GET /query/int/validate - good\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/validate?value=2", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_OK,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int/validate - wrong
+	(void) printf ("GET /query/int/validate - wrong\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/validate?value=-10", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int/validate - missing
+	(void) printf ("GET /query/int/validate - missing\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/validate?test=78", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
+	// GET /query/int/validate - bad
+	(void) printf ("GET /query/int/validate - bad\n");
+	(void) snprintf (
+		actual_address, ADDRESS_SIZE,
+		"%s/query/int/validate?value=test", address
+	);
+
+	errors |= curl_full_handle_data (
+		actual_address, HTTP_STATUS_BAD_REQUEST,
+		validation_request_all_data_handler, data_buffer
+	);
+
 	// GET /query/int/default - good
 	(void) printf ("GET /query/int/default - good\n");
 	(void) snprintf (
