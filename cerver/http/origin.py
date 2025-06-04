@@ -1,4 +1,7 @@
-from ctypes import Structure, POINTER, c_int, c_char_p, c_void_p
+from ctypes import Structure, POINTER
+from ctypes import c_int, c_uint, c_char_p, c_void_p
+
+from ..lib import lib
 
 class HttpOrigin (Structure):
 	_fields_ = [
