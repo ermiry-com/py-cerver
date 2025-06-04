@@ -1,4 +1,6 @@
-from ctypes import c_int, c_void_p, py_object, c_bool, CFUNCTYPE, Structure, POINTER
+from ctypes import CFUNCTYPE, POINTER, Structure
+from ctypes import c_int, c_void_p, py_object, c_bool
+from typing import TypeAlias
 
 from .lib import lib
 
@@ -12,10 +14,10 @@ class HandlerData (Structure):
 		("packet", POINTER (Packet))
 	]
 
-HandlerMethod = CFUNCTYPE (None, c_void_p)
+HandlerMethod: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
 
-HandlerDataCreate = CFUNCTYPE (py_object, c_void_p)
-HandlerDataDelete = CFUNCTYPE (None, c_void_p)
+HandlerDataCreate: TypeAlias = CFUNCTYPE (py_object, c_void_p) # type: ignore
+HandlerDataDelete: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
 
 handler_delete = lib.handler_delete
 handler_delete.argtypes = [c_void_p]
