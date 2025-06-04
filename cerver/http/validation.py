@@ -1,8 +1,6 @@
 from ctypes import c_void_p
 from typing import Any, Callable
 
-import distutils.util
-
 from ..files import file_exists
 from ..files import IMAGE_TYPE_NONE, IMAGE_TYPE_PNG, IMAGE_TYPE_JPEG
 from ..files import files_image_get_type
@@ -17,6 +15,8 @@ from .request import http_request_multi_parts_get
 from .request import http_request_multi_parts_get_value
 from .request import http_request_multi_parts_get_filename
 from .request import http_request_multi_parts_get_saved_filename
+
+from ..utils.utils import strtobool
 
 def validate_query_exists_internal (
 	values: c_void_p, query_name: str
@@ -186,7 +186,7 @@ def validate_query_bool_value (
 	if (found):
 		try:
 			result = bool (
-				distutils.util.strtobool (found.contents.str.decode ("utf-8"))
+				strtobool (found.contents.str.decode ("utf-8"))
 			)
 		except ValueError:
 			errors[query_name] = f"Field {query_name} is invalid."
@@ -205,7 +205,7 @@ def validate_query_bool_value_with_default (
 	if (found):
 		try:
 			result = bool (
-				distutils.util.strtobool (found.contents.str.decode ("utf-8"))
+				strtobool (found.contents.str.decode ("utf-8"))
 			)
 		except ValueError:
 			pass
@@ -461,7 +461,7 @@ def validate_mparts_bool (
 	if (found):
 		found = found.decode ("utf-8")
 		try:
-			result = bool (distutils.util.strtobool (found))
+			result = bool (strtobool (found))
 		except ValueError:
 			errors[value] = f"Field {value} is invalid."
 
@@ -479,7 +479,7 @@ def validate_mparts_bool_with_default (
 	if (found):
 		found = found.decode ("utf-8")
 		try:
-			result = bool (distutils.util.strtobool (found))
+			result = bool (strtobool (found))
 		except ValueError:
 			pass
 

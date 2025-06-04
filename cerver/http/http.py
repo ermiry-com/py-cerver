@@ -1,4 +1,5 @@
 import json
+from typing import TypeAlias
 
 from ctypes import CFUNCTYPE, POINTER, cast, c_void_p
 from ctypes import c_int, c_uint, c_uint8, c_char_p, c_bool, c_size_t
@@ -23,11 +24,11 @@ from .route import http_route_set_decode_data_into_json
 from .status import http_status, HTTP_STATUS_OK
 
 # types
-CatchAllHandler = CFUNCTYPE (None, c_void_p, c_void_p)
-NotFoundHandler = CFUNCTYPE (None, c_void_p, c_void_p)
-UploadsFilenameGenerator = CFUNCTYPE (None, c_void_p, c_void_p)
-UploadsDirnameGenerator = CFUNCTYPE (None, c_void_p, c_void_p)
-HttpDeleteCustom = CFUNCTYPE (None, c_void_p)
+CatchAllHandler: TypeAlias = CFUNCTYPE (None, c_void_p, c_void_p) # type: ignore
+NotFoundHandler: TypeAlias = CFUNCTYPE (None, c_void_p, c_void_p) # type: ignore
+UploadsFilenameGenerator: TypeAlias = CFUNCTYPE (None, c_void_p, c_void_p) # type: ignore
+UploadsDirnameGenerator: TypeAlias = CFUNCTYPE (None, c_void_p, c_void_p) # type: ignore
+HttpDeleteCustom: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
 
 # main
 http_cerver_get = lib.http_cerver_get
@@ -164,7 +165,7 @@ def http_create_child_route (
 	child = http_route_create (
 		request_method, route_path.encode ("utf-8"), handler
 	)
-	
+
 	if (auth_method != HTTP_ROUTE_AUTH_TYPE_NONE):
 		http_route_set_auth (child, auth_method)
 		http_route_set_decode_data_into_json (child)
@@ -289,14 +290,14 @@ def http_cerver_auth_configuration (
 				http_cerver, pub_key_filename.encode ("utf-8")
 			)
 
-def http_jwt_create (values={}):
+def http_jwt_create (values=dict ()):
 	"""
 	Creates a HttpJwt instance with custom values.
 	Must be deleted with http_cerver_auth_jwt_delete () to avoid memory leaks
 	# Parameters
 	------------
 	### values: dict, optional
-		The actual Bearer JWT values. Defaults to {}.
+		The actual Bearer JWT values. Defaults to dict ().
 	# Returns
 	------------
 	Reference to a HttpJwt instance
@@ -318,11 +319,10 @@ def http_jwt_create (values={}):
 
 	return http_jwt
 
-
 def http_jwt_create_and_send (
 	http_receive: c_void_p,
 	status_code=HTTP_STATUS_OK,
-	values={}
+	values=dict ()
 ):
 	"""
 	Creates and sends a Bearer JWT
@@ -333,7 +333,7 @@ def http_jwt_create_and_send (
 	### status_code: http_status, optional
 		The HTTP response's status code. Defaults to HTTP_STATUS_OK.
 	### values : dict, optional
-		The actual Bearer JWT values. Defaults to {}.
+		The actual Bearer JWT values. Defaults to dict ().
 	"""
 	http_jwt = http_jwt_create (values)
 	http_cerver_auth_generate_bearer_jwt_json (

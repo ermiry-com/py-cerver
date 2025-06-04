@@ -1,11 +1,12 @@
-from ctypes import POINTER, c_void_p
+from ctypes import c_void_p
 from ctypes import c_int, c_uint, c_uint32, c_char_p, c_bool
+from typing import TypeAlias
 
 from ..lib import lib
 
-from ..types.string import String
+from ..types.string import StringPointer
 
-MultiPartType = c_int
+MultiPartType: TypeAlias = c_int # type: ignore
 
 MULTI_PART_TYPE_NONE = 0
 MULTI_PART_TYPE_FILE = 1
@@ -29,7 +30,7 @@ http_multi_part_is_value.restype = c_bool
 
 http_multi_part_get_name = lib.http_multi_part_get_name
 http_multi_part_get_name.argtypes = [c_void_p]
-http_multi_part_get_name.restype = POINTER (String)
+http_multi_part_get_name.restype = StringPointer
 
 http_multi_part_get_filename = lib.http_multi_part_get_filename
 http_multi_part_get_filename.argtypes = [c_void_p]
@@ -66,7 +67,7 @@ http_multi_part_get_saved_filename_len.argtypes = [c_void_p]
 http_multi_part_get_saved_filename_len.restype = c_int
 
 def http_multi_part_get_file (mpart: c_void_p) -> dict:
-	values = {}
+	values = dict ()
 
 	if (http_multi_part_is_file (mpart)):
 		original = http_multi_part_get_filename (mpart)
