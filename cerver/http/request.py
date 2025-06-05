@@ -1,18 +1,19 @@
-from ctypes import POINTER, CFUNCTYPE, c_void_p, c_char_p
+from ctypes import CFUNCTYPE, c_void_p, c_char_p
 from ctypes import c_int, c_uint, c_uint8, c_size_t, c_bool
-
-import distutils.util
 import json
+from typing import TypeAlias
 
 from ..lib import lib
 
-from ..types.string import String
+from ..types.string import StringPointer
 
 from .content import ContentType
 from .headers import HTTP_HEADER_CONTENT_TYPE
 from .headers import http_header
 from .multipart import http_multi_part_get_file
 from .query import http_query_pairs_get_value
+
+from ..utils.utils import strtobool
 
 RequestMethod = c_int
 
@@ -27,8 +28,8 @@ REQUEST_METHOD_TRACE = 7
 
 REQUEST_METHOD_UNDEFINED = 8
 
-RequestDeleteDecoded = CFUNCTYPE (None, c_void_p)
-RequestDeleteCustom = CFUNCTYPE (None, c_void_p)
+RequestDeleteDecoded: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
+RequestDeleteCustom: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
 
 # getters
 http_request_get_method = lib.http_request_get_method
@@ -37,11 +38,11 @@ http_request_get_method.restype = RequestMethod
 
 http_request_get_url = lib.http_request_get_url
 http_request_get_url.argtypes = [c_void_p]
-http_request_get_url.restype = POINTER (String)
+http_request_get_url.restype = StringPointer
 
 http_request_get_query = lib.http_request_get_query
 http_request_get_query.argtypes = [c_void_p]
-http_request_get_query.restype = POINTER (String)
+http_request_get_query.restype = StringPointer
 
 http_request_get_query_params = lib.http_request_get_query_params
 http_request_get_query_params.argtypes = [c_void_p]
@@ -53,11 +54,11 @@ http_request_get_n_params.restype = c_uint
 
 http_request_get_param_at_idx = lib.http_request_get_param_at_idx
 http_request_get_param_at_idx.argtypes = [c_void_p, c_uint]
-http_request_get_param_at_idx.restype = POINTER (String)
+http_request_get_param_at_idx.restype = StringPointer
 
 http_request_get_header = lib.http_request_get_header
 http_request_get_header.argtypes = [c_void_p, http_header]
-http_request_get_header.restype = POINTER (String)
+http_request_get_header.restype = StringPointer
 
 http_request_get_custom_headers_count = lib.http_request_get_custom_headers_count
 http_request_get_custom_headers_count.argtypes = [c_void_p]
@@ -73,9 +74,9 @@ http_request_get_content_type.restype = ContentType
 
 http_request_get_content_type_string = lib.http_request_get_content_type_string
 http_request_get_content_type_string.argtypes = [c_void_p]
-http_request_get_content_type_string.restype = POINTER (String)
+http_request_get_content_type_string.restype = StringPointer
 
-def http_request_content_type_is_json (request: c_void_p):
+def http_request_content_type_is_json (request: c_void_p) -> bool:
 	result = False
 
 	content_header = http_request_get_header (request, HTTP_HEADER_CONTENT_TYPE)
@@ -87,7 +88,7 @@ def http_request_content_type_is_json (request: c_void_p):
 
 	return result
 
-def http_request_content_type_is_multi_part (request: c_void_p):
+def http_request_content_type_is_multi_part (request: c_void_p) -> bool:
 	result = False
 
 	content_header = http_request_get_header (request, HTTP_HEADER_CONTENT_TYPE)
@@ -127,7 +128,7 @@ http_request_set_default_delete_custom_data.argtypes = [c_void_p]
 
 http_request_get_body = lib.http_request_get_body
 http_request_get_body.argtypes = [c_void_p]
-http_request_get_body.restype = POINTER (String)
+http_request_get_body.restype = StringPointer
 
 http_request_get_current_mpart = lib.http_request_get_current_mpart
 http_request_get_current_mpart.argtypes = [c_void_p]
@@ -233,7 +234,7 @@ def http_request_get_bool_query_value (
 
 	value = http_query_pairs_get_value (values, query_name.encode ("utf-8"))
 	if (value):
-		result = bool (distutils.util.strtobool (value.contents.str.decode ("utf-8")))
+		result = bool (strtobool (value.contents.str.decode ("utf-8")))
 
 	return result
 
@@ -264,7 +265,7 @@ http_request_query_params_print.argtypes = [c_void_p]
 
 http_request_query_params_get_value = lib.http_request_query_params_get_value
 http_request_query_params_get_value.argtypes = [c_void_p, c_char_p]
-http_request_query_params_get_value.restype = POINTER (String)
+http_request_query_params_get_value.restype = StringPointer
 
 # multi-parts
 http_request_multi_parts_get = lib.http_request_multi_parts_get
@@ -317,4 +318,4 @@ http_request_multi_parts_files_print.argtypes = [c_void_p]
 # body
 http_request_body_get_value = lib.http_request_body_get_value
 http_request_body_get_value.argtypes = [c_void_p, c_char_p]
-http_request_body_get_value.restype = POINTER (String)
+http_request_body_get_value.restype = StringPointer

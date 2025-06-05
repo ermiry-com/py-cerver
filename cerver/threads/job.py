@@ -1,10 +1,11 @@
 from ctypes import POINTER, CFUNCTYPE, Structure
 from ctypes import c_void_p, py_object, c_int, c_uint, c_uint64
+from typing import TypeAlias
 
 from ..lib import lib
 
-JobMethod = CFUNCTYPE (None, c_void_p)
-JobDataDelete = CFUNCTYPE (None, c_void_p)
+JobMethod: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
+JobDataDelete: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
 
 class Job (Structure):
 	_fields_ = [
@@ -63,13 +64,13 @@ job_handler_wait = lib.job_handler_wait
 job_handler_wait.argtypes = [c_void_p, py_object, c_void_p]
 
 # JobQueue
-JobQueueType = c_int
+JobQueueType: TypeAlias = c_int # type: ignore
 
 JOB_QUEUE_TYPE_NONE = 0
 JOB_QUEUE_TYPE_JOBS = 1
 JOB_QUEUE_TYPE_HANDLERS = 2
 
-JobQueueHandler = CFUNCTYPE (None, py_object)
+JobQueueHandler: TypeAlias = CFUNCTYPE (None, py_object) # type: ignore
 
 job_queue_new = lib.job_queue_new
 job_queue_new.restype = c_void_p

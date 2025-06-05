@@ -1,14 +1,16 @@
-from ctypes import CFUNCTYPE, c_void_p, py_object, c_int, c_uint, c_char_p
+from ctypes import CFUNCTYPE, c_void_p, py_object
+from ctypes import c_int, c_uint, c_char_p
+from typing import TypeAlias
 
 from ..lib import lib
 
 from .threads import thread_mutex_new, thread_mutex_delete
 from .threads import thread_mutex_lock, thread_mutex_unlock
 
-WorkerState = c_int
+WorkerState: TypeAlias = c_int # type: ignore
 
-WorkerMethod = CFUNCTYPE (None, py_object)
-WorkerDataDelete = CFUNCTYPE (None, c_void_p)
+WorkerMethod: TypeAlias = CFUNCTYPE (None, py_object) # type: ignore
+WorkerDataDelete: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
 
 WORKER_STATE_NONE = 0
 WORKER_STATE_AVAILABLE = 1

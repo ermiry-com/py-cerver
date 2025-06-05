@@ -1,27 +1,28 @@
-from ctypes import CFUNCTYPE, c_void_p, c_int, c_uint, c_char_p
+from ctypes import CFUNCTYPE, c_void_p, c_int, c_char_p
+from typing import TypeAlias
 
 from ..lib import lib
 
 from .request import RequestMethod
 
-HttpRouteModifier = c_int
+HttpRouteModifier: TypeAlias = c_int # type: ignore
 
 HTTP_ROUTE_MODIFIER_NONE = 0
 HTTP_ROUTE_MODIFIER_MULTI_PART = 1
 HTTP_ROUTE_MODIFIER_WEB_SOCKET = 2
 
-HttpRouteAuthType = c_int
+HttpRouteAuthType: TypeAlias = c_int # type: ignore
 
 HTTP_ROUTE_AUTH_TYPE_NONE = 0
 HTTP_ROUTE_AUTH_TYPE_BEARER = 1
 HTTP_ROUTE_AUTH_TYPE_CUSTOM = 2
 
-HttpHandler = CFUNCTYPE (None, c_void_p, c_void_p)
+HttpHandler: TypeAlias = CFUNCTYPE (None, c_void_p, c_void_p) # type: ignore
 
-HttpDecodeData = CFUNCTYPE (c_void_p, c_void_p)
-HttpDeleteDecoded = CFUNCTYPE (None, c_void_p)
+HttpDecodeData: TypeAlias = CFUNCTYPE (c_void_p, c_void_p) # type: ignore
+HttpDeleteDecoded: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
 
-RouteDeleteCustom = CFUNCTYPE (None, c_void_p)
+RouteDeleteCustom: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
 
 http_route_create = lib.http_route_create
 http_route_create.argtypes = [RequestMethod, c_char_p, HttpHandler]
