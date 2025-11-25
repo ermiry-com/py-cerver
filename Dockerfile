@@ -1,8 +1,8 @@
 ARG CERVER_VERSION=2.0b-64
 
-ARG RUNTIME_DEPS='libssl3'
+ARG RUNTIME_DEPS='libssl3t64'
 
-FROM gcc AS builder
+FROM gcc:16.2 AS builder
 
 ARG RUNTIME_DEPS
 RUN apt-get update && apt-get install -y ${RUNTIME_DEPS}
@@ -17,7 +17,7 @@ RUN mkdir /opt/cerver && cd /opt/cerver \
     && make TYPE=production -j4
 
 ############
-FROM python:3.12.10-slim-bookworm
+FROM python:3.14.10-slim-trixie
 
 ARG RUNTIME_DEPS
 RUN apt-get update && apt-get install -y ${RUNTIME_DEPS}
