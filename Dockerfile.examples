@@ -1,4 +1,4 @@
-ARG CERVER_VERSION=2.0b-56
+ARG CERVER_VERSION=2.0b-64
 
 ARG RUNTIME_DEPS='libssl3'
 
@@ -13,6 +13,7 @@ RUN mkdir /opt/cerver && cd /opt/cerver \
     && wget -q --no-check-certificate https://github.com/ermiry/cerver/archive/${CERVER_VERSION}.zip \
     && unzip ${CERVER_VERSION}.zip \
     && cd cerver-${CERVER_VERSION} \
+    && make clean \
     && make TYPE=test -j4
 
 ############
