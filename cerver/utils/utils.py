@@ -1,19 +1,46 @@
+"""Helpers of the package that do not call cerver."""
+
 import sys
 
-def printf (format, *args):
+__all__ = [
+	"printf", "strtobool"
+]
+
+TRUE_VALUES = ("y", "yes", "t", "true", "on", "1")
+FALSE_VALUES = ("n", "no", "f", "false", "off", "0")
+
+def printf (format: str, *args) -> None:
+	"""Writes a message with a printf like format to stdout.
+
+	Args:
+		format: The format, with % conversions.
+		*args: The values of the conversions.
+	"""
 	sys.stdout.write (format % args)
 
 def strtobool (value: str) -> int:
-	"""Convert a string representation of truth to true (1) or false (0).
+	"""Converts the text of a truth value into 1 or 0.
 
-	True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
-	are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
-	'val' is anything else.
+	Args:
+		value: 'y', 'yes', 't', 'true', 'on' or '1' for true; 'n', 'no', 'f', 'false',
+			'off' or '0' for false, in any case.
+
+	Returns:
+		1 for a true value, 0 for a false one.
+
+	Raises:
+		ValueError: If the value is not one of them.
 	"""
-	value = value.lower ()
-	if value in ("y", "yes", "t", "true", "on", "1"):
-		return 1
-	elif value in ("n", "no", "f", "false", "off", "0"):
-		return 0
+	result = None
+
+	lowered = value.lower ()
+	if (lowered in TRUE_VALUES):
+		result = 1
+
+	elif (lowered in FALSE_VALUES):
+		result = 0
+
 	else:
-		raise ValueError ("invalid truth value {!r}".format(value))
+		raise ValueError (f"invalid truth value {value!r}")
+
+	return result
