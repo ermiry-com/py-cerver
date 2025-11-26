@@ -8,11 +8,13 @@ and at last from the paths of the system linker.
 import ctypes
 import ctypes.util
 import os
+from typing import Any
 
 __all__ = [
 	"CERVER_LIBRARY_VARIABLE", "CERVER_LIBRARY_DEFAULT_PATH", "CERVER_LIBRARY_NAME",
 	"CerverLibraryError",
-	"lib"
+	"lib", "libc", "libc_free",
+	"lib_functions", "lib_function"
 ]
 
 CERVER_LIBRARY_VARIABLE = "CERVER_LIBRARY"
@@ -67,3 +69,38 @@ def lib_load () -> ctypes.CDLL:
 	return library
 
 lib = lib_load ()
+
+# the C library of the process, used to free the memory that cerver allocates for the caller
+libc = ctypes.CDLL (None)
+
+libc_free = libc.free
+libc_free.argtypes = [ctypes.c_void_p]
+libc_free.restype = None
+
+# every function that the package declares, by its name in libcerver
+lib_functions: dict = {}
+
+def lib_function (name: str, argtypes: list | None, restype: Any, doc: str) -> Any:
+	"""Declares a function of libcerver with its types and its documentation.
+
+	Args:
+		name: The name of the function in libcerver.
+		argtypes: The ctypes of its arguments, None for a variadic function,
+			whose arguments must be given already converted to ctypes values.
+		restype: The ctypes of its result, None when it returns nothing.
+		doc: Its docstring.
+
+	Returns:
+		The function of the library, ready to be called.
+	"""
+	function = getattr (lib, name)
+
+	if (argtypes is not None):
+		function.argtypes = argtypes
+
+	function.restype = restype
+	function.__doc__ = doc
+
+	lib_functions[name] = function
+
+	return function
