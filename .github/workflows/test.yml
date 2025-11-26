@@ -21,18 +21,21 @@ jobs:
 
       - name: Compile Cerver
         env:
-          CERVER_VERSION: 2.0b-56
+          CERVER_VERSION: 2.0b-64
         run: |
           mkdir /opt/cerver && cd /opt/cerver
           wget -q --no-check-certificate https://github.com/ermiry/cerver/archive/$CERVER_VERSION.zip
           unzip $CERVER_VERSION.zip
           cd cerver-$CERVER_VERSION
+          make clean
           make TYPE=test -j4
           sudo make TYPE=test install
           sudo ldconfig
 
       - name: Compile Tests
-        run: make TYPE=test test
+        run: |
+          make clean
+          make TYPE=test test
 
       - name: Ping Integration Test
         run: |
