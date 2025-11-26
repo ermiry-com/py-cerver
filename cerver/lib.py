@@ -14,12 +14,15 @@ __all__ = [
 	"CERVER_LIBRARY_VARIABLE", "CERVER_LIBRARY_DEFAULT_PATH", "CERVER_LIBRARY_NAME",
 	"CerverLibraryError",
 	"lib", "libc", "libc_free",
-	"lib_functions", "lib_function"
+	"lib_functions", "lib_function",
+	"lib_take_c_string", "lib_c_string", "lib_text"
 ]
 
 CERVER_LIBRARY_VARIABLE = "CERVER_LIBRARY"
 CERVER_LIBRARY_DEFAULT_PATH = "/usr/local/lib/libcerver.so"
 CERVER_LIBRARY_NAME = "cerver"
+
+TEXT_ENCODING = "utf-8"
 
 class CerverLibraryError (ImportError):
 	"""Raised when libcerver can not be found or loaded."""
@@ -104,3 +107,53 @@ def lib_function (name: str, argtypes: list | None, restype: Any, doc: str) -> A
 	lib_functions[name] = function
 
 	return function
+
+def lib_take_c_string (pointer: int | None) -> bytes | None:
+	"""Copies a C string that cerver allocated for the caller and frees it.
+
+	Args:
+		pointer: The address of the string, None or 0 for a NULL one.
+
+	Returns:
+		The bytes of the string, None for a NULL one.
+	"""
+	result = None
+	if (pointer):
+		result = ctypes.string_at (pointer)
+		libc_free (pointer)
+
+	return result
+
+def lib_c_string (value: str | bytes | None) -> bytes | None:
+	"""Converts a value given by the caller into the bytes that a C string argument expects.
+
+	Args:
+		value: A str (encoded as utf-8), bytes or None (NULL).
+
+	Returns:
+		The bytes, or None.
+	"""
+	result = value
+	if (isinstance (value, str)):
+		result = value.encode (TEXT_ENCODING)
+
+	return result
+
+def lib_text (value: bytes | None) -> str | None:
+	"""Converts the bytes of a C string into text.
+
+	Args:
+		value: The bytes, None for a NULL string.
+
+	Returns:
+		The text, None when it is NULL or it is not valid utf-8.
+	"""
+	result = None
+	if (value is not None):
+		try:
+			result = value.decode (TEXT_ENCODING)
+
+		except UnicodeDecodeError:
+			pass
+
+	return result
