@@ -43,7 +43,7 @@ worker_set_work = lib.worker_set_work
 worker_set_work.argtypes = [c_void_p, WorkerMethod]
 
 worker_set_delete_data = lib.worker_set_delete_data
-worker_set_delete_data.argtypes = [c_void_p, WorkerMethod]
+worker_set_delete_data.argtypes = [c_void_p, WorkerDataDelete]
 
 worker_set_reference = lib.worker_set_reference
 worker_set_reference.argtypes = [c_void_p, py_object]
