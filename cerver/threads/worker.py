@@ -1,7 +1,7 @@
 """Workers: a thread that takes its jobs from a queue, alone or shared with other workers."""
 
 from ctypes import CFUNCTYPE, c_void_p, py_object
-from ctypes import c_int, c_uint, c_char_p
+from ctypes import c_int, c_uint, c_uint64, c_char_p
 from typing import TypeAlias
 
 from ..lib import lib_function
@@ -10,19 +10,22 @@ from .threads import thread_mutex_new, thread_mutex_delete
 from .threads import thread_mutex_lock, thread_mutex_unlock
 
 __all__ = [
+	"WORKER_NAME_SIZE",
 	"WorkerState",
 	"WORKER_STATE_NONE", "WORKER_STATE_AVAILABLE", "WORKER_STATE_WORKING",
 	"WORKER_STATE_STOPPED", "WORKER_STATE_ENDED",
 	"WorkerMethod", "WorkerDataDelete", "WorkerRemoveReference",
 	"worker_state_to_string",
-	"worker_delete", "worker_create", "worker_create_with_id",
-	"worker_set_name", "worker_get_state",
+	"worker_delete", "worker_create", "worker_create_with_id", "worker_create_with_queue",
+	"worker_set_name", "worker_get_state", "worker_get_idle_milliseconds",
 	"worker_set_work", "worker_set_delete_data",
 	"worker_set_reference", "worker_set_remove_reference",
 	"worker_start_with_state", "worker_start", "worker_resume", "worker_stop", "worker_end",
 	"worker_push_job", "worker_push_job_with_work",
 	"Worker"
 ]
+
+WORKER_NAME_SIZE = 64
 
 WorkerState: TypeAlias = c_int # type: ignore
 
@@ -81,13 +84,26 @@ worker_create_with_id = lib_function (
 	"""
 )
 
+worker_create_with_queue = lib_function (
+	"worker_create_with_queue", [c_uint, c_void_p], c_void_p,
+	"""Creates a worker that takes its jobs from a queue that it shares with other workers.
+
+	Args:
+		id: The id.
+		job_queue: The JobQueue, it is not deleted with the worker.
+
+	Returns:
+		The worker, released with worker_delete ().
+	"""
+)
+
 worker_set_name = lib_function (
 	"worker_set_name", [c_void_p, c_char_p], None,
 	"""Sets the name of the worker, used in the name of its thread.
 
 	Args:
 		worker: The worker.
-		name: The name, as bytes.
+		name: The name, as bytes, up to WORKER_NAME_SIZE bytes.
 	"""
 )
 
@@ -100,6 +116,18 @@ worker_get_state = lib_function (
 
 	Returns:
 		A WORKER_STATE_* value.
+	"""
+)
+
+worker_get_idle_milliseconds = lib_function (
+	"worker_get_idle_milliseconds", [c_void_p], c_uint64,
+	"""Returns the milliseconds that an available worker has been without a job.
+
+	Args:
+		worker: The worker.
+
+	Returns:
+		The milliseconds, 0 if it is not available.
 	"""
 )
 
