@@ -1,13 +1,13 @@
 """Workers: a thread that takes its jobs from a queue, alone or shared with other workers."""
 
+import threading
+
 from ctypes import CFUNCTYPE, c_void_p, py_object
 from ctypes import c_int, c_uint, c_uint64, c_char_p
-from typing import TypeAlias
+from typing import Any, Callable, TypeAlias
 
-from ..lib import lib_function
-
-from .threads import thread_mutex_new, thread_mutex_delete
-from .threads import thread_mutex_lock, thread_mutex_unlock
+from ..callbacks import callback_wrap
+from ..lib import lib_function, lib_c_string
 
 __all__ = [
 	"WORKER_NAME_SIZE",
@@ -259,58 +259,123 @@ worker_push_job_with_work = lib_function (
 	"""
 )
 
-@CFUNCTYPE (None, py_object)
-def worker_remove_reference (worker):
-	worker.queue.pop (0)
+class Worker:
+	"""A worker with a Python work, that keeps every object of a job until it ran.
 
-class Worker ():
-	def __init__ (self, name, work):
+	Example:
+		worker = Worker ("images", process_image)
+		worker.start ()
+		worker.push ({"path": path})
+
+	Attributes:
+		worker: The C worker.
+	"""
+
+	def __init__ (self, name: str, work: Callable [[Any], None]):
+		"""Creates the worker.
+
+		Args:
+			name: The name of the worker.
+			work: A Python function (or a WorkerMethod) that gets the object of each job.
+
+		Raises:
+			RuntimeError: If cerver could not create the worker.
+		"""
 		self.worker = worker_create ()
-		worker_set_reference (self.worker, self)
-		worker_set_name (self.worker, name.encode ("utf-8"))
-		worker_set_work (self.worker, work)
-		worker_set_remove_reference (self.worker, worker_remove_reference)
+		if (not self.worker):
+			raise RuntimeError ("Failed to create the worker")
 
 		self.queue = []
+		self.lock = threading.Lock ()
 
-		self.mutex = thread_mutex_new ()
+		self.work = callback_wrap (work, WorkerMethod)
+		self.remove_reference = callback_wrap (self.job_done, WorkerRemoveReference)
 
-	def __del__ (self):
-		# correctly end internal queue
-		self.end ()
-		worker_delete (self.worker)
+		worker_set_reference (self.worker, self)
+		worker_set_name (self.worker, lib_c_string (name))
+		worker_set_work (self.worker, self.work)
+		worker_set_remove_reference (self.worker, self.remove_reference)
 
-		# remove all saved references
-		self.queue.clear ()
+	@staticmethod
+	def job_done (worker: "Worker") -> None:
+		"""Releases the object of the job that ran, called from the thread of the worker."""
+		with worker.lock:
+			if (worker.queue):
+				worker.queue.pop (0)
 
-		thread_mutex_delete (self.mutex)
+	def start_with_state (self, worker_state: int) -> int:
+		"""Starts the thread of the worker in a state.
 
-	def start_with_state (self, worker_state):
+		Args:
+			worker_state: WORKER_STATE_AVAILABLE or WORKER_STATE_STOPPED.
+
+		Returns:
+			0 on success, 1 on error.
+		"""
 		return worker_start_with_state (self.worker, worker_state)
 
-	def start (self):
+	def start (self) -> int:
+		"""Starts the thread of the worker.
+
+		Returns:
+			0 on success, 1 on error.
+		"""
 		return worker_start (self.worker)
 
-	def resume (self):
+	def resume (self) -> int:
+		"""Lets a stopped worker take jobs again.
+
+		Returns:
+			0 on success, 1 if it was not stopped.
+		"""
 		return worker_resume (self.worker)
 
-	def stop (self):
+	def stop (self) -> int:
+		"""Stops the worker after its current job.
+
+		Returns:
+			0 on success, 1 if it was not running.
+		"""
 		return worker_stop (self.worker)
 
-	def push (self, data):
-		result = None
+	def state (self) -> int:
+		"""Returns the state of the worker.
 
-		thread_mutex_lock (self.mutex)
+		Returns:
+			A WORKER_STATE_* value.
+		"""
+		return worker_get_state (self.worker)
 
-		# safely insert object reference into local queue
-		self.queue.append (data)
+	def push (self, data: Any) -> int:
+		"""Pushes a job with an object for the work.
 
-		# process data using internal queue
-		result = worker_push_job (self.worker, data)
+		Args:
+			data: Any Python object, it is kept until the job ran.
 
-		thread_mutex_unlock (self.mutex)
+		Returns:
+			0 on success, 1 on error.
+		"""
+		with self.lock:
+			self.queue.append (data)
+
+			result = worker_push_job (self.worker, data)
+			if (result):
+				self.queue.pop ()
 
 		return result
 
-	def end (self):
+	def end (self) -> int:
+		"""Ends the worker after its current job and joins its thread.
+
+		Returns:
+			0 on success, 1 if it was not running.
+		"""
 		return worker_end (self.worker)
+
+	def __del__ (self) -> None:
+		"""Ends the worker and releases it when the object is collected."""
+		self.end ()
+		worker_delete (self.worker)
+
+		with self.lock:
+			self.queue.clear ()
