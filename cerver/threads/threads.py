@@ -3,7 +3,8 @@ from typing import TypeAlias
 
 from ..lib import lib
 
-ThreadWork: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
+# void *(*) (void *), the work of a thread
+ThreadWork: TypeAlias = CFUNCTYPE (c_void_p, c_void_p) # type: ignore
 
 thread_create_detached = lib.thread_create_detached
 thread_create_detached.argtypes = [ThreadWork, c_void_p]
