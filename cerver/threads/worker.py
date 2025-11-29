@@ -1,16 +1,30 @@
+"""Workers: a thread that takes its jobs from a queue, alone or shared with other workers."""
+
 from ctypes import CFUNCTYPE, c_void_p, py_object
 from ctypes import c_int, c_uint, c_char_p
 from typing import TypeAlias
 
-from ..lib import lib
+from ..lib import lib_function
 
 from .threads import thread_mutex_new, thread_mutex_delete
 from .threads import thread_mutex_lock, thread_mutex_unlock
 
-WorkerState: TypeAlias = c_int # type: ignore
+__all__ = [
+	"WorkerState",
+	"WORKER_STATE_NONE", "WORKER_STATE_AVAILABLE", "WORKER_STATE_WORKING",
+	"WORKER_STATE_STOPPED", "WORKER_STATE_ENDED",
+	"WorkerMethod", "WorkerDataDelete", "WorkerRemoveReference",
+	"worker_state_to_string",
+	"worker_delete", "worker_create", "worker_create_with_id",
+	"worker_set_name", "worker_get_state",
+	"worker_set_work", "worker_set_delete_data",
+	"worker_set_reference", "worker_set_remove_reference",
+	"worker_start_with_state", "worker_start", "worker_resume", "worker_stop", "worker_end",
+	"worker_push_job", "worker_push_job_with_work",
+	"Worker"
+]
 
-WorkerMethod: TypeAlias = CFUNCTYPE (None, py_object) # type: ignore
-WorkerDataDelete: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
+WorkerState: TypeAlias = c_int # type: ignore
 
 WORKER_STATE_NONE = 0
 WORKER_STATE_AVAILABLE = 1
@@ -18,66 +32,204 @@ WORKER_STATE_WORKING = 2
 WORKER_STATE_STOPPED = 3
 WORKER_STATE_ENDED = 4
 
-worker_state_to_string = lib.worker_state_to_string
-worker_state_to_string.argtypes = [WorkerState]
-worker_state_to_string.restype = c_char_p
+# void (*) (void *args), it gets the Python object of each job
+WorkerMethod: TypeAlias = CFUNCTYPE (None, py_object) # type: ignore
+WorkerDataDelete: TypeAlias = CFUNCTYPE (None, c_void_p) # type: ignore
 
-worker_delete = lib.worker_delete
-worker_delete.argtypes = [c_void_p]
+# void (*) (const void *args), it gets the reference of the worker after each job
+WorkerRemoveReference: TypeAlias = CFUNCTYPE (None, py_object) # type: ignore
 
-worker_create = lib.worker_create
-worker_create.restype = c_void_p
+worker_state_to_string = lib_function (
+	"worker_state_to_string", [WorkerState], c_char_p,
+	"""Returns the name of a worker state.
 
-worker_create_with_id = lib.worker_create_with_id
-worker_create_with_id.argtypes = [c_uint]
-worker_create_with_id.restype = c_void_p
+	Args:
+		state: A WORKER_STATE_* value.
 
-worker_set_name = lib.worker_set_name
-worker_set_name.argtypes = [c_void_p, c_char_p]
+	Returns:
+		The name, as bytes.
+	"""
+)
 
-worker_get_state = lib.worker_get_state
-worker_get_state.argtypes = [c_void_p]
-worker_get_state.restype = WorkerState
+worker_delete = lib_function (
+	"worker_delete", [c_void_p], None,
+	"""Ends a worker if it is running and deletes it.
 
-worker_set_work = lib.worker_set_work
-worker_set_work.argtypes = [c_void_p, WorkerMethod]
+	Args:
+		worker_ptr: The worker, it must not be used after this call.
+	"""
+)
 
-worker_set_delete_data = lib.worker_set_delete_data
-worker_set_delete_data.argtypes = [c_void_p, WorkerDataDelete]
+worker_create = lib_function (
+	"worker_create", [], c_void_p,
+	"""Creates a worker with its own queue.
 
-worker_set_reference = lib.worker_set_reference
-worker_set_reference.argtypes = [c_void_p, py_object]
+	Returns:
+		The worker, released with worker_delete ().
+	"""
+)
 
-worker_set_remove_reference = lib.worker_set_remove_reference
-worker_set_remove_reference.argtypes = [c_void_p, WorkerMethod]
+worker_create_with_id = lib_function (
+	"worker_create_with_id", [c_uint], c_void_p,
+	"""Creates a worker with an id and its own queue.
 
-worker_start_with_state = lib.worker_start_with_state
-worker_start_with_state.argtypes = [c_void_p, WorkerState]
-worker_start_with_state.restype = c_uint
+	Args:
+		id: The id.
 
-worker_start = lib.worker_start
-worker_start.argtypes = [c_void_p]
-worker_start.restype = c_uint
+	Returns:
+		The worker, released with worker_delete ().
+	"""
+)
 
-worker_resume = lib.worker_resume
-worker_resume.argtypes = [c_void_p]
-worker_resume.restype = c_uint
+worker_set_name = lib_function (
+	"worker_set_name", [c_void_p, c_char_p], None,
+	"""Sets the name of the worker, used in the name of its thread.
 
-worker_stop = lib.worker_stop
-worker_stop.argtypes = [c_void_p]
-worker_stop.restype = c_uint
+	Args:
+		worker: The worker.
+		name: The name, as bytes.
+	"""
+)
 
-worker_end = lib.worker_end
-worker_end.argtypes = [c_void_p]
-worker_end.restype = c_uint
+worker_get_state = lib_function (
+	"worker_get_state", [c_void_p], WorkerState,
+	"""Returns the state of the worker.
 
-worker_push_job = lib.worker_push_job
-worker_push_job.argtypes = [c_void_p, py_object]
-worker_push_job.restype = c_uint
+	Args:
+		worker: The worker.
 
-worker_push_job_with_work = lib.worker_push_job_with_work
-worker_push_job_with_work.argtypes = [c_void_p, WorkerMethod, py_object]
-worker_push_job_with_work.restype = c_uint
+	Returns:
+		A WORKER_STATE_* value.
+	"""
+)
+
+worker_set_work = lib_function (
+	"worker_set_work", [c_void_p, c_void_p], None,
+	"""Sets the work that runs with the jobs that are pushed without one.
+
+	Args:
+		worker: The worker.
+		work: A WorkerMethod kept by the caller.
+	"""
+)
+
+worker_set_delete_data = lib_function (
+	"worker_set_delete_data", [c_void_p, c_void_p], None,
+	"""Sets how the data of the jobs that are still queued is released when the worker ends.
+
+	Args:
+		worker: The worker.
+		delete_data: A WorkerDataDelete kept by the caller, or None.
+	"""
+)
+
+worker_set_reference = lib_function (
+	"worker_set_reference", [c_void_p, py_object], None,
+	"""Sets the reference that the remove reference method gets after each job.
+
+	Args:
+		worker: The worker.
+		reference: A Python object, kept alive by the caller.
+	"""
+)
+
+worker_set_remove_reference = lib_function (
+	"worker_set_remove_reference", [c_void_p, c_void_p], None,
+	"""Sets the method that runs with the reference of the worker after each job.
+
+	Args:
+		worker: The worker.
+		remove_reference: A WorkerRemoveReference kept by the caller.
+	"""
+)
+
+worker_start_with_state = lib_function (
+	"worker_start_with_state", [c_void_p, WorkerState], c_uint,
+	"""Starts the thread of the worker in a state.
+
+	Args:
+		worker: The worker.
+		worker_state: WORKER_STATE_AVAILABLE or WORKER_STATE_STOPPED.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+worker_start = lib_function (
+	"worker_start", [c_void_p], c_uint,
+	"""Starts the thread of the worker, available to take jobs.
+
+	Args:
+		worker: The worker.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+worker_resume = lib_function (
+	"worker_resume", [c_void_p], c_uint,
+	"""Lets a stopped worker take jobs again.
+
+	Args:
+		worker: The worker.
+
+	Returns:
+		0 on success, 1 if it was not stopped.
+	"""
+)
+
+worker_stop = lib_function (
+	"worker_stop", [c_void_p], c_uint,
+	"""Waits until the worker ends its current job and stops it.
+
+	Args:
+		worker: The worker.
+
+	Returns:
+		0 on success, 1 if it was not running.
+	"""
+)
+
+worker_end = lib_function (
+	"worker_end", [c_void_p], c_uint,
+	"""Waits until the worker ends its current job and joins its thread.
+
+	Args:
+		worker: The worker.
+
+	Returns:
+		0 on success, 1 if it was not running.
+	"""
+)
+
+worker_push_job = lib_function (
+	"worker_push_job", [c_void_p, py_object], c_uint,
+	"""Pushes a job for the work of the worker.
+
+	Args:
+		worker: The worker.
+		args: The Python object that the work gets, kept alive by the caller.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+worker_push_job_with_work = lib_function (
+	"worker_push_job_with_work", [c_void_p, c_void_p, py_object], c_uint,
+	"""Pushes a job with its own work.
+
+	Args:
+		worker: The worker.
+		work: A WorkerMethod kept by the caller.
+		args: The Python object that the work gets, kept alive by the caller.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
 
 @CFUNCTYPE (None, py_object)
 def worker_remove_reference (worker):
