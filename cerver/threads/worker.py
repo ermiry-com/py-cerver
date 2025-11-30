@@ -266,6 +266,8 @@ class Worker:
 		worker = Worker ("images", process_image)
 		worker.start ()
 		worker.push ({"path": path})
+		...
+		worker.delete ()
 
 	Attributes:
 		worker: The C worker.
@@ -372,10 +374,11 @@ class Worker:
 		"""
 		return worker_end (self.worker)
 
-	def __del__ (self) -> None:
-		"""Ends the worker and releases it when the object is collected."""
-		self.end ()
-		worker_delete (self.worker)
+	def delete (self) -> None:
+		"""Ends the worker and releases it, it must not be used after this call."""
+		if (self.worker):
+			worker_delete (self.worker)
+			self.worker = None
 
-		with self.lock:
-			self.queue.clear ()
+			with self.lock:
+				self.queue.clear ()
