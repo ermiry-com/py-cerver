@@ -1,12 +1,15 @@
 from ctypes import Structure, POINTER
-from ctypes import c_int, c_uint, c_char_p, c_void_p
+from ctypes import c_int, c_char, c_char_p, c_void_p
 
 from ..lib import lib
 
+HTTP_ORIGINS_SIZE = 16
+HTTP_ORIGIN_VALUE_SIZE = 256
+
 class HttpOrigin (Structure):
 	_fields_ = [
-		("len", c_uint),
-		("value", c_char_p),
+		("len", c_int),
+		("value", c_char * HTTP_ORIGIN_VALUE_SIZE)
 	]
 
 http_origin_new = lib.http_origin_new
