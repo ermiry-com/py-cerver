@@ -11,7 +11,7 @@ __all__ = [
 	"HttpOrigin", "HttpOriginPointer",
 	"http_origin_new", "http_origin_delete",
 	"http_origin_get_len", "http_origin_get_value",
-	"http_origin_print"
+	"http_origin_init", "http_origin_reset", "http_origin_print"
 ]
 
 HTTP_ORIGINS_SIZE = 16
@@ -71,6 +71,25 @@ http_origin_get_value = lib_function (
 
 	Returns:
 		The value, as bytes.
+	"""
+)
+
+http_origin_init = lib_function (
+	"http_origin_init", [HttpOriginPointer, c_char_p], None,
+	"""Sets the value of an origin.
+
+	Args:
+		origin: The HttpOrigin.
+		value: The origin, as bytes, up to HTTP_ORIGIN_VALUE_SIZE bytes.
+	"""
+)
+
+http_origin_reset = lib_function (
+	"http_origin_reset", [HttpOriginPointer], None,
+	"""Clears the value of an origin.
+
+	Args:
+		origin: The HttpOrigin.
 	"""
 )
 
