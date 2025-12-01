@@ -1,8 +1,11 @@
+"""The headers of HTTP that cerver knows by their type."""
+
 from ctypes import c_int, c_char_p
+from typing import TypeAlias
 
-from ..lib import lib
+from ..lib import lib_function
 
-http_header = c_int
+HttpHeaderType: TypeAlias = c_int # type: ignore
 
 # Authentication
 HTTP_HEADER_AUTHENTICATE = 0
@@ -107,14 +110,40 @@ HTTP_HEADER_REAL_IP = 62
 
 HTTP_HEADER_UNDEFINED = 63
 
-http_header_string = lib.http_header_string
-http_header_string.argtypes = [http_header]
-http_header_string.restype = c_char_p
+http_header_string = lib_function (
+	"http_header_string", [HttpHeaderType], c_char_p,
+	"""Returns the name of a header.
 
-http_header_description = lib.http_header_description
-http_header_description.argtypes = [http_header]
-http_header_description.restype = c_char_p
+	Args:
+		header: An HTTP_HEADER_* value.
 
-http_header_type_by_string = lib.http_header_type_by_string
-http_header_type_by_string.argtypes = [c_char_p]
-http_header_type_by_string.restype = http_header
+	Returns:
+		The name, as bytes, like b"Content-Type".
+	"""
+)
+
+http_header_description = lib_function (
+	"http_header_description", [HttpHeaderType], c_char_p,
+	"""Returns the description of a header.
+
+	Args:
+		header: An HTTP_HEADER_* value.
+
+	Returns:
+		The description, as bytes.
+	"""
+)
+
+http_header_type_by_string = lib_function (
+	"http_header_type_by_string", [c_char_p], HttpHeaderType,
+	"""Returns the type of a header by its name.
+
+	Args:
+		header_type_string: The name, as bytes.
+
+	Returns:
+		An HTTP_HEADER_* value, HTTP_HEADER_UNDEFINED if it is unknown.
+	"""
+)
+
+__all__ = ["HttpHeaderType"] + [name for name in dir () if name.startswith (("HTTP_HEADER_", "http_header"))]
