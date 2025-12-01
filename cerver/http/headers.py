@@ -1,6 +1,6 @@
 """The headers of HTTP that cerver knows by their type."""
 
-from ctypes import c_int, c_char_p
+from ctypes import POINTER, c_int, c_char_p, c_bool, c_size_t, c_void_p
 from typing import TypeAlias
 
 from ..lib import lib_function
@@ -143,6 +143,34 @@ http_header_type_by_string = lib_function (
 
 	Returns:
 		An HTTP_HEADER_* value, HTTP_HEADER_UNDEFINED if it is unknown.
+	"""
+)
+
+http_header_print = lib_function (
+	"http_header_print", [c_void_p], None,
+	"""Prints a header of a request.
+
+	Args:
+		header: The HttpHeader.
+	"""
+)
+
+http_headers_buffer_find = lib_function (
+	"http_headers_buffer_find",
+	[c_char_p, c_size_t, c_char_p, c_size_t, POINTER (c_void_p), POINTER (c_size_t)],
+	c_bool,
+	"""Finds a header by its name in a buffer of headers, without a copy.
+
+	Args:
+		buffer: The headers, as bytes.
+		length: Their length.
+		name: The name of the header, as bytes.
+		name_length: Its length.
+		value: A pointer to a c_void_p that gets the address of the value.
+		value_length: A pointer to a c_size_t that gets its length.
+
+	Returns:
+		True if it was found.
 	"""
 )
 
