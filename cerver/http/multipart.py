@@ -18,10 +18,12 @@ __all__ = [
 	"http_multi_part_get_filename", "http_multi_part_get_filename_len",
 	"http_multi_part_get_generated_filename", "http_multi_part_get_generated_filename_len",
 	"http_multi_part_set_generated_filename_variadic", "http_multi_part_set_generated_filename",
-	"http_multi_part_get_n_reads", "http_multi_part_get_total_wrote",
+	"http_multi_part_get_n_reads", "http_multi_part_get_total_wrote", "http_multi_part_get_error",
 	"http_multi_part_get_saved_filename", "http_multi_part_get_saved_filename_len",
 	"http_multi_part_get_moved_file", "http_multi_part_get_value", "http_multi_part_get_value_len",
 	"http_multi_part_move_file",
+	"http_multi_part_move_file_generate_destination_variadic",
+	"http_multi_part_move_file_generate_destination",
 	"http_multi_part_headers_print", "http_multi_part_print",
 	"http_multi_part_get_file"
 ]
@@ -196,6 +198,18 @@ http_multi_part_get_total_wrote = lib_function (
 	"""
 )
 
+http_multi_part_get_error = lib_function (
+	"http_multi_part_get_error", [c_void_p], c_int,
+	"""Returns the errno of the open () or write () that failed to save a file part.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The errno, 0 if it was saved completely.
+	"""
+)
+
 http_multi_part_get_saved_filename = lib_function (
 	"http_multi_part_get_saved_filename", [c_void_p], c_char_p,
 	"""Returns the path where a file part was saved.
@@ -268,6 +282,33 @@ http_multi_part_move_file = lib_function (
 		0 on success, 1 on error.
 	"""
 )
+
+http_multi_part_move_file_generate_destination_variadic = lib_function (
+	"http_multi_part_move_file_generate_destination", None, c_uint,
+	"""Works like http_multi_part_move_file () with a printf format (variadic).
+
+	Args:
+		mpart: The MultiPart, as c_void_p.
+		format: The format, as bytes, followed by its arguments.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+def http_multi_part_move_file_generate_destination (mpart: int, destination: str | bytes) -> int:
+	"""Moves the saved file of a part to a path.
+
+	Args:
+		mpart: The MultiPart.
+		destination: The new path.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+	return http_multi_part_move_file_generate_destination_variadic (
+		c_void_p (mpart), c_char_p (MULTI_PART_FORMAT), c_char_p (lib_c_string (destination))
+	)
 
 http_multi_part_headers_print = lib_function (
 	"http_multi_part_headers_print", [c_void_p], None,
