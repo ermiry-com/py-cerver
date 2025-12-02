@@ -4,7 +4,7 @@ from ctypes import c_void_p, c_char_p
 from ctypes import c_int, c_uint, c_uint32, c_bool
 from typing import TypeAlias
 
-from ..lib import lib, lib_function
+from ..lib import lib_function, lib_c_string
 
 from ..types.string import StringPointer
 
@@ -17,7 +17,7 @@ __all__ = [
 	"http_multi_part_is_file", "http_multi_part_is_value", "http_multi_part_get_name",
 	"http_multi_part_get_filename", "http_multi_part_get_filename_len",
 	"http_multi_part_get_generated_filename", "http_multi_part_get_generated_filename_len",
-	"http_multi_part_set_generated_filename",
+	"http_multi_part_set_generated_filename_variadic", "http_multi_part_set_generated_filename",
 	"http_multi_part_get_n_reads", "http_multi_part_get_total_wrote",
 	"http_multi_part_get_saved_filename", "http_multi_part_get_saved_filename_len",
 	"http_multi_part_get_moved_file", "http_multi_part_get_value", "http_multi_part_get_value_len",
@@ -33,6 +33,9 @@ HTTP_MULTI_PART_SAVED_FILENAME_SIZE = 1024
 HTTP_MULTI_PART_VALUE_SIZE = 256
 
 HTTP_MULTI_PART_DEFAULT_FILENAME = "file"
+
+# the format that sets a value as it is
+MULTI_PART_FORMAT = b"%s"
 
 MultiPartType: TypeAlias = c_int # type: ignore
 
@@ -148,7 +151,26 @@ http_multi_part_get_generated_filename_len = lib_function (
 	"""
 )
 
-http_multi_part_set_generated_filename = lib.http_multi_part_set_generated_filename
+http_multi_part_set_generated_filename_variadic = lib_function (
+	"http_multi_part_set_generated_filename", None, None,
+	"""Sets the generated filename of a file part with a printf format (variadic).
+
+	Args:
+		multi_part: The MultiPart, as c_void_p.
+		format: The format, as bytes, followed by its arguments.
+	"""
+)
+
+def http_multi_part_set_generated_filename (mpart: int, filename: str | bytes) -> None:
+	"""Sets the filename of a file part, from an uploads filename generator.
+
+	Args:
+		mpart: The MultiPart.
+		filename: The filename.
+	"""
+	http_multi_part_set_generated_filename_variadic (
+		c_void_p (mpart), c_char_p (MULTI_PART_FORMAT), c_char_p (lib_c_string (filename))
+	)
 
 http_multi_part_get_n_reads = lib_function (
 	"http_multi_part_get_n_reads", [c_void_p], c_uint32,
