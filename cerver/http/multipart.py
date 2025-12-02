@@ -4,7 +4,7 @@ from ctypes import c_void_p, c_char_p
 from ctypes import c_int, c_uint, c_uint32, c_bool
 from typing import TypeAlias
 
-from ..lib import lib_function, lib_c_string
+from ..lib import lib_function, lib_c_string, lib_text
 
 from ..types.string import StringPointer
 
@@ -25,7 +25,7 @@ __all__ = [
 	"http_multi_part_move_file_generate_destination_variadic",
 	"http_multi_part_move_file_generate_destination",
 	"http_multi_part_headers_print", "http_multi_part_print",
-	"http_multi_part_get_file"
+	"http_multi_part_filename_text", "http_multi_part_get_file"
 ]
 
 HTTP_MULTI_PART_DIRNAME_SIZE = 1024
@@ -328,18 +328,37 @@ http_multi_part_print = lib_function (
 	"""
 )
 
-def http_multi_part_get_file (mpart: c_void_p) -> dict:
+def http_multi_part_filename_text (filename: bytes | None) -> str | None:
+	"""Returns a filename of cerver as text.
+
+	Args:
+		filename: The bytes of the filename.
+
+	Returns:
+		The text, None when there is none or it is not utf-8.
+	"""
+	return lib_text (filename) if (filename) else None
+
+def http_multi_part_get_file (mpart: int) -> dict:
+	"""Returns the filenames of a file part.
+
+	A file input without a file has no filenames, so they are None.
+
+	Args:
+		mpart: The MultiPart.
+
+	Returns:
+		A dict with "original", "saved" and "generated" (when there is one), empty for a value part.
+	"""
 	values = dict ()
 
 	if (http_multi_part_is_file (mpart)):
-		original = http_multi_part_get_filename (mpart)
-		values["original"] = original.decode ("utf-8")
+		values["original"] = http_multi_part_filename_text (http_multi_part_get_filename (mpart))
 
-		generated = http_multi_part_get_generated_filename (mpart)
+		generated = http_multi_part_filename_text (http_multi_part_get_generated_filename (mpart))
 		if (generated):
-			values["generated"] = generated.decode ("utf-8")
+			values["generated"] = generated
 
-		saved = http_multi_part_get_saved_filename (mpart)
-		values["saved"] = saved.decode ("utf-8")
+		values["saved"] = http_multi_part_filename_text (http_multi_part_get_saved_filename (mpart))
 
 	return values
