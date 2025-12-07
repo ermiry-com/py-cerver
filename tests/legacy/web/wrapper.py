@@ -1,4 +1,4 @@
-import os, sys
+import os, signal, sys
 import json
 
 import ctypes
