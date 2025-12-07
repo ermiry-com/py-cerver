@@ -73,14 +73,14 @@ static unsigned int json_request_all_actual (
 	// POST /json
 	(void) printf ("POST /json\n");
 	errors |= json_request_post_json (
-		actual_address, data_buffer, "./test/data/small.json"
+		actual_address, data_buffer, "./tests/data/small.json"
 	);
 
 	// POST /json/big
 	(void) printf ("POST /json/big\n");
 	(void) snprintf (actual_address, ADDRESS_SIZE, "%s/json/big", address);
 	errors |= json_request_post_json (
-		actual_address, data_buffer, "./test/data/big.json"
+		actual_address, data_buffer, "./tests/data/big.json"
 	);
 
 	// GET /json/create

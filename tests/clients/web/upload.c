@@ -45,7 +45,7 @@ static unsigned int upload_request_all_actual (
 		curl, actual_address,
 		HTTP_STATUS_OK,
 		upload_request_all_data_handler, data_buffer,
-		"./test/web/img/ermiry.png"
+		"./tests/legacy/web/img/ermiry.png"
 	);
 
 	// POST /multiple
@@ -54,8 +54,8 @@ static unsigned int upload_request_all_actual (
 	// 	curl, actual_address,
 	// 	HTTP_STATUS_OK,
 	// 	upload_request_all_data_handler, data_buffer,
-	// 	"./test/web/img/ermiry.png",
-	// 	"./test/web/img/github.jpeg"
+	// 	"./tests/legacy/web/img/ermiry.png",
+	// 	"./tests/legacy/web/img/github.jpeg"
 	// );
 
 	// POST /iter/good
@@ -64,7 +64,7 @@ static unsigned int upload_request_all_actual (
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
 		HTTP_STATUS_OK,
-		"file", "./test/web/img/ermiry.png",
+		"file", "./tests/legacy/web/img/ermiry.png",
 		"key", "okay",
 		upload_request_all_data_handler, data_buffer
 	);
@@ -87,7 +87,7 @@ static unsigned int upload_request_all_actual (
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
 		HTTP_STATUS_OK,
-		"file", "./test/web/img/ermiry.png",
+		"file", "./tests/legacy/web/img/ermiry.png",
 		"key", "okay",
 		upload_request_all_data_handler, data_buffer
 	);
@@ -97,7 +97,7 @@ static unsigned int upload_request_all_actual (
 	errors |= curl_upload_file_with_extra_value (
 		curl, actual_address,
 		HTTP_STATUS_BAD_REQUEST,
-		"file", "./test/web/img/ermiry.png",
+		"file", "./tests/legacy/web/img/ermiry.png",
 		"key", "discard",
 		upload_request_all_data_handler, data_buffer
 	);
