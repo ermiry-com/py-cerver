@@ -14,7 +14,7 @@ keys
 !test/jwt/keys
 !test/web/keys
 
-!test/data
+!tests/data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
