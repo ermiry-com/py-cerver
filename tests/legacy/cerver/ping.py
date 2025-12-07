@@ -2,6 +2,11 @@ import os, signal, sys
 import ctypes
 
 from cerver import *
+from cerver.core import Packet, PACKET_TYPE_APP, packet_send_request
+from cerver.network import PROTOCOL_TCP
+
+# the request type of the answer of an app packet
+APP_REQUEST_TEST_MSG = 0
 
 ping_cerver = None
 
