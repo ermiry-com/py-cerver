@@ -38,7 +38,7 @@ COPY ./cerver ./cerver
 COPY ./path.sh .
 RUN /bin/bash path.sh
 
-COPY ./test/cerver .
+COPY ./tests/legacy/cerver .
 COPY ./tests/legacy/web/ ./web
 
 CMD ["/bin/bash"]
