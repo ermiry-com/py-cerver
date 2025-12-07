@@ -4,7 +4,7 @@
 #include <cerver/client.h>
 #include <cerver/packets.h>
 
-#include "../test.h"
+#include "test.h"
 
 static const char *client_name = { "test-client" };
 
