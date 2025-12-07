@@ -10,9 +10,7 @@ logs
 
 keys
 
-!test/http/keys
-!test/jwt/keys
-!test/web/keys
+!tests/legacy/web/keys
 
 !tests/data
 
