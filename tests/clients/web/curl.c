@@ -137,7 +137,9 @@ CurlResult curl_simple_with_auth (
 	curl_easy_setopt (curl, CURLOPT_HTTPHEADER, headers);
 
 	curl_easy_setopt (curl, CURLOPT_URL, address);
-	curl_easy_setopt (curl, CURLOPT_CUSTOMREQUEST, "GET");
+
+	// a GET without the body of a previous POST of the same handle
+	curl_easy_setopt (curl, CURLOPT_HTTPGET, 1L);
 
 	// perfrom the request
 	result = curl_perform_request (curl, expected_status);
