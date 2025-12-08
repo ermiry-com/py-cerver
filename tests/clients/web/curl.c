@@ -142,6 +142,10 @@ CurlResult curl_simple_with_auth (
 	// perfrom the request
 	result = curl_perform_request (curl, expected_status);
 
+	// the handle must not keep the list after it is released
+	curl_easy_setopt (curl, CURLOPT_HTTPHEADER, NULL);
+	curl_slist_free_all (headers);
+
 	return result;
 
 }
@@ -212,10 +216,9 @@ CurlResult curl_simple_post_json (
 	);
 
 	struct curl_slist *headers = NULL;
-	(void) curl_slist_append (headers, "Accept: application/json");
-	(void) curl_slist_append (headers, "Content-Type: application/json");
-	(void) curl_slist_append (headers, content_length);
-	// (void) curl_slist_append (headers, "charset: utf-8");
+	headers = curl_slist_append (headers, "Accept: application/json");
+	headers = curl_slist_append (headers, "Content-Type: application/json");
+	headers = curl_slist_append (headers, content_length);
 
 	curl_easy_setopt (curl, CURLOPT_CUSTOMREQUEST, "POST");
 	curl_easy_setopt (curl, CURLOPT_HTTPHEADER, headers);
@@ -230,6 +233,10 @@ CurlResult curl_simple_post_json (
 
 	// perfrom the request
 	result = curl_perform_request (curl, expected_status);
+
+	// the handle must not keep the list after it is released
+	curl_easy_setopt (curl, CURLOPT_HTTPHEADER, NULL);
+	curl_slist_free_all (headers);
 
 	return result;
 
@@ -267,6 +274,8 @@ CurlResult curl_simple_post_with_auth (
 	// perfrom the request
 	result = curl_perform_request (curl, expected_status);
 
+	// the handle must not keep the list after it is released
+	curl_easy_setopt (curl, CURLOPT_HTTPHEADER, NULL);
 	curl_slist_free_all (headers);
 
 	return result;
