@@ -25,7 +25,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/ping || { exit 1; }
+./tests/clients/bin/client/ping || { exit 1; }
 
 sudo docker kill test
 
@@ -41,7 +41,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/web || { exit 1; }
+./tests/clients/bin/client/web/web || { exit 1; }
 
 sudo docker kill test
 
@@ -57,7 +57,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/query || { exit 1; }
+./tests/clients/bin/client/web/query || { exit 1; }
 
 sudo docker kill test
 
@@ -73,7 +73,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/json || { exit 1; }
+./tests/clients/bin/client/web/json || { exit 1; }
 
 sudo docker kill test
 
@@ -89,7 +89,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/auth || { exit 1; }
+./tests/clients/bin/client/web/auth || { exit 1; }
 
 sudo docker kill test
 
@@ -105,7 +105,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/api || { exit 1; }
+./tests/clients/bin/client/web/api || { exit 1; }
 
 sudo docker kill test
 
@@ -121,7 +121,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/multi || { exit 1; }
+./tests/clients/bin/client/web/multi || { exit 1; }
 
 sudo docker kill test
 
@@ -137,7 +137,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/upload || { exit 1; }
+./tests/clients/bin/client/web/upload || { exit 1; }
 
 sudo docker kill test
 
@@ -153,7 +153,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/multiple || { exit 1; }
+./tests/clients/bin/client/web/multiple || { exit 1; }
 
 sudo docker kill test
 
@@ -169,7 +169,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/jobs || { exit 1; }
+./tests/clients/bin/client/web/jobs || { exit 1; }
 
 sudo docker kill test
 
@@ -185,7 +185,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/worker || { exit 1; }
+./tests/clients/bin/client/web/worker || { exit 1; }
 
 sudo docker kill test
 
@@ -201,7 +201,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/admin || { exit 1; }
+./tests/clients/bin/client/web/admin || { exit 1; }
 
 sudo docker kill test
 
@@ -217,7 +217,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/validation || { exit 1; }
+./tests/clients/bin/client/web/validation || { exit 1; }
 
 sudo docker kill test
 
@@ -233,7 +233,7 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/wrapper || { exit 1; }
+./tests/clients/bin/client/web/wrapper || { exit 1; }
 
 sudo docker kill test
 

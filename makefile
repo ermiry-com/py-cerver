@@ -48,7 +48,7 @@ DEPEXT      := d
 OBJEXT      := o
 
 # tests
-TESTDIR		:= test
+TESTDIR		:= tests/clients
 TESTBUILD	:= $(TESTDIR)/objs
 TESTTARGET	:= $(TESTDIR)/bin
 
@@ -109,13 +109,13 @@ testapp:
 	@mkdir -p ./$(TESTTARGET)/app
 	$(CC) $(TESTAPPFGS) $(TESTAPPSRC) -shared -o $(TESTAPP) $(TESTAPPLIBS)
 
-INTCLIENTIN		:= ./$(TESTBUILD)/client
+INTCLIENTIN		:= ./$(TESTBUILD)
 INTCLIENTOUT	:= ./$(TESTTARGET)/client
 
 integration-client:
 	$(CC) $(TESTINC) $(INTCLIENTIN)/ping.o -o $(INTCLIENTOUT)/ping $(TESTLIBS)
 
-INTWEBCLIENTIN		:= ./$(TESTBUILD)/client/web
+INTWEBCLIENTIN		:= ./$(TESTBUILD)/web
 INTWEBCLIENTOUT		:= ./$(TESTTARGET)/client/web
 INTWEBCLIENTLIBS	:= $(TESTLIBS) $(CURL)
 
