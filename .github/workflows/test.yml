@@ -5,7 +5,46 @@ on:
     branches:
       - '*'
 
+env:
+  CERVER_REPOSITORY: ermiry/cerver
+  CERVER_REF: 2.0b-64
+
 jobs:
+  suite:
+    name: PyCerver suite
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: ['', 'address,undefined']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout Cerver
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CERVER_REPOSITORY }}
+          ref: ${{ env.CERVER_REF }}
+          path: .cerver
+
+      - name: Move Cerver out of the workspace
+        run: mv .cerver "${RUNNER_TEMP}/cerver"
+
+      - name: Build
+        env:
+          SANITIZER: ${{ matrix.sanitizer }}
+          CERVER_DIR: ${{ runner.temp }}/cerver
+        run: ./tests/build.sh
+
+      - name: Every tier
+        if: ${{ matrix.sanitizer == '' }}
+        run: ./tests/run.sh
+
+      - name: Every tier with sanitizers
+        if: ${{ matrix.sanitizer != '' }}
+        run: ./tests/run.sh asan
+
   test:
     name: PyCerver tests
     runs-on: ubuntu-latest
