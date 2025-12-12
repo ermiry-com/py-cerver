@@ -10,6 +10,8 @@ logs
 
 keys
 
+!examples/uploads
+
 !tests/legacy/web/keys
 
 !tests/data
