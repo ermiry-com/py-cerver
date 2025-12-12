@@ -1,0 +1,39 @@
+name: PyCerver Nightly
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+env:
+  CERVER_REPOSITORY: ermiry/cerver
+  CERVER_REF: 2.0b-64
+
+jobs:
+  nightly:
+    name: PyCerver fuzzing and flaky hunter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout Cerver
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CERVER_REPOSITORY }}
+          ref: ${{ env.CERVER_REF }}
+          path: .cerver
+
+      - name: Move Cerver out of the workspace
+        run: mv .cerver "${RUNNER_TEMP}/cerver"
+
+      - name: Build
+        env:
+          CERVER_DIR: ${{ runner.temp }}/cerver
+        run: ./tests/build.sh
+
+      - name: Fuzzing
+        run: ./tests/run.sh fuzz
+
+      - name: Flaky hunter
+        run: ./tests/run.sh repeat e2e/ 20
