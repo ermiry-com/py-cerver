@@ -1,176 +1,121 @@
 ![Cerver Banner](https://ermiry.com/api/images/cerver/banner.png)
 
-PyCerver is a pure Python wrapper around the [cerver](https://cerver.ermiry.com) framework. It uses the built-in ctypes module to interface with cerver, and provides simple Python classes and wrappers for common cerver functionality. You can check the original project's source code [here](https://github.com/ermiry/cerver)!
+PyCerver is a pure Python wrapper around the [cerver](https://cerver.ermiry.com) framework. It uses the built-in ctypes module to interface with cerver, and provides Python helpers for the common cerver functionality: HTTP services with groups and decorators, request values as Python text, JSON responses, validators, JWTs, thread pools, job queues, workers, and TCP / UDP cervers and clients. You can check the original project's source code [here](https://github.com/ermiry/cerver)!
 
-## Trying out
+## Compatibility
 
-### Local
+| pycerver | cerver | Python |
+|---|---|---|
+| 1.0 | 2.0b-64 or newer | 3.10 to 3.14 |
 
-You can test out PyCerver without actually installing it. You just need to set up your PYTHONPATH to point to the location of the source distribution package.
+PyCerver loads `libcerver.so` at import time: from the path in the `CERVER_LIBRARY` environment variable, then from `/usr/local/lib/libcerver.so`, and then from the paths of the system linker. The breaking changes of each version are in [incompatibilities.md](incompatibilities.md).
+
+## Installation
+
+1. Compile and install cerver (see [cerver-install.sh](cerver-install.sh))
+
+``` bash
+bash cerver-install.sh
+```
+
+2. Install pycerver
+
+``` bash
+pip install pycerver==1.0
+```
+
+You can also use the source distribution without installing it, with your `PYTHONPATH` pointing to it:
 
 ``` bash
 export PYTHONPATH=/path/to/py-cerver:$PYTHONPATH
 ```
 
-### Docker
-
-0. Buid local **development** docker image
-
-``` bash
-bash development.sh
-```
-
-1. Run **development** image with local source
-
-``` bash
-sudo docker run \
-  -it \
-  --name pycerver --rm \
-  -p 8080:8080 \
-  -v /home/ermiry/Documents/py-cerver:/home/pycerver \
-  ermiry/pycerver:development /bin/bash
-```
-
-2. Handle **pycerver** module
-
-``` bash
-export PYTHONPATH=$pwd:$PYTHONPATH
-```
-
-3. Run any of the included examples
-
-``` bash
-python3 examples/http/web.py
-```
-
 ## Getting Started
 
-1. Import the necessary dependencies
+A web service with a group of two endpoints, that runs until it gets SIGINT or SIGTERM:
 
 ``` python
-# provides the ability to handle signals to stop the application
-import signal
-import sys			# to use sys.exit () to exit the program
+import sys
 
-# needed to interact with the low level cerver framework
-import ctypes
+from cerver import cerver_init, cerver_end, cerver_run
+from cerver.http import HTTP_STATUS_OK, REQUEST_METHOD_GET
+from cerver.http import http_cerver_configuration, http_cerver_get, http_group
+from cerver.http import http_request_get_named_param_string, http_response_json_send
 
-# get access to main and HTTP cerver methods
-from cerver import *
-from cerver.http import *
-```
+def hello (http_receive, request):
+	"""GET /api/hello"""
+	http_response_json_send (http_receive, HTTP_STATUS_OK, {"msg": "Hello from pycerver!"})
 
-2. Create a global **Cerver** instance reference
+def main () -> int:
+	cerver_init ()
 
-``` python
-# define a global reference to the cerver instance
-web_service = None
-```
+	service = http_cerver_configuration ("quick", port=8080)
+	http_cerver = http_cerver_get (service)
 
-3. Define an **end** method to be used as the callback when catching signals. We can use this method to display the cerver's stats and to correctly dispose all the memory that has been allocated by our application
+	api = http_group (http_cerver, "api/hello", REQUEST_METHOD_GET, hello)
 
-``` python
-def end (signum, frame):
-  # prints the HTTP cerver stats
-  # like how many requests were handled by each route
-  http_cerver_all_stats_print (http_cerver_get (web_service))
+	@api.get ("/:name")
+	def hello_name (http_receive, request):
+		"""GET /api/hello/:name"""
+		name = http_request_get_named_param_string (request, "name")
+		http_response_json_send (http_receive, HTTP_STATUS_OK, {"msg": f"Hello {name}!"})
 
-  # correctly disposes HTTP cerver references
-  cerver_teardown (web_service)
+	# starts the cerver in its own thread, and stops it and tears it down with SIGINT or SIGTERM
+	result = cerver_run (service)
 
-  # correctly disposes cerver internal global values.
-  # Should be called only once at the very end of the program
-  cerver_end ()
+	cerver_end ()
 
-  # exit the application with a custom message
-  sys.exit ("Done!")
-```
+	return result
 
-4. Create a handler method for the **GET /test** route
-
-``` python
-# GET /test
-@ctypes.CFUNCTYPE (None, ctypes.c_void_p, ctypes.c_void_p)
-def test_handler (http_receive, request):
-  # creates a HTTP response with a status code and a JSON body
-  response = http_response_json_msg (
-    HTTP_STATUS_OK, b"Test route works!"
-  )
-
-  # prints the generated HTTP response
-  http_response_print (response)
-
-  # send the HTTP response to the client
-  http_response_send (response, http_receive)
-
-  # correctly disposes a HTTP response and all of its data
-  http_response_delete (response)
-```
-
-5. Define a start method where the **Cerver** instance will be created and its configuration will be set before starting it
-
-``` python
-def start ():
-  # tells Python to use the global reference
-  global web_service
-
-  # creates a new cerver of type CERVER_TYPE_WEB
-  # that will bind and listen to port 8080 and with a connection queue of size 10
-  web_service = cerver_create_web (b"web-service", 8080, 10)
-
-  # main configuration
-  # set the cerver's thpool number of threads
-  # This will enable the ability to handle requests using multiple threads
-  cerver_set_thpool_n_threads (web_service, 4);
-  cerver_set_handler_type (web_service, CERVER_HANDLER_TYPE_THREADS);
-
-  # enable cerver's reusable address flags
-  # to avoid errors when binding to the selected port
-  cerver_set_reusable_address_flags (web_service, True)
-
-  # HTTP configuration
-  # gets a reference to the cerver's internal HTTP structure
-  http_cerver = http_cerver_get (web_service)
-
-  # GET /test
-  # create a new HTTP route to handle GET requests at /test endpoint
-  # using the previously defined test_handler ()
-  test_route = http_route_create (
-    REQUEST_METHOD_GET, b"test", test_handler
-  )
-
-  # register the new test route to the HTTP cerver
-  http_cerver_route_register (http_cerver, test_route)
-
-  # start
-  # start listening for connections and handling requests
-  cerver_start (web_service)
-```
-
-6. Define the application's entry point where the **cerver** is initialized and the signals are handled
-
-``` python
 if __name__ == "__main__":
-  # register to the desired signals and sets the end () method to handle them
-  signal.signal (signal.SIGINT, end)
-  signal.signal (signal.SIGTERM, end)
-  signal.signal (signal.SIGPIPE, signal.SIG_IGN)
-
-  # initializes global cerver values
-  # Should be called only once at the start of the program
-  cerver_init ()
-
-  # prints the base cerver framework version information
-  cerver_version_print_full ()
-
-  # prints the pycerver wrapper version information
-  pycerver_version_print_full ()
-
-  # calls the previously defined start () method
-  start ()
+	sys.exit (main ())
 ```
 
-You can also take a look at the official [wiki](https://github.com/ermiry-com/py-cerver/wiki) to get better explanations about the included examples and of all the methods that are available in the framework.
+``` bash
+curl http://localhost:8080/api/hello/world
+```
+
+## Packages
+
+| Package | What it has |
+|---|---|
+| `cerver` | The cerver: creation, configuration, `cerver_run`, handlers, events, errors, files, timer, packets and connections |
+| `cerver.http` | The HTTP cerver: routes, groups and decorators, middleware, requests, responses, validation, JWTs, origins, proxies, compression and metrics |
+| `cerver.threads` | Threads, the thread pool and its stats, job queues with priorities, workers and the worker manager |
+| `cerver.network` | Address resolution and parsing, sockets and UDP |
+| `cerver.client` | The cerver client: connections, events, errors and files |
+| `cerver.types`, `cerver.utils` | The `String` of cerver and the log |
+
+Every package has an explicit `__all__`, and the raw bindings keep the names of the C functions. A callback that is passed to a raw binding has to be a `CFUNCTYPE` object (like `HttpHandler (function)`); the helpers (`http_group`, `HttpGroup`, `http_handler`, `cerver_event_on`, `Worker`, ...) take plain Python functions and keep them alive.
+
+## Examples
+
+The [examples](examples) run with `python3 examples/<folder>/<example>.py`, and read the port from `PORT`:
+
+| Folder | What they show |
+|---|---|
+| `basics` | The smallest service, its configuration from the environment (address, threads, limits, timeouts and policies), static files and the version |
+| `routing` | Groups, subgroups, typed and catch all params, the answers without a route and the routes tree |
+| `requests` | Query, JSON body, headers, typed validators, and the real IP behind proxies with request ids |
+| `responses` | JSON and prebuilt error responses, custom headers, files, streams, redirects, entity tags and gzip |
+| `auth` | JWTs, a custom authentication and the admin routes with their metrics |
+| `uploads` | Multipart uploads, a validated image and the files deleted when the request ends |
+| `middleware` | The middleware of the cerver, of a group and of an endpoint, and CORS |
+| `service` | The layout of a service: configuration from the environment, controllers, routes and an errors table |
+| `workers` | A job queue that handles requests in its own thread, the worker manager and a worker without HTTP |
+| `client` | A TCP and UDP client of a cerver, with reconnection |
+| `deployment` | A compose with nginx in front of the service |
+
+## Tests
+
+The tests run in Docker, against a cerver compiled from its sources (see [tests/README.md](tests/README.md)):
+
+``` bash
+CERVER_DIR=/path/to/cerver ./tests/build.sh
+./tests/run.sh
+```
+
+You can also take a look at the official [wiki](https://github.com/ermiry-com/py-cerver/wiki) to get better explanations about all the methods that are available in the framework.
 
 ---
 
