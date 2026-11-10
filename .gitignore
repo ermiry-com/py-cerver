@@ -10,11 +10,11 @@ logs
 
 keys
 
-!test/http/keys
-!test/jwt/keys
-!test/web/keys
+!examples/uploads
 
-!test/data
+!tests/legacy/web/keys
+
+!tests/data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

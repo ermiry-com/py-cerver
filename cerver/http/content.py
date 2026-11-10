@@ -1,8 +1,11 @@
+"""The content types of HTTP: their mimes, extensions and descriptions."""
+
 from ctypes import c_int, c_char_p, c_bool
+from typing import TypeAlias
 
-from ..lib import lib
+from ..lib import lib_function
 
-ContentType = c_int
+ContentType: TypeAlias = c_int # type: ignore
 
 HTTP_CONTENT_TYPE_NONE = 0
 HTTP_CONTENT_TYPE_AAC = 1
@@ -79,34 +82,100 @@ HTTP_CONTENT_TYPE_3GP = 71
 HTTP_CONTENT_TYPE_3G2 = 72
 HTTP_CONTENT_TYPE_7Z = 73
 
-http_content_type_extension = lib.http_content_type_extension
-http_content_type_extension.argtypes = [ContentType]
-http_content_type_extension.restype = c_char_p
+http_content_type_extension = lib_function (
+	"http_content_type_extension", [ContentType], c_char_p,
+	"""Returns the extension of a content type.
 
-http_content_type_description = lib.http_content_type_description
-http_content_type_description.argtypes = [ContentType]
-http_content_type_description.restype = c_char_p
+	Args:
+		content_type: An HTTP_CONTENT_TYPE_* value.
 
-http_content_type_mime = lib.http_content_type_mime
-http_content_type_mime.argtypes = [ContentType]
-http_content_type_mime.restype = c_char_p
+	Returns:
+		The extension, as bytes.
+	"""
+)
 
-http_content_type_by_mime = lib.http_content_type_by_mime
-http_content_type_by_mime.argtypes = [c_char_p]
-http_content_type_by_mime.restype = ContentType
+http_content_type_description = lib_function (
+	"http_content_type_description", [ContentType], c_char_p,
+	"""Returns the description of a content type.
 
-http_content_type_by_extension = lib.http_content_type_by_extension
-http_content_type_by_extension.argtypes = [c_char_p]
-http_content_type_by_extension.restype = ContentType
+	Args:
+		content_type: An HTTP_CONTENT_TYPE_* value.
 
-http_content_type_mime_by_extension = lib.http_content_type_mime_by_extension
-http_content_type_mime_by_extension.argtypes = [c_char_p]
-http_content_type_mime_by_extension.restype = c_char_p
+	Returns:
+		The description, as bytes.
+	"""
+)
 
-http_content_type_is_json = lib.http_content_type_is_json
-http_content_type_is_json.argtypes = [c_char_p]
-http_content_type_is_json.restype = c_bool
+http_content_type_mime = lib_function (
+	"http_content_type_mime", [ContentType], c_char_p,
+	"""Returns the mime of a content type.
 
-http_content_type_from_filename = lib.http_content_type_from_filename
-http_content_type_from_filename.argtypes = [c_char_p]
-http_content_type_from_filename.restype = ContentType
+	Args:
+		content_type: An HTTP_CONTENT_TYPE_* value.
+
+	Returns:
+		The mime, as bytes, like b"application/json".
+	"""
+)
+
+http_content_type_by_mime = lib_function (
+	"http_content_type_by_mime", [c_char_p], ContentType,
+	"""Returns the content type of a mime.
+
+	Args:
+		mime_string: The mime, as bytes.
+
+	Returns:
+		An HTTP_CONTENT_TYPE_* value, HTTP_CONTENT_TYPE_NONE if it is unknown.
+	"""
+)
+
+http_content_type_by_extension = lib_function (
+	"http_content_type_by_extension", [c_char_p], ContentType,
+	"""Returns the content type of an extension.
+
+	Args:
+		extension_string: The extension without the dot, as bytes.
+
+	Returns:
+		An HTTP_CONTENT_TYPE_* value, HTTP_CONTENT_TYPE_NONE if it is unknown.
+	"""
+)
+
+http_content_type_mime_by_extension = lib_function (
+	"http_content_type_mime_by_extension", [c_char_p], c_char_p,
+	"""Returns the mime of an extension.
+
+	Args:
+		extension_string: The extension without the dot, as bytes.
+
+	Returns:
+		The mime, as bytes, None if it is unknown.
+	"""
+)
+
+http_content_type_is_json = lib_function (
+	"http_content_type_is_json", [c_char_p], c_bool,
+	"""Returns if the value of a Content-Type header is JSON.
+
+	Args:
+		description: The value of the header, as bytes.
+
+	Returns:
+		True for application/json.
+	"""
+)
+
+http_content_type_from_filename = lib_function (
+	"http_content_type_from_filename", [c_char_p], ContentType,
+	"""Returns the content type of a filename by its extension.
+
+	Args:
+		filename: The filename, as bytes.
+
+	Returns:
+		An HTTP_CONTENT_TYPE_* value.
+	"""
+)
+
+__all__ = ["ContentType"] + [name for name in dir () if name.startswith (("HTTP_CONTENT_TYPE_", "http_content_type_"))]

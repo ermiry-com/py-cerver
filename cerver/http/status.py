@@ -1,8 +1,11 @@
+"""The status codes of HTTP."""
+
 from ctypes import c_int, c_char_p
+from typing import TypeAlias
 
-from ..lib import lib
+from ..lib import lib_function
 
-http_status = c_int
+HttpStatus: TypeAlias = c_int # type: ignore
 
 HTTP_STATUS_NONE = 0
 HTTP_STATUS_CONTINUE = 100
@@ -65,6 +68,16 @@ HTTP_STATUS_LOOP_DETECTED = 508
 HTTP_STATUS_NOT_EXTENDED = 510
 HTTP_STATUS_NETWORK_AUTHENTICATION_REQUIRED = 511
 
-http_status_string = lib.http_status_string
-http_status_string.argtypes = [http_status]
-http_status_string.restype = c_char_p
+http_status_string = lib_function (
+	"http_status_string", [HttpStatus], c_char_p,
+	"""Returns the reason phrase of a status.
+
+	Args:
+		status: An HTTP_STATUS_* value.
+
+	Returns:
+		The phrase, as bytes, like b"Not Found".
+	"""
+)
+
+__all__ = ["HttpStatus", "http_status_string"] + [name for name in dir () if name.startswith ("HTTP_STATUS_")]

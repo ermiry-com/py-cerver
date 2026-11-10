@@ -1,8 +1,11 @@
-from ctypes import c_int, c_char_p
+"""The headers of HTTP that cerver knows by their type."""
 
-from ..lib import lib
+from ctypes import POINTER, c_int, c_char_p, c_bool, c_size_t, c_void_p
+from typing import TypeAlias
 
-http_header = c_int
+from ..lib import lib_function
+
+HttpHeaderType: TypeAlias = c_int # type: ignore
 
 # Authentication
 HTTP_HEADER_AUTHENTICATE = 0
@@ -91,16 +94,84 @@ HTTP_HEADER_SEC_WEBSOCKET_VERSION = 52
 HTTP_HEADER_DATE = 53
 HTTP_HEADER_UPGRADE = 54
 
-HTTP_HEADER_UNDEFINED = 53
+# Transfer coding
+HTTP_HEADER_TRANSFER_ENCODING = 55
 
-http_header_string = lib.http_header_string
-http_header_string.argtypes = [http_header]
-http_header_string.restype = c_char_p
+# Conditionals
+HTTP_HEADER_IF_NONE_MATCH = 56
+HTTP_HEADER_IF_MODIFIED_SINCE = 57
+HTTP_HEADER_ETAG = 58
+HTTP_HEADER_LAST_MODIFIED = 59
 
-http_header_description = lib.http_header_description
-http_header_description.argtypes = [http_header]
-http_header_description.restype = c_char_p
+# Tracing
+HTTP_HEADER_REQUEST_ID = 60
+HTTP_HEADER_FORWARDED_FOR = 61
+HTTP_HEADER_REAL_IP = 62
 
-http_header_type_by_string = lib.http_header_type_by_string
-http_header_type_by_string.argtypes = [c_char_p]
-http_header_type_by_string.restype = http_header
+HTTP_HEADER_UNDEFINED = 63
+
+http_header_string = lib_function (
+	"http_header_string", [HttpHeaderType], c_char_p,
+	"""Returns the name of a header.
+
+	Args:
+		header: An HTTP_HEADER_* value.
+
+	Returns:
+		The name, as bytes, like b"Content-Type".
+	"""
+)
+
+http_header_description = lib_function (
+	"http_header_description", [HttpHeaderType], c_char_p,
+	"""Returns the description of a header.
+
+	Args:
+		header: An HTTP_HEADER_* value.
+
+	Returns:
+		The description, as bytes.
+	"""
+)
+
+http_header_type_by_string = lib_function (
+	"http_header_type_by_string", [c_char_p], HttpHeaderType,
+	"""Returns the type of a header by its name.
+
+	Args:
+		header_type_string: The name, as bytes.
+
+	Returns:
+		An HTTP_HEADER_* value, HTTP_HEADER_UNDEFINED if it is unknown.
+	"""
+)
+
+http_header_print = lib_function (
+	"http_header_print", [c_void_p], None,
+	"""Prints a header of a request.
+
+	Args:
+		header: The HttpHeader.
+	"""
+)
+
+http_headers_buffer_find = lib_function (
+	"http_headers_buffer_find",
+	[c_char_p, c_size_t, c_char_p, c_size_t, POINTER (c_void_p), POINTER (c_size_t)],
+	c_bool,
+	"""Finds a header by its name in a buffer of headers, without a copy.
+
+	Args:
+		buffer: The headers, as bytes.
+		length: Their length.
+		name: The name of the header, as bytes.
+		name_length: Its length.
+		value: A pointer to a c_void_p that gets the address of the value.
+		value_length: A pointer to a c_size_t that gets its length.
+
+	Returns:
+		True if it was found.
+	"""
+)
+
+__all__ = ["HttpHeaderType"] + [name for name in dir () if name.startswith (("HTTP_HEADER_", "http_header"))]

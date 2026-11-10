@@ -3,8 +3,8 @@
 # ensure a clean build
 make clean
 
-# remove any active container
-sudo docker kill $(sudo docker ps -q)
+# remove the test container of a previous run, never the other containers of the machine
+sudo docker kill test 2> /dev/null
 
 # compile tests
 make TYPE=test -j4 test || { exit 1; }
@@ -25,9 +25,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/ping || { exit 1; }
+./tests/clients/bin/client/ping || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # web
 echo "Web integration test..."
@@ -41,9 +41,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/web || { exit 1; }
+./tests/clients/bin/client/web/web || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # query
 echo "Query integration test..."
@@ -57,9 +57,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/query || { exit 1; }
+./tests/clients/bin/client/web/query || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # JSON
 echo "JSON integration test..."
@@ -73,9 +73,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/json || { exit 1; }
+./tests/clients/bin/client/web/json || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # auth
 echo "Web Auth integration test..."
@@ -89,9 +89,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/auth || { exit 1; }
+./tests/clients/bin/client/web/auth || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # api
 echo "API integration test..."
@@ -105,9 +105,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/api || { exit 1; }
+./tests/clients/bin/client/web/api || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # multi
 echo "Multi integration test..."
@@ -121,9 +121,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/multi || { exit 1; }
+./tests/clients/bin/client/web/multi || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # upload
 echo "Upload integration test..."
@@ -137,9 +137,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/upload || { exit 1; }
+./tests/clients/bin/client/web/upload || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # multiple
 echo "Multiple integration test..."
@@ -153,9 +153,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/multiple || { exit 1; }
+./tests/clients/bin/client/web/multiple || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # jobs
 echo "Jobs integration test..."
@@ -169,9 +169,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/jobs || { exit 1; }
+./tests/clients/bin/client/web/jobs || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # worker
 echo "Worker integration test..."
@@ -185,9 +185,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/worker || { exit 1; }
+./tests/clients/bin/client/web/worker || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # admin
 echo "Admin integration test..."
@@ -201,9 +201,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/admin || { exit 1; }
+./tests/clients/bin/client/web/admin || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # validation
 echo "Validation integration test..."
@@ -217,9 +217,9 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/validation || { exit 1; }
+./tests/clients/bin/client/web/validation || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 # wrapper
 echo "Wrapper integration test..."
@@ -233,8 +233,8 @@ sleep 2
 
 sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
-./test/bin/client/web/wrapper || { exit 1; }
+./tests/clients/bin/client/web/wrapper || { exit 1; }
 
-sudo docker kill $(sudo docker ps -q)
+sudo docker kill test
 
 printf "\n\nDone\n\n"

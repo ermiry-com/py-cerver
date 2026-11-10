@@ -1,10 +1,43 @@
-from ctypes import c_void_p
-from ctypes import c_int, c_uint, c_uint32, c_char_p, c_bool
+"""A part of a multipart/form-data request: a value or an uploaded file."""
+
+from ctypes import c_void_p, c_char_p
+from ctypes import c_int, c_uint, c_uint32, c_bool
 from typing import TypeAlias
 
-from ..lib import lib
+from ..lib import lib_function, lib_c_string, lib_text
 
 from ..types.string import StringPointer
+
+__all__ = [
+	"HTTP_MULTI_PART_DIRNAME_SIZE", "HTTP_MULTI_PART_FILENAME_SIZE",
+	"HTTP_MULTI_PART_GENERATED_FILENAME_SIZE", "HTTP_MULTI_PART_SAVED_FILENAME_SIZE",
+	"HTTP_MULTI_PART_VALUE_SIZE", "HTTP_MULTI_PART_DEFAULT_FILENAME",
+	"MultiPartType", "MULTI_PART_TYPE_NONE", "MULTI_PART_TYPE_FILE", "MULTI_PART_TYPE_VALUE",
+	"http_multi_part_is_not_empty", "http_multi_part_get_type",
+	"http_multi_part_is_file", "http_multi_part_is_value", "http_multi_part_get_name",
+	"http_multi_part_get_filename", "http_multi_part_get_filename_len",
+	"http_multi_part_get_generated_filename", "http_multi_part_get_generated_filename_len",
+	"http_multi_part_set_generated_filename_variadic", "http_multi_part_set_generated_filename",
+	"http_multi_part_get_n_reads", "http_multi_part_get_total_wrote", "http_multi_part_get_error",
+	"http_multi_part_get_saved_filename", "http_multi_part_get_saved_filename_len",
+	"http_multi_part_get_moved_file", "http_multi_part_get_value", "http_multi_part_get_value_len",
+	"http_multi_part_move_file",
+	"http_multi_part_move_file_generate_destination_variadic",
+	"http_multi_part_move_file_generate_destination",
+	"http_multi_part_headers_print", "http_multi_part_print",
+	"http_multi_part_filename_text", "http_multi_part_get_file"
+]
+
+HTTP_MULTI_PART_DIRNAME_SIZE = 1024
+HTTP_MULTI_PART_FILENAME_SIZE = 256
+HTTP_MULTI_PART_GENERATED_FILENAME_SIZE = 512
+HTTP_MULTI_PART_SAVED_FILENAME_SIZE = 1024
+HTTP_MULTI_PART_VALUE_SIZE = 256
+
+HTTP_MULTI_PART_DEFAULT_FILENAME = "file"
+
+# the format that sets a value as it is
+MULTI_PART_FORMAT = b"%s"
 
 MultiPartType: TypeAlias = c_int # type: ignore
 
@@ -12,94 +45,320 @@ MULTI_PART_TYPE_NONE = 0
 MULTI_PART_TYPE_FILE = 1
 MULTI_PART_TYPE_VALUE = 2
 
-http_multi_part_is_not_empty = lib.http_multi_part_is_not_empty
-http_multi_part_is_not_empty.argtypes = [c_void_p]
-http_multi_part_is_not_empty.restype = c_bool
+http_multi_part_is_not_empty = lib_function (
+	"http_multi_part_is_not_empty", [c_void_p], c_bool,
+	"""Returns if a part has a value or a file.
 
-http_multi_part_get_type = lib.http_multi_part_get_type
-http_multi_part_get_type.argtypes = [c_void_p]
-http_multi_part_get_type.restype = MultiPartType
+	Args:
+		multi_part: The MultiPart.
 
-http_multi_part_is_file = lib.http_multi_part_is_file
-http_multi_part_is_file.argtypes = [c_void_p]
-http_multi_part_is_file.restype = c_bool
+	Returns:
+		True if it is not empty.
+	"""
+)
 
-http_multi_part_is_value = lib.http_multi_part_is_value
-http_multi_part_is_value.argtypes = [c_void_p]
-http_multi_part_is_value.restype = c_bool
+http_multi_part_get_type = lib_function (
+	"http_multi_part_get_type", [c_void_p], MultiPartType,
+	"""Returns the type of a part.
 
-http_multi_part_get_name = lib.http_multi_part_get_name
-http_multi_part_get_name.argtypes = [c_void_p]
-http_multi_part_get_name.restype = StringPointer
+	Args:
+		multi_part: The MultiPart.
 
-http_multi_part_get_filename = lib.http_multi_part_get_filename
-http_multi_part_get_filename.argtypes = [c_void_p]
-http_multi_part_get_filename.restype = c_char_p
+	Returns:
+		MULTI_PART_TYPE_FILE or MULTI_PART_TYPE_VALUE.
+	"""
+)
 
-http_multi_part_get_filename_len = lib.http_multi_part_get_filename_len
-http_multi_part_get_filename_len.argtypes = [c_void_p]
-http_multi_part_get_filename_len.restype = c_int
+http_multi_part_is_file = lib_function (
+	"http_multi_part_is_file", [c_void_p], c_bool,
+	"""Returns if a part is a file.
 
-http_multi_part_get_generated_filename = lib.http_multi_part_get_generated_filename
-http_multi_part_get_generated_filename.argtypes = [c_void_p]
-http_multi_part_get_generated_filename.restype = c_char_p
+	Args:
+		multi_part: The MultiPart.
 
-http_multi_part_get_generated_filename_len = lib.http_multi_part_get_generated_filename_len
-http_multi_part_get_generated_filename_len.argtypes = [c_void_p]
-http_multi_part_get_generated_filename_len.restype = c_int
+	Returns:
+		True for a file.
+	"""
+)
 
-http_multi_part_set_generated_filename = lib.http_multi_part_set_generated_filename
+http_multi_part_is_value = lib_function (
+	"http_multi_part_is_value", [c_void_p], c_bool,
+	"""Returns if a part is a value.
 
-http_multi_part_get_n_reads = lib.http_multi_part_get_n_reads
-http_multi_part_get_n_reads.argtypes = [c_void_p]
-http_multi_part_get_n_reads.restype = c_uint32
+	Args:
+		multi_part: The MultiPart.
 
-http_multi_part_get_total_wrote = lib.http_multi_part_get_total_wrote
-http_multi_part_get_total_wrote.argtypes = [c_void_p]
-http_multi_part_get_total_wrote.restype = c_uint32
+	Returns:
+		True for a value.
+	"""
+)
 
-http_multi_part_get_saved_filename = lib.http_multi_part_get_saved_filename
-http_multi_part_get_saved_filename.argtypes = [c_void_p]
-http_multi_part_get_saved_filename.restype = c_char_p
+http_multi_part_get_name = lib_function (
+	"http_multi_part_get_name", [c_void_p], StringPointer,
+	"""Returns the name of a part.
 
-http_multi_part_get_saved_filename_len = lib.http_multi_part_get_saved_filename_len
-http_multi_part_get_saved_filename_len.argtypes = [c_void_p]
-http_multi_part_get_saved_filename_len.restype = c_int
+	Args:
+		multi_part: The MultiPart.
 
-def http_multi_part_get_file (mpart: c_void_p) -> dict:
+	Returns:
+		A StringPointer.
+	"""
+)
+
+http_multi_part_get_filename = lib_function (
+	"http_multi_part_get_filename", [c_void_p], c_char_p,
+	"""Returns the original filename of a file part, sanitized.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The filename, as bytes.
+	"""
+)
+
+http_multi_part_get_filename_len = lib_function (
+	"http_multi_part_get_filename_len", [c_void_p], c_int,
+	"""Returns the length of the original filename of a file part.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The length.
+	"""
+)
+
+http_multi_part_get_generated_filename = lib_function (
+	"http_multi_part_get_generated_filename", [c_void_p], c_char_p,
+	"""Returns the filename that the uploads filename generator gave to a file part.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The filename, as bytes, b"" without a generator.
+	"""
+)
+
+http_multi_part_get_generated_filename_len = lib_function (
+	"http_multi_part_get_generated_filename_len", [c_void_p], c_int,
+	"""Returns the length of the generated filename of a file part.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The length.
+	"""
+)
+
+http_multi_part_set_generated_filename_variadic = lib_function (
+	"http_multi_part_set_generated_filename", None, None,
+	"""Sets the generated filename of a file part with a printf format (variadic).
+
+	Args:
+		multi_part: The MultiPart, as c_void_p.
+		format: The format, as bytes, followed by its arguments.
+	"""
+)
+
+def http_multi_part_set_generated_filename (mpart: int, filename: str | bytes) -> None:
+	"""Sets the filename of a file part, from an uploads filename generator.
+
+	Args:
+		mpart: The MultiPart.
+		filename: The filename.
+	"""
+	http_multi_part_set_generated_filename_variadic (
+		c_void_p (mpart), c_char_p (MULTI_PART_FORMAT), c_char_p (lib_c_string (filename))
+	)
+
+http_multi_part_get_n_reads = lib_function (
+	"http_multi_part_get_n_reads", [c_void_p], c_uint32,
+	"""Returns how many reads it took to receive a file part.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The number of reads.
+	"""
+)
+
+http_multi_part_get_total_wrote = lib_function (
+	"http_multi_part_get_total_wrote", [c_void_p], c_uint32,
+	"""Returns the bytes of a file part that were written to its file.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The bytes.
+	"""
+)
+
+http_multi_part_get_error = lib_function (
+	"http_multi_part_get_error", [c_void_p], c_int,
+	"""Returns the errno of the open () or write () that failed to save a file part.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The errno, 0 if it was saved completely.
+	"""
+)
+
+http_multi_part_get_saved_filename = lib_function (
+	"http_multi_part_get_saved_filename", [c_void_p], c_char_p,
+	"""Returns the path where a file part was saved.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The path, as bytes.
+	"""
+)
+
+http_multi_part_get_saved_filename_len = lib_function (
+	"http_multi_part_get_saved_filename_len", [c_void_p], c_int,
+	"""Returns the length of the path where a file part was saved.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The length.
+	"""
+)
+
+http_multi_part_get_moved_file = lib_function (
+	"http_multi_part_get_moved_file", [c_void_p], c_bool,
+	"""Returns if the file of a part was moved with http_multi_part_move_file ().
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		True if it was moved.
+	"""
+)
+
+http_multi_part_get_value = lib_function (
+	"http_multi_part_get_value", [c_void_p], c_char_p,
+	"""Returns the value of a value part.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The value, as bytes.
+	"""
+)
+
+http_multi_part_get_value_len = lib_function (
+	"http_multi_part_get_value_len", [c_void_p], c_int,
+	"""Returns the length of the value of a value part.
+
+	Args:
+		multi_part: The MultiPart.
+
+	Returns:
+		The length.
+	"""
+)
+
+http_multi_part_move_file = lib_function (
+	"http_multi_part_move_file", [c_void_p, c_char_p], c_uint,
+	"""Moves the saved file of a part, it is not deleted with the uploads of the request.
+
+	Args:
+		mpart: The MultiPart.
+		destination_path: The new path, as bytes.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+http_multi_part_move_file_generate_destination_variadic = lib_function (
+	"http_multi_part_move_file_generate_destination", None, c_uint,
+	"""Works like http_multi_part_move_file () with a printf format (variadic).
+
+	Args:
+		mpart: The MultiPart, as c_void_p.
+		format: The format, as bytes, followed by its arguments.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+def http_multi_part_move_file_generate_destination (mpart: int, destination: str | bytes) -> int:
+	"""Moves the saved file of a part to a path.
+
+	Args:
+		mpart: The MultiPart.
+		destination: The new path.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+	return http_multi_part_move_file_generate_destination_variadic (
+		c_void_p (mpart), c_char_p (MULTI_PART_FORMAT), c_char_p (lib_c_string (destination))
+	)
+
+http_multi_part_headers_print = lib_function (
+	"http_multi_part_headers_print", [c_void_p], None,
+	"""Prints the headers of a part.
+
+	Args:
+		mpart: The MultiPart.
+	"""
+)
+
+http_multi_part_print = lib_function (
+	"http_multi_part_print", [c_void_p], None,
+	"""Prints a part.
+
+	Args:
+		mpart: The MultiPart.
+	"""
+)
+
+def http_multi_part_filename_text (filename: bytes | None) -> str | None:
+	"""Returns a filename of cerver as text.
+
+	Args:
+		filename: The bytes of the filename.
+
+	Returns:
+		The text, None when there is none or it is not utf-8.
+	"""
+	return lib_text (filename) if (filename) else None
+
+def http_multi_part_get_file (mpart: int) -> dict:
+	"""Returns the filenames of a file part.
+
+	A file input without a file has no filenames, so they are None.
+
+	Args:
+		mpart: The MultiPart.
+
+	Returns:
+		A dict with "original", "saved" and "generated" (when there is one), empty for a value part.
+	"""
 	values = dict ()
 
 	if (http_multi_part_is_file (mpart)):
-		original = http_multi_part_get_filename (mpart)
-		values["original"] = original.decode ("utf-8")
+		values["original"] = http_multi_part_filename_text (http_multi_part_get_filename (mpart))
 
-		generated = http_multi_part_get_generated_filename (mpart)
+		generated = http_multi_part_filename_text (http_multi_part_get_generated_filename (mpart))
 		if (generated):
-			values["generated"] = generated.decode ("utf-8")
+			values["generated"] = generated
 
-		saved = http_multi_part_get_saved_filename (mpart)
-		values["saved"] = saved.decode ("utf-8")
+		values["saved"] = http_multi_part_filename_text (http_multi_part_get_saved_filename (mpart))
 
 	return values
-
-http_multi_part_get_moved_file = lib.http_multi_part_get_moved_file
-http_multi_part_get_moved_file.argtypes = [c_void_p]
-http_multi_part_get_moved_file.restype = c_bool
-
-http_multi_part_get_value = lib.http_multi_part_get_value
-http_multi_part_get_value.argtypes = [c_void_p]
-http_multi_part_get_value.restype = c_char_p
-
-http_multi_part_get_value_len = lib.http_multi_part_get_value_len
-http_multi_part_get_value_len.argtypes = [c_void_p]
-http_multi_part_get_value_len.restype = c_int
-
-http_multi_part_move_file = lib.http_multi_part_move_file
-http_multi_part_move_file.argtypes = [c_void_p, c_char_p]
-http_multi_part_move_file.restype = c_uint
-
-http_multi_part_headers_print = lib.http_multi_part_headers_print
-http_multi_part_headers_print.argtypes = [c_void_p]
-
-http_multi_part_print = lib.http_multi_part_print
-http_multi_part_print.argtypes = [c_void_p]

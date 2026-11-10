@@ -1,6 +1,46 @@
 [build-system]
-requires = [
-	"setuptools>=42",
-	"wheel"
-]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pycerver"
+dynamic = ["version"]
+description = "PyCerver is a pure Python wrapper around the cerver framework"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+	{ name = "Erick Salas", email = "erick.salas@ermiry.com" }
+]
+keywords = ["cerver", "http", "server", "client", "ctypes", "framework"]
+classifiers = [
+	"Development Status :: 5 - Production/Stable",
+	"Intended Audience :: Developers",
+	"Operating System :: POSIX :: Linux",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3 :: Only",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
+	"Programming Language :: Python :: 3.14",
+	"Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+	"Topic :: Software Development :: Libraries :: Application Frameworks",
+	"Typing :: Typed"
+]
+
+[project.urls]
+Homepage = "https://github.com/ermiry-com/py-cerver"
+Documentation = "https://github.com/ermiry-com/py-cerver/wiki"
+Changelog = "https://github.com/ermiry-com/py-cerver/blob/master/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/ermiry-com/py-cerver/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "cerver.version.PYCERVER_VERSION" }
+
+[tool.setuptools.packages.find]
+include = ["cerver", "cerver.*"]
+
+[tool.setuptools.package-data]
+cerver = ["py.typed"]
