@@ -6,11 +6,14 @@ from typing import TypeAlias
 
 from ..lib import lib_function
 
+from ..utils.histograms import Histogram
+
 from .packets import Packet
 
 __all__ = [
 	"HandlerType",
 	"HANDLER_TYPE_NONE", "HANDLER_TYPE_CERVER", "HANDLER_TYPE_CLIENT", "HANDLER_TYPE_ADMIN",
+	"HandlerStats", "HandlerStatsPointer", "handler_get_stats", "handler_stats_print",
 	"HandlerData", "HandlerDataPointer",
 	"HandlerMethod", "HandlerDataCreate", "HandlerDataDelete",
 	"CerverHandlerError",
@@ -27,6 +30,40 @@ HANDLER_TYPE_NONE = 0
 HANDLER_TYPE_CERVER = 1
 HANDLER_TYPE_CLIENT = 2
 HANDLER_TYPE_ADMIN = 3
+
+class HandlerStats (Structure):
+	"""The packets that a handler handled, ``HandlerStats``.
+
+	Attributes:
+		durations: The microseconds that the handler took with each packet.
+		sizes: The bytes of each packet, with its header.
+	"""
+
+	_fields_ = [
+		("durations", Histogram),
+		("sizes", Histogram)
+	]
+
+HandlerStatsPointer: TypeAlias = POINTER (HandlerStats) # type: ignore
+
+handler_get_stats = lib_function (
+	"handler_get_stats", [c_void_p, HandlerStatsPointer], None,
+	"""Copies the stats of the packets that the handler handled.
+
+	Args:
+		handler: The handler.
+		stats: The HandlerStats that gets the values.
+	"""
+)
+
+handler_stats_print = lib_function (
+	"handler_stats_print", [c_void_p], None,
+	"""Prints the stats of the handler with the cerver log.
+
+	Args:
+		handler: The handler.
+	"""
+)
 
 class HandlerData (Structure):
 	"""What a handler method gets for each packet, ``HandlerData``.
