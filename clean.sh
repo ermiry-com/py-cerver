@@ -12,6 +12,9 @@ rm -rf tests/htmlcov tests/.coverage tests/.coverage.* tests/.hypothesis
 # remove uploads path
 sudo rm -r uploads
 
+# the files that the legacy test servers received
+sudo rm -rf tests/legacy/uploads/*
+
 # remove generated build
 sudo rm -r build
 sudo rm -r dist
