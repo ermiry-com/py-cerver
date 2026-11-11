@@ -82,7 +82,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/ping
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
 
       - name: Web Integration Test
         run: |
@@ -90,7 +90,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/web
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
 
       - name: JSON Integration Test
         run: |
@@ -98,7 +98,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/json
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
 
       - name: Web Auth Integration Test
         run: |
@@ -106,7 +106,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/auth
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
 
       - name: Web API Integration Test
         run: |
@@ -114,7 +114,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/api
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
       
       - name: Web Upload Integration Test
         run: |
@@ -122,7 +122,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/upload
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
 
       - name: Web Multiple Integration Test
         run: |
@@ -130,7 +130,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/multiple
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
 
       - name: Web Jobs Integration Test
         run: |
@@ -138,7 +138,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/jobs
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
 
       - name: Web Worker Integration Test
         run: |
@@ -146,7 +146,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/worker
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
 
       - name: Web Admin Integration Test
         run: |
@@ -154,7 +154,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/admin
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
 
       - name: Web Validation Integration Test
         run: |
@@ -162,7 +162,7 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/validation
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
 
       - name: Web Wrapper Integration Test
         run: |
@@ -170,4 +170,4 @@ jobs:
           sleep 2
           sudo docker inspect test --format='{{.State.ExitCode}}'
           ./tests/clients/bin/client/web/wrapper
-          sudo docker kill $(sudo docker ps -q)
+          sudo docker rm -f test
