@@ -1,22 +1,27 @@
 """The sockets of the connections and the sends with a deadline."""
 
 from ctypes import POINTER, Structure
-from ctypes import c_int, c_long, c_bool, c_uint8, c_size_t, c_void_p
+from ctypes import c_int, c_long, c_bool, c_uint8, c_uint32, c_int64, c_size_t, c_void_p
 from typing import TypeAlias
 
 from ..lib import lib_function
 
 __all__ = [
-	"SOCKET_MILLISECONDS_PER_SECOND", "SOCKET_NANOSECONDS_PER_MILLISECOND",
+	"SOCKET_MILLISECONDS_PER_SECOND", "SOCKET_MICROSECONDS_PER_MILLISECOND",
+	"SOCKET_NANOSECONDS_PER_MILLISECOND", "SOCKET_NANOSECONDS_PER_SECOND",
 	"Timespec", "TimespecPointer",
 	"socket_new", "socket_delete", "socket_reference", "socket_create_empty", "socket_create",
-	"socket_deadline_create", "socket_deadline_remaining",
+	"socket_close", "socket_replace", "socket_shutdown",
+	"socket_deadline_create", "socket_deadline_create_milliseconds", "socket_deadline_remaining",
 	"socket_wait_writable", "socket_send_can_retry",
-	"socket_send_vector", "socket_send_buffer", "socket_send_file"
+	"socket_send_vector", "socket_send_buffer", "socket_send_file",
+	"socket_send_vector_until", "socket_send_buffer_until", "socket_send_file_until"
 ]
 
 SOCKET_MILLISECONDS_PER_SECOND = 1000
+SOCKET_MICROSECONDS_PER_MILLISECOND = 1000
 SOCKET_NANOSECONDS_PER_MILLISECOND = 1000000
+SOCKET_NANOSECONDS_PER_SECOND = 1000000000
 
 class Timespec (Structure):
 	"""A ``struct timespec``.
@@ -84,6 +89,45 @@ socket_create = lib_function (
 	"""
 )
 
+socket_close = lib_function (
+	"socket_close", [c_void_p], c_int,
+	"""Closes the descriptor of a socket and sets it to -1, with its close mutex.
+
+	It shuts the descriptor down first and waits for a send of another thread to end,
+	so the caller must not hold the write mutex of the socket.
+
+	Args:
+		socket: The Socket.
+
+	Returns:
+		The result of close (), 0 if the socket was already closed.
+	"""
+)
+
+socket_replace = lib_function (
+	"socket_replace", [c_void_p, c_int], None,
+	"""Closes the descriptor of a socket if it is open and sets a new one, with its close mutex.
+
+	Args:
+		socket: The Socket.
+		fd: The new descriptor.
+	"""
+)
+
+socket_shutdown = lib_function (
+	"socket_shutdown", [c_void_p], c_uint8,
+	"""Shuts down both ways of the descriptor of a socket if it is still open.
+
+	It can be called from any thread that has a reference to the socket.
+
+	Args:
+		socket: The Socket.
+
+	Returns:
+		0 on success, 1 if the socket is closed or shutdown () failed.
+	"""
+)
+
 socket_deadline_create = lib_function (
 	"socket_deadline_create", [TimespecPointer, c_long], None,
 	"""Sets the deadline of a send to a timeout from now (CLOCK_MONOTONIC).
@@ -91,6 +135,16 @@ socket_deadline_create = lib_function (
 	Args:
 		deadline: The Timespec that gets the deadline.
 		timeout: The timeout in seconds, 0 uses CERVER_DEFAULT_SEND_TIMEOUT.
+	"""
+)
+
+socket_deadline_create_milliseconds = lib_function (
+	"socket_deadline_create_milliseconds", [TimespecPointer, c_uint32], None,
+	"""Sets the deadline of a send to a timeout in milliseconds from now (CLOCK_MONOTONIC).
+
+	Args:
+		deadline: The Timespec that gets the deadline.
+		timeout: The timeout in milliseconds, 0 uses CERVER_DEFAULT_SEND_TIMEOUT.
 	"""
 )
 
@@ -192,6 +246,70 @@ socket_send_file = lib_function (
 		file_fd: The descriptor of the file.
 		size: The bytes to send.
 		timeout: The seconds to wait for a full socket, 0 for the default.
+		sent: A pointer to a c_size_t that gets the bytes that were sent, or None.
+		error: A pointer to a c_int that gets the errno of a failure, or None.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+socket_send_vector_until = lib_function (
+	"socket_send_vector_until",
+	[c_void_p, c_void_p, c_int, c_int, TimespecPointer, POINTER (c_size_t), POINTER (c_int)],
+	c_uint8,
+	"""Works like socket_send_vector () with a deadline that several sends can share.
+
+	The send never blocks longer than the deadline, also in a blocking socket with a longer SO_SNDTIMEO.
+
+	Args:
+		socket: The Socket.
+		parts: An array of struct iovec.
+		n_parts: The number of parts.
+		flags: The flags of sendmsg ().
+		deadline: The Timespec of the deadline (socket_deadline_create_milliseconds ()).
+		sent: A pointer to a c_size_t that gets the bytes that were sent, or None.
+		error: A pointer to a c_int that gets the errno of a failure (EAGAIN at the deadline), or None.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+socket_send_buffer_until = lib_function (
+	"socket_send_buffer_until",
+	[c_void_p, c_void_p, c_size_t, c_int, TimespecPointer, POINTER (c_size_t), POINTER (c_int)],
+	c_uint8,
+	"""Works like socket_send_vector_until () with a single buffer.
+
+	Args:
+		socket: The Socket.
+		buffer: The bytes to send.
+		size: Their size.
+		flags: The flags of sendmsg ().
+		deadline: The Timespec of the deadline.
+		sent: A pointer to a c_size_t that gets the bytes that were sent, or None.
+		error: A pointer to a c_int that gets the errno of a failure, or None.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+socket_send_file_until = lib_function (
+	"socket_send_file_until",
+	[c_void_p, c_int, POINTER (c_int64), c_size_t, TimespecPointer, POINTER (c_size_t), POINTER (c_int)],
+	c_uint8,
+	"""Sends the bytes of a file with sendfile () until a deadline that several sends can share.
+
+	In a blocking socket its SO_SNDTIMEO is limited to the deadline while the file is sent.
+
+	Args:
+		socket: The Socket.
+		file_fd: The descriptor of the file.
+		offset: A pointer to a c_int64 with the offset that it moves, or None for the current one.
+		size: The bytes to send, a file that ends before them fails with an error of 0.
+		deadline: The Timespec of the deadline.
 		sent: A pointer to a c_size_t that gets the bytes that were sent, or None.
 		error: A pointer to a c_int that gets the errno of a failure, or None.
 
