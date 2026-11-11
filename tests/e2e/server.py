@@ -6,6 +6,8 @@ the process exits 0 only when the start, the shutdown and the teardown succeeded
 """
 
 import sys
+import threading
+import time
 from ctypes import c_void_p
 
 from cerver import CERVER_HANDLER_TYPE_THREADS
@@ -50,6 +52,10 @@ from cerver.http import http_response_return
 from cerver.http import http_response_set_status
 from cerver.http import http_response_stream_begin
 from cerver.http import http_response_stream_write
+from cerver.http import HTTP_CLIENT_STATE_CONNECTED
+from cerver.http import http_client_state_string
+from cerver.http import http_receive_get_client_state
+from cerver.http import http_receive_is_client_gone
 from cerver.http.decorators import HttpGroup
 
 from cerver import files_create_dir
@@ -73,6 +79,24 @@ STREAM_PIECES = [b"first", b"second"]
 ALLOWED_ORIGIN = b"http://allowed.com"
 
 REDIRECT_LOCATION = "/api/e2e/next?a=1&b=<2>"
+
+# the gone handler waits for its client to leave
+GONE_WAIT_SECONDS = 4
+GONE_POLL_SECONDS = 0.01
+
+gone_lock = threading.Lock ()
+gone_found = {"states": list (), "gone": list ()}
+
+def _gone_wait (http_receive) -> int:
+	"""Asks for the state of the client until it leaves or the wait ends."""
+	deadline = time.monotonic () + GONE_WAIT_SECONDS
+
+	state = http_receive_get_client_state (http_receive)
+	while ((state == HTTP_CLIENT_STATE_CONNECTED) and (time.monotonic () < deadline)):
+		time.sleep (GONE_POLL_SECONDS)
+		state = http_receive_get_client_state (http_receive)
+
+	return state
 
 def _block (http_receive, request):
 	"""Stops the requests that carry the block header, any other one continues."""
@@ -141,6 +165,23 @@ def _routes (http_cerver: c_void_p):
 	@api.post ("method")
 	def method_handler (http_receive, request):
 		http_send_response (http_receive, HTTP_STATUS_OK, {"method": "POST"})
+
+	@api.get ("gone")
+	def gone_handler (http_receive, request):
+		state = _gone_wait (http_receive)
+
+		with gone_lock:
+			gone_found["states"].append (http_client_state_string (state).decode ("utf-8"))
+			gone_found["gone"].append (bool (http_receive_is_client_gone (http_receive)))
+
+		http_send_response (http_receive, HTTP_STATUS_OK, {"state": state})
+
+	@api.get ("gone/found")
+	def gone_found_handler (http_receive, request):
+		with gone_lock:
+			found = {"states": list (gone_found["states"]), "gone": list (gone_found["gone"])}
+
+		http_send_response (http_receive, HTTP_STATUS_OK, found)
 
 	_features_routes (http_cerver)
 
