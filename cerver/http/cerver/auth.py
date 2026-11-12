@@ -3,7 +3,7 @@
 import json
 
 from ctypes import POINTER, byref, cast, string_at
-from ctypes import c_void_p, c_char_p, c_bool, c_int, c_size_t, c_uint8
+from ctypes import c_void_p, c_char_p, c_bool, c_int64, c_size_t, c_uint, c_uint8
 
 from ...lib import lib_function, lib_take_c_string, lib_c_string, lib_text, libc_free
 
@@ -18,8 +18,12 @@ __all__ = [
 	"HTTP_JWT_TOKEN_SIZE",
 	"http_jwt_get_bearer", "http_jwt_get_bearer_len", "http_jwt_get_json", "http_jwt_get_json_len",
 	"http_cerver_auth_load_key_c_string", "http_cerver_auth_load_key",
+	"HTTP_JWT_BEARER_SIZE", "HTTP_CERVER_DEFAULT_JWT_MAX_SIZE",
 	"http_cerver_auth_set_jwt_algorithm",
 	"http_cerver_auth_set_jwt_priv_key_filename", "http_cerver_auth_set_jwt_pub_key_filename",
+	"http_cerver_auth_set_jwt_max_size", "http_cerver_auth_set_jwt_require_expiration",
+	"http_cerver_auth_set_jwt_leeway_seconds",
+	"http_cerver_auth_set_jwt_issuer", "http_cerver_auth_set_jwt_audience",
 	"http_cerver_auth_jwt_new", "http_cerver_auth_jwt_delete",
 	"http_cerver_auth_jwt_add_value", "http_cerver_auth_jwt_add_value_bool",
 	"http_cerver_auth_jwt_add_value_int",
@@ -31,8 +35,12 @@ __all__ = [
 	"http_jwt_get_bearer_string", "http_jwt_token_decode"
 ]
 
-# the size of the bearer and of the json of an HttpJwt
-HTTP_JWT_TOKEN_SIZE = 4096
+# the sizes of the bearer and of the json of an HttpJwt
+HTTP_JWT_BEARER_SIZE = 1 << 13
+HTTP_JWT_TOKEN_SIZE = 1 << 14
+
+# the longest bearer token that a cerver decodes, 0 has no limit
+HTTP_CERVER_DEFAULT_JWT_MAX_SIZE = 1 << 13
 
 TEXT_ENCODING = "utf-8"
 
@@ -117,12 +125,19 @@ def http_cerver_auth_load_key (filename: str | bytes) -> bytes | None:
 	return result
 
 http_cerver_auth_set_jwt_algorithm = lib_function (
-	"http_cerver_auth_set_jwt_algorithm", [c_void_p, JwtAlgorithm], None,
+	"http_cerver_auth_set_jwt_algorithm", [c_void_p, JwtAlgorithm], c_uint8,
 	"""Sets the algorithm that signs and validates the JWTs.
+
+	The keys are loaded for it when the cerver starts, a key that does not match it stops the cerver:
+	a secret of at least the size of the hash for HS, RSA of 2048 bits or more for RS,
+	and P-256 / P-384 / P-521 for ES256 / ES384 / ES512.
 
 	Args:
 		http_cerver: The HttpCerver.
-		jwt_alg: A JWT_ALG_* value, JWT_ALG_HS256 by default.
+		jwt_alg: A JWT_ALG_* value, JWT_ALG_HS256 by default, JWT_ALG_NONE is not accepted.
+
+	Returns:
+		0 on success, 1 on error.
 	"""
 )
 
@@ -143,6 +158,56 @@ http_cerver_auth_set_jwt_pub_key_filename = lib_function (
 	Args:
 		http_cerver: The HttpCerver.
 		filename: The path, as bytes.
+	"""
+)
+
+http_cerver_auth_set_jwt_max_size = lib_function (
+	"http_cerver_auth_set_jwt_max_size", [c_void_p, c_size_t], None,
+	"""Sets the longest bearer token that is decoded, a longer one is rejected.
+
+	Args:
+		http_cerver: The HttpCerver.
+		max_size: The bytes, HTTP_CERVER_DEFAULT_JWT_MAX_SIZE by default, 0 has no limit.
+	"""
+)
+
+http_cerver_auth_set_jwt_require_expiration = lib_function (
+	"http_cerver_auth_set_jwt_require_expiration", [c_void_p, c_bool], None,
+	"""Sets if a token without "exp" is rejected, False by default.
+
+	Args:
+		http_cerver: The HttpCerver.
+		require: True to reject the tokens without "exp".
+	"""
+)
+
+http_cerver_auth_set_jwt_leeway_seconds = lib_function (
+	"http_cerver_auth_set_jwt_leeway_seconds", [c_void_p, c_uint], None,
+	"""Sets the seconds of clock skew that are accepted in "exp" and "nbf", 0 by default.
+
+	Args:
+		http_cerver: The HttpCerver.
+		leeway_seconds: The seconds.
+	"""
+)
+
+http_cerver_auth_set_jwt_issuer = lib_function (
+	"http_cerver_auth_set_jwt_issuer", [c_void_p, c_char_p], None,
+	"""Sets the "iss" that every token must have.
+
+	Args:
+		http_cerver: The HttpCerver.
+		issuer: The issuer, as bytes, or None to accept any.
+	"""
+)
+
+http_cerver_auth_set_jwt_audience = lib_function (
+	"http_cerver_auth_set_jwt_audience", [c_void_p, c_char_p], None,
+	"""Sets the "aud" that every token must have, as its value or in its array.
+
+	Args:
+		http_cerver: The HttpCerver.
+		audience: The audience, as bytes, or None to accept any.
 	"""
 )
 
@@ -187,13 +252,13 @@ http_cerver_auth_jwt_add_value_bool = lib_function (
 )
 
 http_cerver_auth_jwt_add_value_int = lib_function (
-	"http_cerver_auth_jwt_add_value_int", [c_void_p, c_char_p, c_int], None,
+	"http_cerver_auth_jwt_add_value_int", [c_void_p, c_char_p, c_int64], None,
 	"""Adds an integer value to a JWT.
 
 	Args:
 		http_jwt: The HttpJwt.
 		key: The key, as bytes.
-		value: The integer, of 32 bits.
+		value: The integer, of 64 bits (an "exp" after 2038 fits).
 	"""
 )
 
@@ -290,8 +355,9 @@ def http_cerver_auth_configuration (
 		priv_key_filename: The file of the private key, to sign tokens.
 		pub_key_filename: The file of the public key, to validate tokens.
 	"""
-	http_cerver_auth_set_jwt_algorithm (http_cerver, jwt_algorithm)
+	# JWT_ALG_NONE leaves the cerver without tokens: the setter does not accept it
 	if (jwt_algorithm != JWT_ALG_NONE):
+		http_cerver_auth_set_jwt_algorithm (http_cerver, jwt_algorithm)
 		if (priv_key_filename):
 			http_cerver_auth_set_jwt_priv_key_filename (http_cerver, lib_c_string (priv_key_filename))
 
@@ -318,7 +384,7 @@ def http_jwt_create (values: dict | None = None) -> int:
 	"""Creates a JWT with values.
 
 	Args:
-		values: The values of the token: str, int (32 bits) or bool.
+		values: The values of the token: str, int (64 bits) or bool.
 
 	Returns:
 		The HttpJwt, released with http_cerver_auth_jwt_delete ().
@@ -346,7 +412,7 @@ def http_jwt_create_and_send (
 	Args:
 		http_receive: The HttpReceive of the request.
 		status_code: An HTTP_STATUS_* value.
-		values: The values of the token: str, int (32 bits) or bool.
+		values: The values of the token: str, int (64 bits) or bool.
 
 	Returns:
 		0 on success, 1 if the token could not be generated or sent.
