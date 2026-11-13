@@ -1,6 +1,7 @@
 """The limits and the timeouts of the requests of an HTTP cerver."""
 
-from ctypes import c_void_p, c_size_t, c_uint, c_bool
+from ctypes import c_void_p, c_size_t, c_uint, c_bool, c_int, c_char_p
+from typing import TypeAlias
 
 from ...lib import lib_function
 
@@ -21,10 +22,18 @@ __all__ = [
 	"http_cerver_set_headers_timeout", "http_cerver_set_request_timeout",
 	"http_cerver_set_headers_timeout_milliseconds", "http_cerver_set_request_timeout_milliseconds",
 	"http_cerver_set_idle_timeout_milliseconds", "http_cerver_set_send_timeout_milliseconds",
-	"http_cerver_set_half_close_is_gone"
+	"http_cerver_set_half_close_is_gone",
+	"HttpParserLenient",
+	"HTTP_PARSER_LENIENT_NONE", "HTTP_PARSER_LENIENT_HEADERS", "HTTP_PARSER_LENIENT_CHUNKED_LENGTH",
+	"HTTP_PARSER_LENIENT_KEEP_ALIVE", "HTTP_PARSER_LENIENT_TRANSFER_ENCODING", "HTTP_PARSER_LENIENT_VERSION",
+	"HTTP_PARSER_LENIENT_DATA_AFTER_CLOSE", "HTTP_PARSER_LENIENT_OPTIONAL_LF_AFTER_CR",
+	"HTTP_PARSER_LENIENT_OPTIONAL_CRLF_AFTER_CHUNK", "HTTP_PARSER_LENIENT_OPTIONAL_CR_BEFORE_LF",
+	"HTTP_PARSER_LENIENT_SPACES_AFTER_CHUNK_SIZE", "HTTP_PARSER_LENIENT_ALL",
+	"http_parser_lenient_string", "http_parser_lenient_description", "http_cerver_set_parser_lenient"
 ]
 
-# a request that exceeds a limit is answered with 413, 414 or 431, 0 disables it
+# a request that exceeds a limit is answered with 413, 414 or 431, 0 disables it,
+# except the url and the headers limits, that are always active (0 sets their default)
 HTTP_CERVER_DEFAULT_MAX_BODY_SIZE = 1 << 29
 HTTP_CERVER_DEFAULT_MAX_URL_SIZE = 1 << 13
 HTTP_CERVER_DEFAULT_MAX_HEADER_SIZE = 1 << 16
@@ -48,6 +57,57 @@ HTTP_CERVER_DEFAULT_IDLE_TIMEOUT_MILLISECONDS = HTTP_CERVER_DEFAULT_IDLE_TIMEOUT
 
 # http_receive_is_client_gone () takes a client that closed its side as gone
 HTTP_CERVER_DEFAULT_HALF_CLOSE_IS_GONE = True
+
+# the lenient flags of the parser (llhttp), all of them disabled by default (the strict mode),
+# each one can open the cerver to request smuggling or cache poisoning attacks
+HttpParserLenient: TypeAlias = c_int # type: ignore
+
+HTTP_PARSER_LENIENT_NONE = 0
+HTTP_PARSER_LENIENT_HEADERS = 0x1
+HTTP_PARSER_LENIENT_CHUNKED_LENGTH = 0x2
+HTTP_PARSER_LENIENT_KEEP_ALIVE = 0x4
+HTTP_PARSER_LENIENT_TRANSFER_ENCODING = 0x8
+HTTP_PARSER_LENIENT_VERSION = 0x10
+HTTP_PARSER_LENIENT_DATA_AFTER_CLOSE = 0x20
+HTTP_PARSER_LENIENT_OPTIONAL_LF_AFTER_CR = 0x40
+HTTP_PARSER_LENIENT_OPTIONAL_CRLF_AFTER_CHUNK = 0x80
+HTTP_PARSER_LENIENT_OPTIONAL_CR_BEFORE_LF = 0x100
+HTTP_PARSER_LENIENT_SPACES_AFTER_CHUNK_SIZE = 0x200
+HTTP_PARSER_LENIENT_ALL = 0x3FF
+
+http_parser_lenient_string = lib_function (
+	"http_parser_lenient_string", [HttpParserLenient], c_char_p,
+	"""Returns the name of a lenient flag.
+
+	Args:
+		lenient: An HTTP_PARSER_LENIENT_* value.
+
+	Returns:
+		The name, as bytes, like b"version", b"none" for any other value.
+	"""
+)
+
+http_parser_lenient_description = lib_function (
+	"http_parser_lenient_description", [HttpParserLenient], c_char_p,
+	"""Returns what a lenient flag accepts.
+
+	Args:
+		lenient: An HTTP_PARSER_LENIENT_* value.
+
+	Returns:
+		The description, as bytes.
+	"""
+)
+
+http_cerver_set_parser_lenient = lib_function (
+	"http_cerver_set_parser_lenient", [c_void_p, c_uint], None,
+	"""Sets the lenient flags of the parser of every request, a warning is logged for each one.
+
+	Args:
+		http_cerver: The HttpCerver.
+		lenient: The HTTP_PARSER_LENIENT_* values combined with |, a value outside them is ignored.
+	"""
+)
 
 http_cerver_set_max_body_size = lib_function (
 	"http_cerver_set_max_body_size", [c_void_p, c_size_t], None,
