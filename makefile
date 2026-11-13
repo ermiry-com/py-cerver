@@ -115,6 +115,12 @@ INTCLIENTOUT	:= ./$(TESTTARGET)/client
 integration-client:
 	$(CC) $(TESTINC) $(INTCLIENTIN)/ping.o -o $(INTCLIENTOUT)/ping $(TESTLIBS)
 
+INTSERVEROUT	:= ./$(TESTTARGET)/server
+
+integration-server:
+	@mkdir -p ./$(TESTTARGET)/server
+	$(CC) $(TESTINC) $(INTCLIENTIN)/game.o -o $(INTSERVEROUT)/game $(TESTLIBS)
+
 INTWEBCLIENTIN		:= ./$(TESTBUILD)/web
 INTWEBCLIENTOUT		:= ./$(TESTTARGET)/client/web
 INTWEBCLIENTLIBS	:= $(TESTLIBS) $(CURL)
@@ -137,6 +143,7 @@ integration-web-client:
 
 integration: testout $(TESTOBJS)
 	$(MAKE) integration-client
+	$(MAKE) integration-server
 	$(MAKE) integration-web-client
 
 testout:
