@@ -31,7 +31,8 @@ __all__ = [
 # the buckets of the histogram of the durations of a route, in seconds
 HTTP_ROUTE_STATS_DURATION_BUCKETS = 11
 
-HTTP_ROUTE_METHODS_STRING_SIZE = 128
+# fits every method of REQUEST_METHOD_MAP with its separator
+HTTP_ROUTE_METHODS_STRING_SIZE = 512
 
 HttpRouteModifier: TypeAlias = c_int # type: ignore
 
