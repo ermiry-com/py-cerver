@@ -16,7 +16,7 @@ __all__ = [
 	"CERVER_ERROR_FAILED_AUTH", "CERVER_ERROR_GET_FILE", "CERVER_ERROR_SEND_FILE",
 	"CERVER_ERROR_FILE_NOT_FOUND", "CERVER_ERROR_CREATE_LOBBY", "CERVER_ERROR_JOIN_LOBBY",
 	"CERVER_ERROR_LEAVE_LOBBY", "CERVER_ERROR_FIND_LOBBY", "CERVER_ERROR_GAME_INIT",
-	"CERVER_ERROR_GAME_START", "CERVER_ERROR_UNKNOWN",
+	"CERVER_ERROR_GAME_START", "CERVER_ERROR_DESTROY_LOBBY", "CERVER_ERROR_UNKNOWN",
 	"CerverErrorWork", "CerverErrorEventData", "CerverErrorEventDataPointer",
 	"cerver_error_type_description",
 	"cerver_error_event_delete", "cerver_error_event_register", "cerver_error_event_unregister",
@@ -44,7 +44,8 @@ CERVER_ERROR_LEAVE_LOBBY = 9
 CERVER_ERROR_FIND_LOBBY = 10
 CERVER_ERROR_GAME_INIT = 11
 CERVER_ERROR_GAME_START = 12
-CERVER_ERROR_UNKNOWN = 13
+CERVER_ERROR_DESTROY_LOBBY = 13
+CERVER_ERROR_UNKNOWN = 14
 
 # void *(*) (void *), it gets a CerverErrorEventData * that it must release
 CerverErrorWork: TypeAlias = CFUNCTYPE (c_void_p, c_void_p) # type: ignore
@@ -57,6 +58,9 @@ class CerverErrorEventData (Structure):
 		client: The client of the error, None if it has none.
 		connection: The connection of the error, None if it has none.
 		action_args: The work args that were registered.
+		delete_action_args: How the args are released.
+		owns_action_args: The error was dropped after this trigger, so
+			cerver_error_event_data_delete () releases the args with delete_action_args.
 		error_message: The message of the error, a StringPointer.
 	"""
 
@@ -66,6 +70,9 @@ class CerverErrorEventData (Structure):
 		("connection", c_void_p),
 
 		("action_args", c_void_p),
+
+		("delete_action_args", c_void_p),
+		("owns_action_args", c_bool),
 
 		("error_message", StringPointer)
 	]

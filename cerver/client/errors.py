@@ -16,7 +16,7 @@ __all__ = [
 	"CLIENT_ERROR_FAILED_AUTH", "CLIENT_ERROR_GET_FILE", "CLIENT_ERROR_SEND_FILE",
 	"CLIENT_ERROR_FILE_NOT_FOUND", "CLIENT_ERROR_CREATE_LOBBY", "CLIENT_ERROR_JOIN_LOBBY",
 	"CLIENT_ERROR_LEAVE_LOBBY", "CLIENT_ERROR_FIND_LOBBY", "CLIENT_ERROR_GAME_INIT",
-	"CLIENT_ERROR_GAME_START", "CLIENT_ERROR_UNKNOWN",
+	"CLIENT_ERROR_GAME_START", "CLIENT_ERROR_DESTROY_LOBBY", "CLIENT_ERROR_UNKNOWN",
 	"ClientErrorWork", "ClientErrorData", "ClientErrorDataPointer",
 	"client_error_type_description", "client_error_register", "client_error_unregister",
 	"client_error_data_delete", "client_error_packet_generate", "client_error_packet_generate_and_send",
@@ -40,7 +40,8 @@ CLIENT_ERROR_LEAVE_LOBBY = 9
 CLIENT_ERROR_FIND_LOBBY = 10
 CLIENT_ERROR_GAME_INIT = 11
 CLIENT_ERROR_GAME_START = 12
-CLIENT_ERROR_UNKNOWN = 13
+CLIENT_ERROR_DESTROY_LOBBY = 13
+CLIENT_ERROR_UNKNOWN = 14
 
 # void *(*) (void *), it gets a ClientErrorData * that it must release
 ClientErrorWork: TypeAlias = CFUNCTYPE (c_void_p, c_void_p) # type: ignore
@@ -52,6 +53,9 @@ class ClientErrorData (Structure):
 		client: The client.
 		connection: The connection of the error.
 		action_args: The work args that were registered.
+		delete_action_args: How the args are released.
+		owns_action_args: The error was dropped after this trigger, so
+			client_error_data_delete () releases the args with delete_action_args.
 		error_message: The message of the error, a StringPointer.
 	"""
 
@@ -60,6 +64,9 @@ class ClientErrorData (Structure):
 		("connection", c_void_p),
 
 		("action_args", c_void_p),
+
+		("delete_action_args", c_void_p),
+		("owns_action_args", c_bool),
 
 		("error_message", StringPointer)
 	]

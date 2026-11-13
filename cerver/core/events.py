@@ -21,7 +21,7 @@ __all__ = [
 	"CERVER_EVENT_ADMIN_NEW_CONNECTION", "CERVER_EVENT_ADMIN_CLOSE_CONNECTION",
 	"CERVER_EVENT_ADMIN_DISCONNECTED", "CERVER_EVENT_ADMIN_DROPPED",
 	"CERVER_EVENT_LOBBY_CREATE", "CERVER_EVENT_LOBBY_JOIN",
-	"CERVER_EVENT_LOBBY_LEAVE", "CERVER_EVENT_LOBBY_START",
+	"CERVER_EVENT_LOBBY_LEAVE", "CERVER_EVENT_LOBBY_START", "CERVER_EVENT_LOBBY_DESTROY",
 	"CERVER_EVENT_UNKNOWN",
 	"CerverEventWork", "CerverEventData", "CerverEventDataPointer",
 	"cerver_event_type_description",
@@ -57,7 +57,8 @@ CERVER_EVENT_LOBBY_CREATE = 20
 CERVER_EVENT_LOBBY_JOIN = 21
 CERVER_EVENT_LOBBY_LEAVE = 22
 CERVER_EVENT_LOBBY_START = 23
-CERVER_EVENT_UNKNOWN = 24
+CERVER_EVENT_LOBBY_DESTROY = 24
+CERVER_EVENT_UNKNOWN = 25
 
 # void *(*) (void *), it gets a CerverEventData * that it must release
 CerverEventWork: TypeAlias = CFUNCTYPE (c_void_p, c_void_p) # type: ignore
@@ -69,8 +70,12 @@ class CerverEventData (Structure):
 		cerver: The cerver.
 		client: The client of the event, None if it has none.
 		connection: The connection of the event, None if it has none.
+		lobby: The lobby of the lobby events, None in the others; it stays valid
+			until cerver_event_data_delete () releases its reference.
 		action_args: The work args that were registered.
 		delete_action_args: How the args are released.
+		owns_action_args: The event was dropped after this trigger, so
+			cerver_event_data_delete () releases the args with delete_action_args.
 	"""
 
 	_fields_ = [
@@ -78,8 +83,12 @@ class CerverEventData (Structure):
 		("client", c_void_p),
 		("connection", c_void_p),
 
+		("lobby", c_void_p),
+
 		("action_args", c_void_p),
-		("delete_action_args", c_void_p)
+		("delete_action_args", c_void_p),
+
+		("owns_action_args", c_bool)
 	]
 
 CerverEventDataPointer: TypeAlias = POINTER (CerverEventData) # type: ignore
