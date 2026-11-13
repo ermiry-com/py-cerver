@@ -1,12 +1,12 @@
 """pycerver: a Python wrapper of the cerver framework.
 
 The top level has the cerver itself (cerver.core) and the versions; the other parts are
-subpackages: cerver.http, cerver.client, cerver.network, cerver.threads, cerver.utils
-and cerver.types.
+subpackages: cerver.http, cerver.client, cerver.games, cerver.network, cerver.threads,
+cerver.utils and cerver.types.
 """
 
 from . import callbacks, core, lib
-from . import client, http, network, threads, types, utils
+from . import client, games, http, network, threads, types, utils
 
 from .version import __all__ as version_names
 from .version import PYCERVER_VERSION

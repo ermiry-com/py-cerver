@@ -1,7 +1,7 @@
 """Files: directories, paths, images, the files cerver and the sending of files to a connection."""
 
 from ctypes import CFUNCTYPE, POINTER, Structure
-from ctypes import c_int, c_uint, c_uint8, c_char, c_char_p, c_bool, c_void_p
+from ctypes import c_int, c_uint, c_uint8, c_uint64, c_char, c_char_p, c_bool, c_void_p
 from ctypes import c_size_t, c_ssize_t, byref, create_string_buffer, string_at
 from typing import TypeAlias
 
@@ -18,6 +18,7 @@ __all__ = [
 	"file_cerver_search_file", "file_cerver_send_file", "file_cerver_stats_print",
 	"files_sanitize_filename", "files_sanitize_complete_filename",
 	"files_create_dir", "files_create_recursive_dir", "file_move_to",
+	"files_copy", "files_copy_recursive", "files_remove_recursive",
 	"files_get_file_extension_c_string", "files_get_file_extension_reference",
 	"file_exists", "file_read_c_string", "file_n_read_c_string",
 	"files_get_file_extension", "files_sanitize", "files_sanitize_complete",
@@ -172,10 +173,10 @@ files_create_dir = lib_function (
 
 files_create_recursive_dir = lib_function (
 	"files_create_recursive_dir", [c_char_p, c_uint], c_uint,
-	"""Creates every directory of a path.
+	"""Creates every directory of a path, a path that already is a directory is a success.
 
 	Args:
-		dir_path: The path, as bytes.
+		dir_path: The path, as bytes, shorter than DIRNAME_DEFAULT_SIZE.
 		mode: Their permissions, like 0o755.
 
 	Returns:
@@ -185,14 +186,52 @@ files_create_recursive_dir = lib_function (
 
 file_move_to = lib_function (
 	"file_move_to", [c_char_p, c_char_p], c_int,
-	"""Moves a file.
+	"""Moves a file or a directory with rename (), or with a copy between file systems.
 
 	Args:
 		actual_path: The current path, as bytes.
-		saved_path: The new path, as bytes.
+		saved_path: The new path, as bytes, or a directory that exists to move it inside.
 
 	Returns:
-		0 on success.
+		0 on success, 1 on error.
+	"""
+)
+
+files_copy = lib_function (
+	"files_copy", [c_char_p, c_char_p], c_uint,
+	"""Copies a file, a copy that fails is removed.
+
+	Args:
+		source: The path of the file, as bytes.
+		destination: The path of the copy, as bytes.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+files_copy_recursive = lib_function (
+	"files_copy_recursive", [c_char_p, c_char_p], c_uint,
+	"""Copies a file or a directory with everything in it, the directories of the destination can exist.
+
+	Args:
+		source: The path, as bytes.
+		destination: The path of the copy, as bytes.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+files_remove_recursive = lib_function (
+	"files_remove_recursive", [c_char_p], c_uint,
+	"""Removes a file, a symbolic link (without following it) or a directory with everything in it.
+
+	Args:
+		path: The path, as bytes.
+
+	Returns:
+		0 on success, 1 on error.
 	"""
 )
 
@@ -461,7 +500,7 @@ class FileHeader (Structure):
 
 	_fields_ = [
 		("filename", c_char * FILENAME_DEFAULT_SIZE),
-		("len", c_size_t)
+		("len", c_uint64)
 	]
 
 FileHeaderPointer: TypeAlias = POINTER (FileHeader) # type: ignore
@@ -479,16 +518,15 @@ file_header_is_valid = lib_function (
 )
 
 file_header_get = lib_function (
-	"file_header_get", [c_void_p, c_size_t, FileHeaderPointer], c_bool,
-	"""Copies the FileHeader at the start of the data of a packet and validates it.
+	"file_header_get", [c_void_p, FileHeaderPointer], c_bool,
+	"""Decodes the FileHeader object of a packet and validates it.
 
 	Args:
-		data: The data of the packet.
-		data_size: The size of the data.
+		packet: The Packet.
 		file_header: The FileHeader that gets the values.
 
 	Returns:
-		True if the data has a valid header.
+		True if the packet has a valid header.
 	"""
 )
 

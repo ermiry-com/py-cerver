@@ -11,7 +11,12 @@ Bugs these tests fixed:
 
 import json
 import pytest
+import socket
+import struct
+import time
 
+from e2e.conftest import SERVER_ADDRESS
+from e2e.conftest import SERVER_PORT
 from e2e.conftest import e2e_raw
 from e2e.conftest import e2e_request
 
@@ -24,6 +29,16 @@ REDIRECT_LOCATION = "/api/e2e/next?a=1&b=<2>"
 OBJECTID = "507f1f77bcf86cd799439011"
 
 BOUNDARY = "----PyCerverBoundary7MA4YWxk"
+
+GONE_REQUEST = b"GET /api/e2e/gone HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+# the handler starts to wait before the client leaves
+GONE_START_SECONDS = 0.3
+GONE_WAIT_SECONDS = 8
+GONE_POLL_SECONDS = 0.05
+
+# SO_LINGER without lingering: close () resets the connection
+LINGER_RESET = struct.pack ("ii", 1, 0)
 
 def _multipart (filename: str, content: bytes) -> bytes:
 	return (
@@ -137,3 +152,35 @@ class TestUpload:
 		)
 
 		assert response.status == 200
+
+def _gone_found () -> dict:
+	return json.loads (e2e_request ("GET", "/api/e2e/gone/found").body)
+
+def _gone_leave (reset: bool) -> dict:
+	"""Leaves while the python handler waits, returns what the handler found."""
+	before = len (_gone_found ()["states"])
+
+	connection = socket.create_connection ((SERVER_ADDRESS, SERVER_PORT))
+	connection.sendall (GONE_REQUEST)
+	time.sleep (GONE_START_SECONDS)
+
+	if (reset):
+		connection.setsockopt (socket.SOL_SOCKET, socket.SO_LINGER, LINGER_RESET)
+
+	connection.close ()
+
+	deadline = time.monotonic () + GONE_WAIT_SECONDS
+	found = _gone_found ()
+	while ((len (found["states"]) == before) and (time.monotonic () < deadline)):
+		time.sleep (GONE_POLL_SECONDS)
+		found = _gone_found ()
+
+	return {"state": found["states"][before], "gone": found["gone"][before]}
+
+class TestClientGone:
+
+	def test_handler_finds_its_client_closed (self, server):
+		assert _gone_leave (False) == {"state": "Closed", "gone": True}
+
+	def test_handler_finds_its_client_reset (self, server):
+		assert _gone_leave (True) == {"state": "Reset", "gone": True}

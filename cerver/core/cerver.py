@@ -5,7 +5,7 @@ CFUNCTYPE object, see cerver.callbacks): a plain Python function is rejected wit
 TypeError, so a temporary C thunk is never left behind.
 """
 
-from ctypes import CFUNCTYPE
+from ctypes import CFUNCTYPE, POINTER, Structure
 from ctypes import c_void_p, c_char_p, c_bool, c_int, c_long
 from ctypes import c_uint, c_uint8, c_uint16, c_uint32, c_size_t
 from typing import TypeAlias
@@ -13,6 +13,8 @@ from typing import TypeAlias
 from ..lib import lib_function
 
 from ..network.network import Protocol, PROTOCOL_TCP, MAX_UDP_PACKET_SIZE
+
+from ..utils.histograms import Histogram
 
 __all__ = [
 	"CERVER_DEFAULT_ALIAS", "CERVER_DEFAULT_PORT", "CERVER_DEFAULT_PROTOCOL",
@@ -31,8 +33,13 @@ __all__ = [
 	"CERVER_DEFAULT_ON_HOLD_RECEIVE_BUFFER_SIZE", "CERVER_DEFAULT_ON_HOLD_SECONDS",
 	"CERVER_DEFAULT_MAX_BAD_PACKETS", "CERVER_DEFAULT_USE_SESSIONS",
 	"CERVER_DEFAULT_MULTIPLE_HANDLERS", "CERVER_DEFAULT_CHECK_PACKETS",
-	"CERVER_DEFAULT_UPDATE_TICKS", "CERVER_DEFAULT_UPDATE_INTERVAL_SECS",
+	"CERVER_DEFAULT_UPDATE_TICKS", "CERVER_DEFAULT_UPDATE_INTERVAL_SECONDS",
 	"CERVER_INFO_NAME_SIZE", "CERVER_INFO_ALIAS_SIZE", "CERVER_INFO_WELCOME_SIZE",
+	"CERVER_POLL_MIN_FDS", "CERVER_REQUEST_STATS_SIZE", "CERVER_REQUEST_HANDLERS_MAX",
+	"RequestStats", "RequestStatsPointer",
+	"cerver_get_request_stats", "cerver_request_stats_print",
+	"cerver_set_poll_fds", "cerver_set_on_hold_poll_fds",
+	"cerver_set_request_handler", "cerver_set_auth_schema",
 	"CerverPointer", "Action", "Delegate", "SessionIdGenerator",
 	"CerverType",
 	"CERVER_TYPE_NONE", "CERVER_TYPE_CUSTOM", "CERVER_TYPE_GAME",
@@ -130,7 +137,31 @@ CERVER_DEFAULT_MULTIPLE_HANDLERS = False
 CERVER_DEFAULT_CHECK_PACKETS = False
 
 CERVER_DEFAULT_UPDATE_TICKS = 30
-CERVER_DEFAULT_UPDATE_INTERVAL_SECS = 1
+CERVER_DEFAULT_UPDATE_INTERVAL_SECONDS = 1
+
+# the smallest initial size of the main poll array (cerver_set_poll_fds ())
+CERVER_POLL_MIN_FDS = 2
+
+# the request types below it have their own stats in each packet type, the bigger ones share the last entry
+CERVER_REQUEST_STATS_SIZE = 32
+
+# the request types below it can have their own handler (cerver_set_request_handler ())
+CERVER_REQUEST_HANDLERS_MAX = 1024
+
+class RequestStats (Structure):
+	"""The packets of a request type that the handlers of the cerver handled, ``RequestStats``.
+
+	Attributes:
+		durations: The microseconds that the handler took with each packet.
+		sizes: The bytes of each packet, with its header.
+	"""
+
+	_fields_ = [
+		("durations", Histogram),
+		("sizes", Histogram)
+	]
+
+RequestStatsPointer: TypeAlias = POINTER (RequestStats) # type: ignore
 
 CERVER_INFO_NAME_SIZE = 128
 CERVER_INFO_ALIAS_SIZE = 32
@@ -274,6 +305,30 @@ cerver_stats_print = lib_function (
 		cerver: The cerver.
 		received: True to print the received packets by type.
 		sent: True to print the sent packets by type.
+	"""
+)
+
+cerver_get_request_stats = lib_function (
+	"cerver_get_request_stats", [c_void_p, c_int, c_uint32, RequestStatsPointer], c_uint8,
+	"""Copies the stats of a request type of PACKET_TYPE_APP, PACKET_TYPE_APP_ERROR or PACKET_TYPE_CUSTOM.
+
+	Args:
+		cerver: The cerver.
+		packet_type: The PACKET_TYPE_* value.
+		request_type: The request type, one of CERVER_REQUEST_STATS_SIZE or bigger gets the shared stats.
+		stats: The RequestStats that gets the values.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+cerver_request_stats_print = lib_function (
+	"cerver_request_stats_print", [c_void_p], None,
+	"""Prints the stats of the request types that have packets.
+
+	Args:
+		cerver: The cerver.
 	"""
 )
 
@@ -509,6 +564,58 @@ cerver_set_auth_method = lib_function (
 	Args:
 		cerver: The cerver.
 		authenticate: A Delegate kept by the caller that returns 0 on success.
+	"""
+)
+
+cerver_set_auth_schema = lib_function (
+	"cerver_set_auth_schema", [c_void_p, c_void_p], None,
+	"""Sets the schema of the credentials, decoded and validated before the authenticate method gets them.
+
+	Args:
+		cerver: The cerver.
+		schema: The address of the SerializerSchema (serializer_schema ()), without arena fields.
+	"""
+)
+
+cerver_set_poll_fds = lib_function (
+	"cerver_set_poll_fds", [c_void_p, c_uint32, c_uint32], c_uint8,
+	"""Sets, before the cerver starts, the initial size of the main poll array and its max connections.
+
+	Args:
+		cerver: The cerver.
+		initial: The initial size, at least CERVER_POLL_MIN_FDS.
+		max_connections: The max connections, 0 (the default) is no limit; a new one beyond it is closed.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+cerver_set_on_hold_poll_fds = lib_function (
+	"cerver_set_on_hold_poll_fds", [c_void_p, c_uint32], c_uint8,
+	"""Sets, before the cerver starts, the connections that the on hold poll handles at the same time.
+
+	Args:
+		cerver: The cerver.
+		max_connections: The max connections, CERVER_DEFAULT_ON_HOLD_POLL_FDS by default.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+cerver_set_request_handler = lib_function (
+	"cerver_set_request_handler", [c_void_p, c_int, c_uint32, c_void_p], c_uint8,
+	"""Sets the handler of a request type, that takes its packets before the handler of the packet type.
+
+	Args:
+		cerver: The cerver.
+		packet_type: PACKET_TYPE_APP, PACKET_TYPE_APP_ERROR or PACKET_TYPE_CUSTOM.
+		request_type: The request type, below CERVER_REQUEST_HANDLERS_MAX.
+		handler: The Handler (handler_create ()), owned by the cerver after this.
+
+	Returns:
+		0 on success, 1 on error.
 	"""
 )
 

@@ -8,6 +8,7 @@ from ..lib import lib_function
 __all__ = [
 	"RangeType",
 	"HTTP_RANGE_TYPE_NONE", "HTTP_RANGE_TYPE_EMPTY", "HTTP_RANGE_TYPE_FIRST", "HTTP_RANGE_TYPE_FULL",
+	"HTTP_RANGE_TYPE_SUFFIX",
 	"BytesRange", "BytesRangePointer",
 	"http_range_type_string", "http_bytes_range_init", "http_bytes_range_print"
 ]
@@ -18,6 +19,9 @@ HTTP_RANGE_TYPE_NONE = 0
 HTTP_RANGE_TYPE_EMPTY = 1
 HTTP_RANGE_TYPE_FIRST = 2
 HTTP_RANGE_TYPE_FULL = 3
+
+# bytes=-N, the last N bytes of the file: N is the end of the range until it is resolved with the size of the file
+HTTP_RANGE_TYPE_SUFFIX = 4
 
 class BytesRange (Structure):
 	"""The bytes of a Range header, ``BytesRange``.

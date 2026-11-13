@@ -15,14 +15,14 @@ __all__ = [
 	"pycerver_version_print_version_name"
 ]
 
-PYCERVER_VERSION = "1.0"
-PYCERVER_VERSION_NAME = "Release 1.0"
-PYCERVER_VERSION_DATE = "13/12/2025"
-PYCERVER_VERSION_TIME = "17:23 CST"
+PYCERVER_VERSION = "1.1"
+PYCERVER_VERSION_NAME = "Release 1.1"
+PYCERVER_VERSION_DATE = "13/11/2026"
+PYCERVER_VERSION_TIME = "16:15 CST"
 PYCERVER_VERSION_AUTHOR = "Erick Salas"
 
 # the version of cerver whose API this release binds
-PYCERVER_CERVER_VERSION = "2.0b-64"
+PYCERVER_CERVER_VERSION = "2.0b-72"
 
 version = {
 	"id": PYCERVER_VERSION,

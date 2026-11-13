@@ -15,7 +15,8 @@ __all__ = [
 	"CLIENT_EVENT_CERVER_INFO", "CLIENT_EVENT_CERVER_TEARDOWN", "CLIENT_EVENT_CERVER_STATS",
 	"CLIENT_EVENT_CERVER_GAME_STATS", "CLIENT_EVENT_AUTH_SENT", "CLIENT_EVENT_SUCCESS_AUTH",
 	"CLIENT_EVENT_MAX_AUTH_TRIES", "CLIENT_EVENT_LOBBY_CREATE", "CLIENT_EVENT_LOBBY_JOIN",
-	"CLIENT_EVENT_LOBBY_LEAVE", "CLIENT_EVENT_LOBBY_START", "CLIENT_EVENT_UNKNOWN",
+	"CLIENT_EVENT_LOBBY_LEAVE", "CLIENT_EVENT_LOBBY_START", "CLIENT_EVENT_LOBBY_UPDATE",
+	"CLIENT_EVENT_LOBBY_DESTROY", "CLIENT_EVENT_GAME_INIT", "CLIENT_EVENT_UNKNOWN",
 	"ClientEventWork", "ClientEventData", "ClientEventDataPointer",
 	"client_event_type_description", "client_event_register", "client_event_unregister",
 	"client_event_data_delete", "client_event_on"
@@ -42,7 +43,10 @@ CLIENT_EVENT_LOBBY_CREATE = 13
 CLIENT_EVENT_LOBBY_JOIN = 14
 CLIENT_EVENT_LOBBY_LEAVE = 15
 CLIENT_EVENT_LOBBY_START = 16
-CLIENT_EVENT_UNKNOWN = 17
+CLIENT_EVENT_LOBBY_UPDATE = 17
+CLIENT_EVENT_LOBBY_DESTROY = 18
+CLIENT_EVENT_GAME_INIT = 19
+CLIENT_EVENT_UNKNOWN = 20
 
 # void *(*) (void *), it gets a ClientEventData * that it must release
 ClientEventWork: TypeAlias = CFUNCTYPE (c_void_p, c_void_p) # type: ignore
@@ -55,8 +59,12 @@ class ClientEventData (Structure):
 		connection: The connection of the event.
 		response_data: The data that came with the response.
 		delete_response_data: How the response data is released.
+		owns_response_data: client_event_data_delete () releases the response of this event only,
+			like the LobbySummary of the lobby events.
 		action_args: The work args that were registered.
 		delete_action_args: How the args are released.
+		owns_action_args: The event was dropped after this trigger, so
+			client_event_data_delete () releases the args with delete_action_args.
 	"""
 
 	_fields_ = [
@@ -66,8 +74,12 @@ class ClientEventData (Structure):
 		("response_data", c_void_p),
 		("delete_response_data", c_void_p),
 
+		("owns_response_data", c_bool),
+
 		("action_args", c_void_p),
-		("delete_action_args", c_void_p)
+		("delete_action_args", c_void_p),
+
+		("owns_action_args", c_bool)
 	]
 
 ClientEventDataPointer: TypeAlias = POINTER (ClientEventData) # type: ignore

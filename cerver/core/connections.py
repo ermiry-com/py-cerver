@@ -35,7 +35,8 @@ __all__ = [
 	"connection_set_receive", "connection_set_receive_flags", "connection_set_receive_buffer_size",
 	"connection_set_received_data", "connection_set_update_timeout", "connection_set_send_timeout",
 	"connection_set_custom_receive", "connection_set_send_queue", "connection_send_packet",
-	"connection_set_auth_data", "connection_remove_auth_data", "connection_generate_auth_packet",
+	"connection_set_auth_data", "connection_set_auth_object", "connection_set_auth_token",
+	"connection_remove_auth_data", "connection_generate_auth_packet",
 	"connection_set_attempt_reconnect", "connection_drop_request"
 ]
 
@@ -379,6 +380,35 @@ connection_set_auth_data = lib_function (
 		auth_data_size: Its size.
 		delete_auth_data: An Action kept by the caller that releases it, or None.
 		admin_auth: True to authenticate as an admin.
+	"""
+)
+
+connection_set_auth_object = lib_function (
+	"connection_set_auth_object", [c_void_p, c_void_p, c_void_p, c_bool], c_uint8,
+	"""Sets the credentials as an object of the auth schema of the cerver, encoded now.
+
+	Args:
+		connection: The connection.
+		schema: The address of the SerializerSchema of the credentials.
+		object: The address of the object, it can be released after this.
+		admin_auth: True to authenticate as an admin.
+
+	Returns:
+		0 on success, 1 if the object can not be encoded.
+	"""
+)
+
+connection_set_auth_token = lib_function (
+	"connection_set_auth_token", [c_void_p, c_char_p, c_bool], c_uint8,
+	"""Sets the session token that a cerver with sessions gave, to authenticate with it instead of credentials.
+
+	Args:
+		connection: The connection.
+		token: The token, as bytes.
+		admin_auth: True to authenticate as an admin.
+
+	Returns:
+		0 on success, 1 on error.
 	"""
 )
 

@@ -26,6 +26,9 @@ HEADERS = Path ("/usr/local/include/cerver")
 
 PROTOTYPE = re.compile (r"CERVER_(EXPORT|PUBLIC|PRIVATE)\s+([^;{}]+?)\s*\b(\w+)\s*\(([^;{}]*?)\)\s*;", re.DOTALL)
 
+# the printf attribute after the arguments of the functions with a format, it is not part of the prototype
+PRINTF_FORMAT = re.compile (r"CERVER_PRINTF_FORMAT\s*\([^)]*\)")
+
 TYPEDEF_ENUM = re.compile (r"typedef\s+enum\s*\w*\s*\{[^}]*\}\s*(\w+)\s*;", re.DOTALL)
 TYPEDEF_FUNCTION = re.compile (r"typedef\s+[^;()]*\(\s*\*\s*(\w+)\s*\)\s*\(", re.DOTALL)
 TYPEDEF_INTEGER = re.compile (r"typedef\s+(u?int\d+_t|unsigned\s+char|u32|u64)\s+(\w+)\s*;")
@@ -41,7 +44,9 @@ INCLUDED_HEADERS = (
 	"http/headers.h", "http/http.h", "http/method.h", "http/metrics.h", "http/middleware.h",
 	"http/multipart.h", "http/origin.h", "http/proxy.h", "http/request.h", "http/response.h",
 	"http/route.h", "http/status.h", "http/stream.h", "http/tree.h", "http/url.h", "http/utils.h",
-	"http/validator.h", "http/jwt/alg.h"
+	"http/validator.h", "http/jwt/alg.h",
+	"serializer.h", "system.h", "utils/histogram.h",
+	"game/game.h", "game/gametype.h", "game/lobby.h", "game/player.h", "game/score.h"
 )
 
 # the functions of the included headers that are not bound, with their reason
@@ -86,7 +91,8 @@ def header_texts () -> dict:
 	texts = {}
 	for header in HEADERS.rglob ("*.h"):
 		text = re.sub (r"/\*.*?\*/", "", header.read_text (), flags=re.DOTALL)
-		texts[str (header.relative_to (HEADERS))] = re.sub (r"//[^\n]*", "", text)
+		text = re.sub (r"//[^\n]*", "", text)
+		texts[str (header.relative_to (HEADERS))] = PRINTF_FORMAT.sub ("", text)
 
 	return texts
 

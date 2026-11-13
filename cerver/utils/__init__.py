@@ -1,8 +1,9 @@
-"""The log of cerver and helpers of the package."""
+"""The log of cerver, its histograms and helpers of the package."""
 
-from . import log, utils
+from . import histograms, log, utils
 
+from .histograms import *
 from .log import *
 from .utils import *
 
-__all__ = log.__all__ + utils.__all__
+__all__ = histograms.__all__ + log.__all__ + utils.__all__

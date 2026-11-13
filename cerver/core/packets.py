@@ -3,6 +3,7 @@
 from ctypes import POINTER, Structure
 from ctypes import c_int, c_bool, c_char_p, c_void_p
 from ctypes import c_uint, c_uint8, c_uint16, c_uint32, c_uint64, c_size_t, string_at
+from ctypes import byref
 from typing import TypeAlias
 
 from ..lib import lib_function
@@ -28,7 +29,14 @@ __all__ = [
 	"GAME_PACKET_TYPE_LOBBY_UPDATE", "GAME_PACKET_TYPE_LOBBY_DESTROY",
 	"ProtocolID", "ProtocolVersion", "PacketVersion", "PacketVersionPointer",
 	"PacketsPerType", "PacketsPerTypePointer",
-	"PacketHeader", "PacketHeaderPointer", "Packet", "PacketPointer",
+	"PACKET_HEADER_SIZE", "PACKET_HEADER_FORMAT", "PACKET_FLAG_SERIALIZED", "PACKET_FLAGS_KNOWN",
+	"PacketHeaderResult",
+	"PACKET_HEADER_RESULT_NONE", "PACKET_HEADER_RESULT_FORMAT", "PACKET_HEADER_RESULT_FLAGS",
+	"PACKET_HEADER_RESULT_RESERVED",
+	"PacketHeader", "PacketHeaderPointer", "PacketHeaderBytes", "Packet", "PacketPointer",
+	"packet_header_result_string", "packet_header_encode", "packet_header_decode",
+	"packet_header_to_bytes", "packet_header_from_bytes",
+	"packet_set_route_id", "packet_create_serialized", "packet_get_object",
 	"packets_get_protocol_id", "packets_set_protocol_id",
 	"packets_get_protocol_version", "packets_set_protocol_version",
 	"packet_version_new", "packet_version_delete", "packet_version_create",
@@ -155,32 +163,58 @@ class PacketsPerType (Structure):
 
 PacketsPerTypePointer: TypeAlias = POINTER (PacketsPerType) # type: ignore
 
+# the header travels in PACKET_HEADER_SIZE bytes in network byte order, field by field,
+# so it never depends on the layout of PacketHeader in memory
+PACKET_HEADER_SIZE = 32
+
+# the format of the header in the wire, a peer that sends another one is closed
+PACKET_HEADER_FORMAT = 1
+
+# the data of the packet is an object of the serializer
+PACKET_FLAG_SERIALIZED = 0x01
+
+# a header with any other flag is a bad packet
+PACKET_FLAGS_KNOWN = PACKET_FLAG_SERIALIZED
+
+PacketHeaderResult: TypeAlias = c_int # type: ignore
+
+PACKET_HEADER_RESULT_NONE = 0
+PACKET_HEADER_RESULT_FORMAT = 1
+PACKET_HEADER_RESULT_FLAGS = 2
+PACKET_HEADER_RESULT_RESERVED = 3
+
 class PacketHeader (Structure):
-	"""The header of every packet, ``PacketHeader``.
+	"""The header of every packet in memory, ``PacketHeader``.
+
+	It is not the header in the wire: packet_header_encode () writes it in PACKET_HEADER_SIZE bytes.
 
 	Attributes:
 		packet_type: The main type, a PACKET_TYPE_* value.
 		packet_size: The size of the packet, the header and the data.
 		handler_id: The app handler of a cerver with multiple handlers.
+		flags: PACKET_FLAG_* values.
 		request_type: The subtype of the packet.
-		sock_fd: The connection of the packet in a load balancer.
+		route_id: The route of a client of a load balancer, to send the responses of a service back to it.
 		version: The protocol of the sender.
 	"""
 
 	_fields_ = [
 		("packet_type", PacketType),
-		("packet_size", c_size_t),
+		("packet_size", c_uint64),
 
 		("handler_id", c_uint8),
+		("flags", c_uint8),
 
 		("request_type", c_uint32),
 
-		("sock_fd", c_uint16),
+		("route_id", c_uint32),
 
 		("version", PacketVersion)
 	]
 
 PacketHeaderPointer: TypeAlias = POINTER (PacketHeader) # type: ignore
+
+PacketHeaderBytes: TypeAlias = c_uint8 * PACKET_HEADER_SIZE # type: ignore
 
 class Packet (Structure):
 	"""A packet that is sent or received, ``Packet``.
@@ -195,8 +229,11 @@ class Packet (Structure):
 		data_size: The size of the data.
 		data: The data, without the header.
 		header: The header.
+		encoded_header: The header of a request packet in the wire, encoded from header when it is sent.
 		release: Called by packet_delete () before the packet is released (an UDP peer).
 		release_args: The argument of release.
+		data_class: The class of the recycled buffer of the data, 0 if it was not taken from them.
+		recycle_next: The next packet while it is kept to be reused.
 	"""
 
 	_fields_ = [
@@ -218,6 +255,8 @@ class Packet (Structure):
 
 		("header", PacketHeader),
 
+		("encoded_header", PacketHeaderBytes),
+
 		("version", PacketVersion),
 
 		("packet_size", c_size_t),
@@ -225,7 +264,11 @@ class Packet (Structure):
 		("packet_ref", c_bool),
 
 		("release", c_void_p),
-		("release_args", c_void_p)
+		("release_args", c_void_p),
+
+		("data_class", c_uint),
+
+		("recycle_next", c_void_p)
 	]
 
 PacketPointer: TypeAlias = POINTER (Packet) # type: ignore
@@ -364,6 +407,76 @@ packets_per_type_array_print = lib_function (
 )
 
 # header
+packet_header_result_string = lib_function (
+	"packet_header_result_string", [PacketHeaderResult], c_char_p,
+	"""Returns the description of a result of packet_header_decode ().
+
+	Args:
+		result: A PACKET_HEADER_RESULT_* value.
+
+	Returns:
+		The description, as bytes.
+	"""
+)
+
+packet_header_encode = lib_function (
+	"packet_header_encode", [PacketHeaderPointer, POINTER (c_uint8)], None,
+	"""Writes the header in the wire format, PACKET_HEADER_SIZE bytes in network byte order.
+
+	Args:
+		header: The PacketHeader.
+		buffer: A PacketHeaderBytes that gets the bytes.
+	"""
+)
+
+packet_header_decode = lib_function (
+	"packet_header_decode", [POINTER (c_uint8), PacketHeaderPointer], PacketHeaderResult,
+	"""Reads a header in the wire format, the header is only written when it is valid.
+
+	Args:
+		buffer: A PacketHeaderBytes with the bytes of the header.
+		header: The PacketHeader that gets the values.
+
+	Returns:
+		A PACKET_HEADER_RESULT_* value, PACKET_HEADER_RESULT_NONE for a valid header.
+	"""
+)
+
+def packet_header_to_bytes (header: PacketHeader) -> bytes:
+	"""Returns the bytes of a header in the wire format.
+
+	Args:
+		header: The PacketHeader.
+
+	Returns:
+		The PACKET_HEADER_SIZE bytes.
+	"""
+	buffer = PacketHeaderBytes ()
+	packet_header_encode (byref (header), buffer)
+
+	return bytes (buffer)
+
+def packet_header_from_bytes (data: bytes) -> tuple[int, PacketHeader]:
+	"""Reads a header from the first PACKET_HEADER_SIZE bytes of data.
+
+	Args:
+		data: The bytes of the packet, at least PACKET_HEADER_SIZE.
+
+	Returns:
+		The PACKET_HEADER_RESULT_* value and the PacketHeader, that only has values when it is valid.
+
+	Raises:
+		ValueError: The data is shorter than the header.
+	"""
+	if (len (data) < PACKET_HEADER_SIZE):
+		raise ValueError (f"a header has {PACKET_HEADER_SIZE} bytes, got {len (data)}")
+
+	buffer = PacketHeaderBytes.from_buffer_copy (data[:PACKET_HEADER_SIZE])
+	header = PacketHeader ()
+	result = packet_header_decode (buffer, byref (header))
+
+	return result, header
+
 packet_header_new = lib_function (
 	"packet_header_new", [], PacketHeaderPointer,
 	"""Allocates an empty packet header.
@@ -498,7 +611,7 @@ packet_set_header = lib_function (
 
 packet_set_header_values = lib_function (
 	"packet_set_header_values",
-	[PacketPointer, PacketType, c_size_t, c_uint8, c_uint32, c_uint16],
+	[PacketPointer, PacketType, c_size_t, c_uint8, c_uint32, c_uint32],
 	None,
 	"""Sets the values of the header of the packet.
 
@@ -508,7 +621,47 @@ packet_set_header_values = lib_function (
 		packet_size: The size of the packet.
 		handler_id: The app handler of a cerver with multiple handlers.
 		request_type: The subtype of the packet.
-		sock_fd: The connection of the packet in a load balancer.
+		route_id: The route of a client of a load balancer.
+	"""
+)
+
+packet_set_route_id = lib_function (
+	"packet_set_route_id", [PacketPointer, c_uint32], None,
+	"""Sets the route id of the header, a service answers a request of a load balancer with it.
+
+	Args:
+		packet: The Packet.
+		route_id: The route id of the request.
+	"""
+)
+
+packet_create_serialized = lib_function (
+	"packet_create_serialized", [PacketType, c_uint32, c_void_p, c_void_p], PacketPointer,
+	"""Creates a packet whose data is an object encoded with its schema (PACKET_FLAG_SERIALIZED).
+
+	Args:
+		type: A PACKET_TYPE_* value.
+		request_type: The subtype of the packet.
+		schema: The address of the SerializerSchema of the object.
+		object: The address of the object.
+
+	Returns:
+		The Packet, released with packet_delete (), None if the object can not be encoded.
+	"""
+)
+
+packet_get_object = lib_function (
+	"packet_get_object", [PacketPointer, c_void_p, c_void_p, c_void_p], c_int,
+	"""Decodes the object of a packet that has PACKET_FLAG_SERIALIZED with its schema.
+
+	Args:
+		packet: The Packet.
+		schema: The address of the SerializerSchema of the object.
+		arena: The Arena of the arena fields, or None.
+		object: The address of the object that gets the values.
+
+	Returns:
+		A SERIALIZER_RESULT_* value, 0 when the object was decoded.
 	"""
 )
 

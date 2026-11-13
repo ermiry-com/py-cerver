@@ -4,7 +4,7 @@
 make clean
 
 # remove the test container of a previous run, never the other containers of the machine
-sudo docker kill test 2> /dev/null
+sudo docker rm -f test 2> /dev/null
 
 # compile tests
 make TYPE=test -j4 test || { exit 1; }
@@ -27,7 +27,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/ping || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # web
 echo "Web integration test..."
@@ -43,7 +43,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/web || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # query
 echo "Query integration test..."
@@ -59,7 +59,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/query || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # JSON
 echo "JSON integration test..."
@@ -75,7 +75,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/json || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # auth
 echo "Web Auth integration test..."
@@ -91,7 +91,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/auth || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # api
 echo "API integration test..."
@@ -107,7 +107,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/api || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # multi
 echo "Multi integration test..."
@@ -123,7 +123,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/multi || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # upload
 echo "Upload integration test..."
@@ -139,7 +139,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/upload || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # multiple
 echo "Multiple integration test..."
@@ -155,7 +155,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/multiple || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # jobs
 echo "Jobs integration test..."
@@ -171,7 +171,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/jobs || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # worker
 echo "Worker integration test..."
@@ -187,7 +187,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/worker || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # admin
 echo "Admin integration test..."
@@ -203,7 +203,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/admin || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # validation
 echo "Validation integration test..."
@@ -219,7 +219,7 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/validation || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 # wrapper
 echo "Wrapper integration test..."
@@ -235,6 +235,6 @@ sudo docker inspect test --format='{{.State.ExitCode}}' || { exit 1; }
 
 ./tests/clients/bin/client/web/wrapper || { exit 1; }
 
-sudo docker kill test
+sudo docker rm -f test
 
 printf "\n\nDone\n\n"

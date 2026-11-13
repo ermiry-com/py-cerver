@@ -9,6 +9,11 @@ from cerver import cerver_set_overload_policy, cerver_set_drain_policy, cerver_s
 from cerver import CERVER_OVERLOAD_POLICY_REJECT, CERVER_DRAIN_POLICY_REJECT
 from cerver.http import http_cerver_get, http_cerver_configuration
 from cerver.http import http_cerver_set_max_body_size, http_cerver_set_headers_timeout
+from cerver.http import http_cerver_set_headers_timeout_milliseconds, http_cerver_set_request_timeout_milliseconds
+from cerver.http import http_cerver_set_idle_timeout_milliseconds, http_cerver_set_half_close_is_gone
+from cerver.http import http_cerver_set_send_timeout_milliseconds
+from cerver.http import http_stage_label, http_abort_reason_label, http_client_state_string
+from cerver.http import HTTP_STAGES, HTTP_STAGE_UPLOAD, HTTP_ABORT_REASON_RESET, HTTP_CLIENT_STATE_CLOSED
 from cerver.http import http_cerver_set_request_id, http_cerver_set_date_header
 from cerver.http import http_cerver_set_trusted_proxies, http_cerver_add_trusted_proxy
 from cerver.http import HTTP_TRUSTED_PROXIES_LIST, http_proxy_is_trusted
@@ -27,6 +32,12 @@ CERVER_CONNECTION_QUEUE = 4
 
 MAX_BODY_SIZE = 1 << 20
 HEADERS_TIMEOUT = 8
+
+# milliseconds
+HEADERS_TIMEOUT_MILLISECONDS = 1500
+REQUEST_TIMEOUT_MILLISECONDS = 4500
+IDLE_TIMEOUT_MILLISECONDS = 250
+SEND_TIMEOUT_MILLISECONDS = 750
 COMPRESSION_LEVEL = 4
 COMPRESSION_MIN_SIZE = 1 << 9
 DRAIN_TIMEOUT = 2
@@ -80,10 +91,31 @@ class TestConfiguration:
 		assert http_proxy_is_trusted (http_cerver, b"10.1.1.1", 8)
 		assert not http_proxy_is_trusted (http_cerver, b"11.1.1.1", 8)
 
+	def test_timeouts_in_milliseconds (self, cerver):
+		http_cerver = http_cerver_get (cerver)
+
+		http_cerver_set_headers_timeout_milliseconds (http_cerver, HEADERS_TIMEOUT_MILLISECONDS)
+		http_cerver_set_request_timeout_milliseconds (http_cerver, REQUEST_TIMEOUT_MILLISECONDS)
+		http_cerver_set_idle_timeout_milliseconds (http_cerver, IDLE_TIMEOUT_MILLISECONDS)
+		http_cerver_set_send_timeout_milliseconds (http_cerver, SEND_TIMEOUT_MILLISECONDS)
+		http_cerver_set_half_close_is_gone (http_cerver, False)
+
 	def test_metrics (self, cerver):
 		metrics = http_cerver_metrics (http_cerver_get (cerver))
 		assert "cerver_info{version=" in metrics
 		assert "cerver_http_request_duration_seconds" in metrics
+
+	def test_gone_metrics (self, cerver):
+		metrics = http_cerver_metrics (http_cerver_get (cerver))
+		assert "cerver_http_failed_responses_total 0" in metrics
+		assert 'cerver_http_aborted_requests_total{stage="upload",reason="reset"} 0' in metrics
+		assert 'cerver_http_vanished_requests_total{stage="queued"} 0' in metrics
+
+	def test_stage_names (self):
+		assert HTTP_STAGES == 7
+		assert http_stage_label (HTTP_STAGE_UPLOAD) == b"upload"
+		assert http_abort_reason_label (HTTP_ABORT_REASON_RESET) == b"reset"
+		assert http_client_state_string (HTTP_CLIENT_STATE_CLOSED) == b"Closed"
 
 	def test_service_configuration (self):
 		service = http_cerver_configuration ("configuration", port=CERVER_PORT + 1)

@@ -13,11 +13,15 @@ from cerver.client import ClientEventData, ClientErrorData
 from cerver.core import Packet, PacketHeader, PacketVersion, PacketsPerType, ProtocolVersion
 from cerver.core import ConnectionCustomReceiveData
 from cerver.core import AuthData, AuthMethod, CerverErrorEventData, CerverEventData
-from cerver.core import CerverUpdate, FileHeader, HandlerData
+from cerver.core import CerverUpdate, FileHeader, HandlerData, HandlerStats, RequestStats
+from cerver.core import FileSystemStats, SystemCpuSample, SystemLoad, SystemMemory, SystemProcess
+from cerver.games import LobbyCreate, LobbyJoin, LobbyRequest
+from cerver.games import LobbyPlayerSummary, LobbySettingsSummary, LobbySummary
 from cerver.http import BytesRange, HttpOrigin, HttpProxyNetwork
 from cerver.network import NetworkAddresses, SockaddrStorage, Timespec
 from cerver.threads import Job, JobQueueStats, ThpoolStats, WorkerManagerStats
 from cerver.types import String
+from cerver.utils import Histogram
 
 from probes import PROBE_VALUES, PROBE_SIZE, PROBE_OFFSET
 
@@ -35,7 +39,13 @@ STRUCTURES = {
 	"ClientEventData": ClientEventData, "ClientErrorData": ClientErrorData,
 	"Job": Job, "ThpoolStats": ThpoolStats, "JobQueueStats": JobQueueStats,
 	"WorkerManagerStats": WorkerManagerStats,
-	"HttpOrigin": HttpOrigin, "BytesRange": BytesRange, "HttpProxyNetwork": HttpProxyNetwork
+	"Histogram": Histogram, "RequestStats": RequestStats, "HandlerStats": HandlerStats,
+	"HttpOrigin": HttpOrigin, "BytesRange": BytesRange, "HttpProxyNetwork": HttpProxyNetwork,
+	"FileSystemStats": FileSystemStats, "SystemMemory": SystemMemory, "SystemLoad": SystemLoad,
+	"SystemCpuSample": SystemCpuSample, "SystemProcess": SystemProcess,
+	"LobbyCreate": LobbyCreate, "LobbyJoin": LobbyJoin, "LobbyRequest": LobbyRequest,
+	"LobbyPlayerSummary": LobbyPlayerSummary, "LobbySettingsSummary": LobbySettingsSummary,
+	"LobbySummary": LobbySummary
 }
 
 C_SIZES = PROBE_VALUES[PROBE_SIZE]
@@ -55,6 +65,6 @@ class TestStructures:
 		name, member = field.split (".")
 		assert getattr (STRUCTURES[name], member).offset == C_OFFSETS[field]
 
-	def test_packet_release_is_last (self):
+	def test_packet_pool_fields_are_last (self):
 		names = [name for name, _ in Packet._fields_]
-		assert names[-2:] == ["release", "release_args"]
+		assert names[-4:] == ["release", "release_args", "data_class", "recycle_next"]
