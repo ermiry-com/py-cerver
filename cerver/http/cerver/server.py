@@ -21,7 +21,7 @@ __all__ = [
 	"http_cerver_static_path_add", "http_receive_public_path_remove",
 	"http_cerver_get_custom_data", "http_cerver_set_custom_data",
 	"http_cerver_set_delete_custom_data", "http_cerver_set_default_delete_custom_data",
-	"http_cerver_add_responses_header",
+	"http_cerver_add_responses_header", "http_cerver_add_responses_header_by_name",
 	"http_cerver_all_stats_print", "http_cerver_routes_stats_print", "http_cerver_route_stats_print"
 ]
 
@@ -188,12 +188,26 @@ http_cerver_set_default_delete_custom_data = lib_function (
 # responses
 http_cerver_add_responses_header = lib_function (
 	"http_cerver_add_responses_header", [c_void_p, HttpHeaderType, c_char_p], c_uint8,
-	"""Adds a header to every response of an HTTP cerver.
+	"""Adds a header to every response of an HTTP cerver that does not have it.
 
 	Args:
 		http_cerver: The HttpCerver.
 		type: An HTTP_HEADER_* value.
 		actual_header: The value, as bytes.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+http_cerver_add_responses_header_by_name = lib_function (
+	"http_cerver_add_responses_header_by_name", [c_void_p, c_char_p, c_char_p], c_uint8,
+	"""Adds a header with any name to every response of an HTTP cerver that does not have it.
+
+	Args:
+		http_cerver: The HttpCerver.
+		name: The name, as bytes, like b"X-Frame-Options".
+		value: The value, as bytes, without a CR, a LF or a NUL.
 
 	Returns:
 		0 on success, 1 on error.
