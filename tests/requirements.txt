@@ -3,3 +3,4 @@ pytest-cov==4.1.0
 pytest-xdist==3.5.0
 hypothesis==6.112.1
 cbor2==5.6.5
+websockets==15.0.1

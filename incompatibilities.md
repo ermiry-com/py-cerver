@@ -3,6 +3,34 @@
 The changes of each version that can break code built with the version before it, the newest first.
 Unlike `CHANGELOG.md`, which only has the current version, every entry stays here.
 
+## 1.2b-1 (from 1.1)
+
+1.2b-1 binds the 2.1 line of cerver (`nightly`), the 2.1b-13: the parser is llhttp. It needs a `libcerver.so` of the
+2.1b-13 or newer of that line, and it does not load against a cerver of the 2.0 line (the bindings of WebSocket, of
+the methods and of the headers of the responses are not in it).
+
+- Without `http_method_str ()` (cerver removed it): `http_request_method_str ()` names every method
+- `REQUEST_METHOD_UNDEFINED` is 255 (it was 34) and `REQUEST_METHOD_SIZE` is 47 (it was 29); new
+  `REQUEST_METHOD_*` for the 34 methods of HTTP and `QUERY`, all of them can be registered
+- `HTTP_ROUTE_METHODS_STRING_SIZE` is 512 (it was 128)
+- `http_cerver_set_max_url_size ()` and `http_cerver_set_max_header_size ()` with 0 set the default value
+- Only `HTTP/1.0` and `HTTP/1.1` are served: another protocol is a 400 and another version of HTTP a 505, unless
+  `HTTP_PARSER_LENIENT_VERSION` is set
+- The headers of a response are a list (`http_response_header_set ()`, `_add ()`, `_remove ()`, `_count ()`,
+  `_get ()` and the same with `_by_name`): a header can be repeated, like `Set-Cookie`, and it can have any name.
+  They arrive in the order they were added, `Connection: close` is added by cerver when the response is sent, and a
+  value with a CR, a LF or a NUL is rejected (`http_response_add_header ()` returns 1)
+- The WebSocket connections, the clients, the registry and the handshake are opaque: they are only used through
+  their functions. The timeouts of WebSocket are set with the `_milliseconds` setters (the old names were removed)
+- New: the lenient flags of the parser (`HTTP_PARSER_LENIENT_*`, `http_cerver_set_parser_lenient ()`,
+  `http_parser_lenient_string ()`, `http_parser_lenient_description ()`) and
+  `http_cerver_add_responses_header_by_name ()`
+- New: WebSocket in `cerver.http.websockets`, the endpoints and the groups with `http_group_web_socket_add ()` and
+  `web_socket_handlers ()`, the connections, rooms and broadcast, their stats (`http_cerver_web_socket_get_stats ()`,
+  `http_web_socket_get_stats ()`), the headers of the upgrade (`http_web_socket_upgrade_add_header ()`), the query
+  of a connection (`http_web_socket_get_query ()`) and the client (`http_web_socket_client_*`)
+- New: the examples of `websockets/`, `requests/methods.py` and `requests/abandoned.py`
+
 ## 1.1 (from 1.0)
 
 1.1 binds cerver 2.0b-72: it needs a `libcerver.so` of that version or newer, and it does not load against an older

@@ -21,6 +21,7 @@ from cerver.http import HTTP_HEADER_CONTENT_TYPE
 from cerver.http import HTTP_MIDDLEWARE_RESULT_CONTINUE
 from cerver.http import HTTP_MIDDLEWARE_RESULT_STOP
 from cerver.http import HTTP_ROUTE_MODIFIER_MULTI_PART
+from cerver.http import REQUEST_METHOD_QUERY
 from cerver.http import HTTP_STATUS_BAD_REQUEST
 from cerver.http import HTTP_STATUS_FORBIDDEN
 from cerver.http import HTTP_STATUS_OK
@@ -46,7 +47,14 @@ from cerver.http import http_cerver_set_trusted_proxies
 from cerver.http import http_group_set_cors
 from cerver.http import http_request_get_client_ip
 from cerver.http import http_request_get_id
+from cerver.http import HTTP_HEADER_SET_COOKIE
+from cerver.http import http_response_add_content_length_header
 from cerver.http import http_response_add_content_type_header
+from cerver.http import http_response_create
+from cerver.http import http_response_delete
+from cerver.http import http_response_header_add
+from cerver.http import http_response_header_add_by_name
+from cerver.http import http_response_send
 from cerver.http import http_response_get
 from cerver.http import http_response_return
 from cerver.http import http_response_set_status
@@ -79,6 +87,12 @@ STREAM_PIECES = [b"first", b"second"]
 ALLOWED_ORIGIN = b"http://allowed.com"
 
 REDIRECT_LOCATION = "/api/e2e/next?a=1&b=<2>"
+
+# a header that is repeated and one with a name of the application
+COOKIES = [b"session=first; Path=/", b"theme=dark; Path=/"]
+TRACE_NAME = b"X-Trace"
+TRACE_VALUE = b"abc-123"
+COOKIES_BODY = b"cookies"
 
 # the gone handler waits for its client to leave
 GONE_WAIT_SECONDS = 4
@@ -134,6 +148,19 @@ def _routes (http_cerver: c_void_p):
 	def raise_handler (http_receive, request):
 		raise RuntimeError ("the handler failed before its response")
 
+	@api.get ("cookies")
+	def cookies_handler (http_receive, request):
+		response = http_response_create (HTTP_STATUS_OK, COOKIES_BODY, len (COOKIES_BODY))
+
+		http_response_header_add (response, HTTP_HEADER_SET_COOKIE, COOKIES[0])
+		http_response_header_add_by_name (response, TRACE_NAME, TRACE_VALUE)
+		http_response_header_add (response, HTTP_HEADER_SET_COOKIE, COOKIES[1])
+		http_response_add_content_type_header (response, HTTP_CONTENT_TYPE_TXT)
+		http_response_add_content_length_header (response, len (COOKIES_BODY))
+
+		http_response_send (response, http_receive)
+		http_response_delete (response)
+
 	@api.get ("items/:id<objectid>")
 	def item_handler (http_receive, request):
 		item = http_request_get_param_at_idx (request, 0).contents.str.decode ("utf-8")
@@ -165,6 +192,12 @@ def _routes (http_cerver: c_void_p):
 	@api.post ("method")
 	def method_handler (http_receive, request):
 		http_send_response (http_receive, HTTP_STATUS_OK, {"method": "POST"})
+
+	# a method that the parser accepts since llhttp, with a body
+	@api.route (REQUEST_METHOD_QUERY, "query")
+	def query_handler (http_receive, request):
+		body = http_request_get_body_json (request)
+		http_send_response (http_receive, HTTP_STATUS_OK, {"query": body})
 
 	@api.get ("gone")
 	def gone_handler (http_receive, request):

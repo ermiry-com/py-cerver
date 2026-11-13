@@ -88,6 +88,27 @@ class TestResponses:
 		# the server keeps serving
 		assert e2e_request ("GET", "/api/e2e/json").status == 200
 
+	def test_repeated_headers_arrive_in_their_order (self, server):
+		raw = e2e_raw (b"GET /api/e2e/cookies HTTP/1.1\r\nHost: localhost\r\n\r\n")
+
+		head, body = raw.split (b"\r\n\r\n", 1)
+		lines = head.split (b"\r\n")
+
+		assert lines[0].startswith (b"HTTP/1.1 200")
+		assert body == b"cookies"
+
+		# a header can be repeated and it can have any name (cerver 2.1b-11)
+		first = lines.index (b"Set-Cookie: session=first; Path=/")
+		trace = lines.index (b"X-Trace: abc-123")
+		second = lines.index (b"Set-Cookie: theme=dark; Path=/")
+		assert first < trace < second
+		assert len ([line for line in lines if line.startswith (b"Set-Cookie: ")]) == 2
+
+		# cerver says once that it closes the connection, after the headers of the response
+		connection = [line for line in lines if line.lower ().startswith (b"connection:")]
+		assert connection == [b"Connection: close"]
+		assert lines.index (b"Connection: close") > second
+
 class TestRoutes:
 
 	def test_typed_param (self, server):
@@ -129,6 +150,24 @@ class TestBody:
 	@pytest.mark.parametrize ("content", [b"{", b"[1]", b"\xff\xfe"])
 	def test_body_that_is_not_an_object (self, server, content):
 		assert e2e_request ("POST", "/api/e2e/body", content, {"Content-Type": "application/json"}).status == 400
+
+class TestParser:
+
+	def test_query_with_a_body (self, server):
+		body = {"select": ["name"]}
+		response = e2e_request ("QUERY", "/api/e2e/query", json.dumps (body).encode ("utf-8"), {"Content-Type": "application/json"})
+
+		assert response.status == 200
+		assert json.loads (response.body) == {"query": body}
+
+	@pytest.mark.parametrize ("request_bytes", [
+		b"GET /api/e2e/json HTTP/1.1\nHost: localhost\n\n",
+		b"GET /api/e2e/json HTTP/1.5\r\nHost: localhost\r\n\r\n",
+		b"GET /api/e2e/json HTTP/1.1\r\nHost: localhost\r\nX-Folded: a\r\n b\r\n\r\n",
+		b"DESCRIBE /api/e2e/json HTTP/1.1\r\nHost: localhost\r\n\r\n"
+	])
+	def test_strict_mode (self, server, request_bytes):
+		assert e2e_raw (request_bytes).startswith (b"HTTP/1.1 400")
 
 class TestUpload:
 

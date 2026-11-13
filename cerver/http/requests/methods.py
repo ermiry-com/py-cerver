@@ -9,13 +9,20 @@ __all__ = [
 	"RequestMethod",
 	"REQUEST_METHOD_DELETE", "REQUEST_METHOD_GET", "REQUEST_METHOD_HEAD", "REQUEST_METHOD_POST",
 	"REQUEST_METHOD_PUT", "REQUEST_METHOD_CONNECT", "REQUEST_METHOD_OPTIONS", "REQUEST_METHOD_TRACE",
-	"REQUEST_METHOD_PATCH", "REQUEST_METHOD_UNDEFINED", "REQUEST_METHOD_SIZE",
-	"http_request_method_str", "http_request_method_is_valid", "http_method_str"
+	"REQUEST_METHOD_COPY", "REQUEST_METHOD_LOCK", "REQUEST_METHOD_MKCOL", "REQUEST_METHOD_MOVE",
+	"REQUEST_METHOD_PROPFIND", "REQUEST_METHOD_PROPPATCH", "REQUEST_METHOD_SEARCH", "REQUEST_METHOD_UNLOCK",
+	"REQUEST_METHOD_BIND", "REQUEST_METHOD_REBIND", "REQUEST_METHOD_UNBIND", "REQUEST_METHOD_ACL",
+	"REQUEST_METHOD_REPORT", "REQUEST_METHOD_MKACTIVITY", "REQUEST_METHOD_CHECKOUT", "REQUEST_METHOD_MERGE",
+	"REQUEST_METHOD_MSEARCH", "REQUEST_METHOD_NOTIFY", "REQUEST_METHOD_SUBSCRIBE", "REQUEST_METHOD_UNSUBSCRIBE",
+	"REQUEST_METHOD_PATCH", "REQUEST_METHOD_PURGE", "REQUEST_METHOD_MKCALENDAR", "REQUEST_METHOD_LINK",
+	"REQUEST_METHOD_UNLINK", "REQUEST_METHOD_SOURCE", "REQUEST_METHOD_QUERY",
+	"REQUEST_METHOD_UNDEFINED", "REQUEST_METHOD_SIZE",
+	"http_request_method_str", "http_request_method_is_valid"
 ]
 
 RequestMethod: TypeAlias = c_int # type: ignore
 
-# the values are the ones of the HTTP parser
+# the values are the ones of the HTTP parser (llhttp), every method can be registered in a route
 REQUEST_METHOD_DELETE = 0
 REQUEST_METHOD_GET = 1
 REQUEST_METHOD_HEAD = 2
@@ -24,13 +31,46 @@ REQUEST_METHOD_PUT = 4
 REQUEST_METHOD_CONNECT = 5
 REQUEST_METHOD_OPTIONS = 6
 REQUEST_METHOD_TRACE = 7
+
+# WebDAV
+REQUEST_METHOD_COPY = 8
+REQUEST_METHOD_LOCK = 9
+REQUEST_METHOD_MKCOL = 10
+REQUEST_METHOD_MOVE = 11
+REQUEST_METHOD_PROPFIND = 12
+REQUEST_METHOD_PROPPATCH = 13
+REQUEST_METHOD_SEARCH = 14
+REQUEST_METHOD_UNLOCK = 15
+REQUEST_METHOD_BIND = 16
+REQUEST_METHOD_REBIND = 17
+REQUEST_METHOD_UNBIND = 18
+REQUEST_METHOD_ACL = 19
+
+# subversion
+REQUEST_METHOD_REPORT = 20
+REQUEST_METHOD_MKACTIVITY = 21
+REQUEST_METHOD_CHECKOUT = 22
+REQUEST_METHOD_MERGE = 23
+
+# upnp
+REQUEST_METHOD_MSEARCH = 24
+REQUEST_METHOD_NOTIFY = 25
+REQUEST_METHOD_SUBSCRIBE = 26
+REQUEST_METHOD_UNSUBSCRIBE = 27
+
 REQUEST_METHOD_PATCH = 28
+REQUEST_METHOD_PURGE = 29
+REQUEST_METHOD_MKCALENDAR = 30
+REQUEST_METHOD_LINK = 31
+REQUEST_METHOD_UNLINK = 32
+REQUEST_METHOD_SOURCE = 33
+REQUEST_METHOD_QUERY = 46
 
-# any other method of the parser is undefined
-REQUEST_METHOD_UNDEFINED = 34
+# any other value is undefined, also the method of a request that has not been parsed
+REQUEST_METHOD_UNDEFINED = 255
 
-# the size of the tables indexed by a request method
-REQUEST_METHOD_SIZE = 29
+# the size of the tables indexed by a request method (the highest value + 1)
+REQUEST_METHOD_SIZE = 47
 
 http_request_method_str = lib_function (
 	"http_request_method_str", [RequestMethod], c_char_p,
@@ -40,30 +80,18 @@ http_request_method_str = lib_function (
 		request_method: A REQUEST_METHOD_* value.
 
 	Returns:
-		The name, as bytes, like b"GET".
+		The name, as bytes, like b"GET" or b"M-SEARCH", b"Undefined" for any other value.
 	"""
 )
 
 http_request_method_is_valid = lib_function (
 	"http_request_method_is_valid", [RequestMethod], c_bool,
-	"""Returns if a request method is one that cerver handles.
+	"""Returns if a request method is one of the methods of cerver.
 
 	Args:
 		request_method: A REQUEST_METHOD_* value.
 
 	Returns:
 		True if it is valid.
-	"""
-)
-
-http_method_str = lib_function (
-	"http_method_str", [c_int], c_char_p,
-	"""Returns the name of a method of the HTTP parser.
-
-	Args:
-		m: A method of the parser, the REQUEST_METHOD_* values are among them.
-
-	Returns:
-		The name, as bytes.
 	"""
 )

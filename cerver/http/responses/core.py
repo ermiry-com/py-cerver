@@ -2,7 +2,7 @@
 
 import json
 
-from ctypes import c_void_p, c_char_p, c_size_t, c_uint8
+from ctypes import POINTER, byref, c_void_p, c_char_p, c_size_t, c_uint, c_uint8, string_at
 
 from ...lib import lib_function, lib_c_string
 
@@ -13,7 +13,13 @@ from ..utils import BytesRangePointer
 
 __all__ = [
 	"http_response_delete", "http_response_get", "http_response_return",
-	"http_response_set_status", "http_response_set_header", "http_response_add_header",
+	"http_response_set_status", "http_response_set_header",
+	"http_response_header_set", "http_response_header_add", "http_response_header_remove",
+	"http_response_header_count", "http_response_header_get", "http_response_header_value",
+	"http_response_header_set_by_name", "http_response_header_add_by_name",
+	"http_response_header_remove_by_name", "http_response_header_count_by_name",
+	"http_response_header_get_by_name", "http_response_header_value_by_name",
+	"http_response_add_header",
 	"http_response_add_custom_header_variadic", "http_response_add_custom_header_value",
 	"http_response_add_content_type_header", "http_response_add_content_length_header",
 	"http_response_add_json_headers", "http_response_add_content_range_header",
@@ -72,7 +78,9 @@ http_response_set_status = lib_function (
 
 http_response_set_header = lib_function (
 	"http_response_set_header", [c_void_p, c_void_p, c_size_t], None,
-	"""Sets a compiled header of a response, replacing the previous one; it is released with the response.
+	"""Sets the header of a response as the bytes that are sent, replacing the previous one.
+
+	The headers that were added to the response are not sent; it is released with the response.
 
 	Args:
 		response: The HttpResponse.
@@ -81,9 +89,181 @@ http_response_set_header = lib_function (
 	"""
 )
 
+http_response_header_set = lib_function (
+	"http_response_header_set", [c_void_p, HttpHeaderType, c_char_p], c_uint8,
+	"""Sets a header of a response, it replaces the ones that it has with the same type.
+
+	Args:
+		response: The HttpResponse.
+		type: An HTTP_HEADER_* value.
+		value: The value, as bytes, without a CR, a LF or a NUL.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+http_response_header_add = lib_function (
+	"http_response_header_add", [c_void_p, HttpHeaderType, c_char_p], c_uint8,
+	"""Adds a header to a response after the ones that it has, so a header can be repeated, like Set-Cookie.
+
+	The headers are sent in the order they were added.
+
+	Args:
+		response: The HttpResponse.
+		type: An HTTP_HEADER_* value.
+		value: The value, as bytes, without a CR, a LF or a NUL.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+http_response_header_remove = lib_function (
+	"http_response_header_remove", [c_void_p, HttpHeaderType], c_uint,
+	"""Removes the headers of a response with the type.
+
+	Args:
+		response: The HttpResponse.
+		type: An HTTP_HEADER_* value.
+
+	Returns:
+		The number of headers that were removed.
+	"""
+)
+
+http_response_header_count = lib_function (
+	"http_response_header_count", [c_void_p, HttpHeaderType], c_uint,
+	"""Returns the number of headers of a response with the type.
+
+	Args:
+		response: The HttpResponse.
+		type: An HTTP_HEADER_* value.
+	"""
+)
+
+http_response_header_get = lib_function (
+	"http_response_header_get", [c_void_p, HttpHeaderType, c_uint, POINTER (c_size_t)], c_void_p,
+	"""Gets the value of a header of a response, that does not end with a NUL.
+
+	http_response_header_value () returns it as bytes.
+
+	Args:
+		response: The HttpResponse.
+		type: An HTTP_HEADER_* value.
+		position: The position between the headers with the type, 0 is the first one that was added.
+		value_length: Where the length of the value is written.
+
+	Returns:
+		The address of the value, None if the response does not have the header.
+	"""
+)
+
+def http_response_header_value (response: int, header_type: int, position: int = 0) -> bytes | None:
+	"""Returns the value of a header of a response.
+
+	Args:
+		response: The HttpResponse.
+		header_type: An HTTP_HEADER_* value.
+		position: The position between the headers with the type, 0 is the first one that was added.
+
+	Returns:
+		The value, None if the response does not have the header.
+	"""
+	length = c_size_t (0)
+	value = http_response_header_get (response, header_type, position, byref (length))
+
+	return string_at (value, length.value) if (value) else None
+
+http_response_header_set_by_name = lib_function (
+	"http_response_header_set_by_name", [c_void_p, c_char_p, c_char_p], c_uint8,
+	"""Sets a header of a response by its name, it replaces the ones that it has with the same name.
+
+	The name can be the one of any header, it is compared without case.
+
+	Args:
+		response: The HttpResponse.
+		name: The name, as bytes, like b"X-Trace".
+		value: The value, as bytes, without a CR, a LF or a NUL.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+http_response_header_add_by_name = lib_function (
+	"http_response_header_add_by_name", [c_void_p, c_char_p, c_char_p], c_uint8,
+	"""Adds a header to a response by its name, after the ones that it has.
+
+	Args:
+		response: The HttpResponse.
+		name: The name, as bytes.
+		value: The value, as bytes, without a CR, a LF or a NUL.
+
+	Returns:
+		0 on success, 1 on error.
+	"""
+)
+
+http_response_header_remove_by_name = lib_function (
+	"http_response_header_remove_by_name", [c_void_p, c_char_p], c_uint,
+	"""Removes the headers of a response with the name.
+
+	Args:
+		response: The HttpResponse.
+		name: The name, as bytes.
+
+	Returns:
+		The number of headers that were removed.
+	"""
+)
+
+http_response_header_count_by_name = lib_function (
+	"http_response_header_count_by_name", [c_void_p, c_char_p], c_uint,
+	"""Returns the number of headers of a response with the name.
+
+	Args:
+		response: The HttpResponse.
+		name: The name, as bytes.
+	"""
+)
+
+http_response_header_get_by_name = lib_function (
+	"http_response_header_get_by_name", [c_void_p, c_char_p, c_uint, POINTER (c_size_t)], c_void_p,
+	"""Gets the value of a header of a response by its name, that does not end with a NUL.
+
+	http_response_header_value_by_name () returns it as bytes.
+
+	Args:
+		response: The HttpResponse.
+		name: The name, as bytes.
+		position: The position between the headers with the name, 0 is the first one that was added.
+		value_length: Where the length of the value is written.
+
+	Returns:
+		The address of the value, None if the response does not have the header.
+	"""
+)
+
+def http_response_header_value_by_name (response: int, name: str | bytes, position: int = 0) -> bytes | None:
+	"""Returns the value of a header of a response by its name.
+
+	Args:
+		response: The HttpResponse.
+		name: The name of the header.
+		position: The position between the headers with the name, 0 is the first one that was added.
+
+	Returns:
+		The value, None if the response does not have the header.
+	"""
+	length = c_size_t (0)
+	value = http_response_header_get_by_name (response, lib_c_string (name), position, byref (length))
+
+	return string_at (value, length.value) if (value) else None
+
 http_response_add_header = lib_function (
 	"http_response_add_header", [c_void_p, HttpHeaderType, c_char_p], c_uint8,
-	"""Adds a header to a response, it is compiled by http_response_compile ().
+	"""Sets a header of a response, like http_response_header_set ().
 
 	Args:
 		response: The HttpResponse.
