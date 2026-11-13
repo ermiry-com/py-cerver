@@ -6,6 +6,7 @@ PyCerver is a pure Python wrapper around the [cerver](https://cerver.ermiry.com)
 
 | pycerver | cerver | Python |
 |---|---|---|
+| 1.2b-1 | 2.1b-13 or newer of the nightly line | 3.10 to 3.14 |
 | 1.1 | 2.0b-72 or newer | 3.10 to 3.14 |
 | 1.0 | 2.0b-64 or newer | 3.10 to 3.14 |
 
@@ -81,7 +82,7 @@ curl http://localhost:8080/api/hello/world
 | Package | What it has |
 |---|---|
 | `cerver` | The cerver: creation, configuration, `cerver_run`, handlers, events, errors, files, timer, packets and connections |
-| `cerver.http` | The HTTP cerver: routes, groups and decorators, middleware, requests, responses, validation, JWTs, origins, proxies, compression and metrics |
+| `cerver.http` | The HTTP cerver: routes, groups and decorators, middleware, requests, responses, validation, JWTs, origins, proxies, compression, metrics, and WebSocket (endpoints, rooms, broadcast and the client) |
 | `cerver.threads` | Threads, the thread pool and its stats, job queues with priorities, workers and the worker manager |
 | `cerver.network` | Address resolution and parsing, sockets and UDP |
 | `cerver.client` | The cerver client: connections, events, errors and files |
@@ -97,13 +98,14 @@ The [examples](examples) run with `python3 examples/<folder>/<example>.py`, and 
 |---|---|
 | `basics` | The smallest service, its configuration from the environment (address, threads, limits, timeouts and policies), static files and the version |
 | `routing` | Groups, subgroups, typed and catch all params, the answers without a route and the routes tree |
-| `requests` | Query, JSON body, headers, typed validators, and the real IP behind proxies with request ids |
+| `requests` | Query, JSON body, headers, typed validators, the real IP behind proxies with request ids, the methods of the parser (QUERY, WebDAV) with its lenient flags, and the clients that leave with the timeouts in milliseconds |
 | `responses` | JSON and prebuilt error responses, custom headers, files, streams, redirects, entity tags and gzip |
 | `auth` | JWTs, a custom authentication and the admin routes with their metrics |
 | `uploads` | Multipart uploads, a validated image and the files deleted when the request ends |
 | `middleware` | The middleware of the cerver, of a group and of an endpoint, and CORS |
 | `service` | The layout of a service: configuration from the environment, controllers, routes and an errors table |
 | `workers` | A job queue that handles requests in its own thread, the worker manager and a worker without HTTP |
+| `websockets` | A WebSocket echo with permessage-deflate, a subprotocol and pings, a chat with rooms and broadcast, and the WebSocket client of cerver with reconnection |
 | `client` | A TCP and UDP client of a cerver, with reconnection |
 | `deployment` | A compose with nginx in front of the service |
 
