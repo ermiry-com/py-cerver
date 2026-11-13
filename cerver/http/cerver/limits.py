@@ -7,6 +7,7 @@ from ...lib import lib_function
 __all__ = [
 	"HTTP_CERVER_DEFAULT_MAX_BODY_SIZE", "HTTP_CERVER_DEFAULT_MAX_URL_SIZE",
 	"HTTP_CERVER_DEFAULT_MAX_HEADER_SIZE", "HTTP_CERVER_DEFAULT_MAX_HEADERS",
+	"HTTP_CERVER_DEFAULT_MAX_CUSTOM_HEADER_SIZE",
 	"HTTP_CERVER_DEFAULT_MAX_MULTIPART_PARTS", "HTTP_CERVER_DEFAULT_MAX_FILE_SIZE",
 	"HTTP_CERVER_DEFAULT_HEADERS_TIMEOUT", "HTTP_CERVER_DEFAULT_REQUEST_TIMEOUT",
 	"HTTP_MILLISECONDS_PER_SECOND",
@@ -15,6 +16,7 @@ __all__ = [
 	"HTTP_CERVER_DEFAULT_HALF_CLOSE_IS_GONE",
 	"http_cerver_set_max_body_size", "http_cerver_set_max_url_size",
 	"http_cerver_set_max_header_size", "http_cerver_set_max_headers",
+	"http_cerver_set_max_custom_header_size",
 	"http_cerver_set_max_multipart_parts", "http_cerver_set_max_file_size",
 	"http_cerver_set_headers_timeout", "http_cerver_set_request_timeout",
 	"http_cerver_set_headers_timeout_milliseconds", "http_cerver_set_request_timeout_milliseconds",
@@ -27,12 +29,13 @@ HTTP_CERVER_DEFAULT_MAX_BODY_SIZE = 1 << 29
 HTTP_CERVER_DEFAULT_MAX_URL_SIZE = 1 << 13
 HTTP_CERVER_DEFAULT_MAX_HEADER_SIZE = 1 << 16
 HTTP_CERVER_DEFAULT_MAX_HEADERS = 1 << 7
+HTTP_CERVER_DEFAULT_MAX_CUSTOM_HEADER_SIZE = 1 << 13
 HTTP_CERVER_DEFAULT_MAX_MULTIPART_PARTS = 1 << 10
 HTTP_CERVER_DEFAULT_MAX_FILE_SIZE = 1 << 29
 
 # in secs, a slower request is answered with 408, 0 disables it
 HTTP_CERVER_DEFAULT_HEADERS_TIMEOUT = 1 << 4
-HTTP_CERVER_DEFAULT_REQUEST_TIMEOUT = 0
+HTTP_CERVER_DEFAULT_REQUEST_TIMEOUT = 300
 
 HTTP_MILLISECONDS_PER_SECOND = 1000
 
@@ -83,6 +86,19 @@ http_cerver_set_max_headers = lib_function (
 	Args:
 		http_cerver: The HttpCerver.
 		max_headers: The number of headers, 0 disables the limit.
+	"""
+)
+
+http_cerver_set_max_custom_header_size = lib_function (
+	"http_cerver_set_max_custom_header_size", [c_void_p, c_size_t], None,
+	"""Sets the biggest value of a header that is not one of the known ones (431 after it).
+
+	The values of a header that is repeated are joined, and the size of all the headers
+	is still limited by ``http_cerver_set_max_header_size``.
+
+	Args:
+		http_cerver: The HttpCerver.
+		max_custom_header_size: The size in bytes, 0 disables the limit.
 	"""
 )
 
