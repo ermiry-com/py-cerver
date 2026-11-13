@@ -21,6 +21,7 @@ from cerver.http import HTTP_HEADER_CONTENT_TYPE
 from cerver.http import HTTP_MIDDLEWARE_RESULT_CONTINUE
 from cerver.http import HTTP_MIDDLEWARE_RESULT_STOP
 from cerver.http import HTTP_ROUTE_MODIFIER_MULTI_PART
+from cerver.http import REQUEST_METHOD_QUERY
 from cerver.http import HTTP_STATUS_BAD_REQUEST
 from cerver.http import HTTP_STATUS_FORBIDDEN
 from cerver.http import HTTP_STATUS_OK
@@ -165,6 +166,12 @@ def _routes (http_cerver: c_void_p):
 	@api.post ("method")
 	def method_handler (http_receive, request):
 		http_send_response (http_receive, HTTP_STATUS_OK, {"method": "POST"})
+
+	# a method that the parser accepts since llhttp, with a body
+	@api.route (REQUEST_METHOD_QUERY, "query")
+	def query_handler (http_receive, request):
+		body = http_request_get_body_json (request)
+		http_send_response (http_receive, HTTP_STATUS_OK, {"query": body})
 
 	@api.get ("gone")
 	def gone_handler (http_receive, request):

@@ -130,6 +130,24 @@ class TestBody:
 	def test_body_that_is_not_an_object (self, server, content):
 		assert e2e_request ("POST", "/api/e2e/body", content, {"Content-Type": "application/json"}).status == 400
 
+class TestParser:
+
+	def test_query_with_a_body (self, server):
+		body = {"select": ["name"]}
+		response = e2e_request ("QUERY", "/api/e2e/query", json.dumps (body).encode ("utf-8"), {"Content-Type": "application/json"})
+
+		assert response.status == 200
+		assert json.loads (response.body) == {"query": body}
+
+	@pytest.mark.parametrize ("request_bytes", [
+		b"GET /api/e2e/json HTTP/1.1\nHost: localhost\n\n",
+		b"GET /api/e2e/json HTTP/1.5\r\nHost: localhost\r\n\r\n",
+		b"GET /api/e2e/json HTTP/1.1\r\nHost: localhost\r\nX-Folded: a\r\n b\r\n\r\n",
+		b"DESCRIBE /api/e2e/json HTTP/1.1\r\nHost: localhost\r\n\r\n"
+	])
+	def test_strict_mode (self, server, request_bytes):
+		assert e2e_raw (request_bytes).startswith (b"HTTP/1.1 400")
+
 class TestUpload:
 
 	def test_file (self, server):

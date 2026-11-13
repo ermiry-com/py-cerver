@@ -23,6 +23,15 @@ from cerver.http import http_cerver_metrics, http_cerver_routes_compile, http_ce
 from cerver.http import http_cerver_set_uploads_path, http_cerver_generate_uploads_path
 from cerver.http import http_create_route, http_create_child_route, REQUEST_METHOD_GET
 from cerver.http import http_handler, HttpGroup, http_group
+from cerver.http import REQUEST_METHOD_QUERY, REQUEST_METHOD_PROPFIND, REQUEST_METHOD_MSEARCH
+from cerver.http import http_cerver_set_parser_lenient, http_parser_lenient_string, http_parser_lenient_description
+from cerver.http import HTTP_PARSER_LENIENT_VERSION, HTTP_PARSER_LENIENT_HEADERS, HTTP_PARSER_LENIENT_NONE
+from cerver.http import http_cerver_set_max_header_size, http_cerver_set_max_url_size
+from cerver.http import http_cerver_set_headers_timeout_milliseconds, http_cerver_set_idle_timeout_milliseconds
+from cerver.http import http_cerver_set_half_close_is_gone
+from cerver.http import http_stage_string, http_stage_label, HTTP_STAGE_REQUEST_LINE
+from cerver.http import http_abort_reason_label, HTTP_ABORT_REASON_RESET
+from cerver.http import http_client_state_string, HTTP_CLIENT_STATE_CONNECTED
 
 pytestmark = [pytest.mark.integration]
 
@@ -122,6 +131,27 @@ class TestConfiguration:
 		assert service
 		cerver_teardown (service)
 
+	def test_parser_and_clients (self, cerver):
+		http_cerver = http_cerver_get (cerver)
+
+		# the lenient flags of llhttp, the limits that are always active and the clients that leave
+		http_cerver_set_parser_lenient (http_cerver, HTTP_PARSER_LENIENT_VERSION | HTTP_PARSER_LENIENT_HEADERS)
+		http_cerver_set_parser_lenient (http_cerver, HTTP_PARSER_LENIENT_NONE)
+		http_cerver_set_max_header_size (http_cerver, 0)
+		http_cerver_set_max_url_size (http_cerver, 0)
+		http_cerver_set_headers_timeout_milliseconds (http_cerver, HEADERS_TIMEOUT)
+		http_cerver_set_idle_timeout_milliseconds (http_cerver, HEADERS_TIMEOUT)
+		http_cerver_set_half_close_is_gone (http_cerver, False)
+
+	def test_names (self):
+		assert http_parser_lenient_string (HTTP_PARSER_LENIENT_VERSION) == b"version"
+		assert http_parser_lenient_description (HTTP_PARSER_LENIENT_VERSION) == b"any HTTP version"
+		assert http_parser_lenient_string (HTTP_PARSER_LENIENT_NONE) == b"none"
+		assert http_stage_string (HTTP_STAGE_REQUEST_LINE) == b"Request Line"
+		assert http_stage_label (HTTP_STAGE_REQUEST_LINE) == b"request_line"
+		assert http_abort_reason_label (HTTP_ABORT_REASON_RESET) == b"reset"
+		assert http_client_state_string (HTTP_CLIENT_STATE_CONNECTED) == b"Connected"
+
 class TestRoutes:
 
 	def test_first_api_with_children (self, cerver):
@@ -144,3 +174,14 @@ class TestRoutes:
 	def test_group_class_root (self, cerver):
 		api = HttpGroup.create (http_cerver_get (cerver), "api/root")
 		assert api.root (REQUEST_METHOD_GET, _handler)
+
+	def test_methods_of_llhttp (self, cerver):
+		http_cerver = http_cerver_get (cerver)
+		api = http_group (http_cerver, "api/dav", REQUEST_METHOD_GET, _handler)
+		api.route (REQUEST_METHOD_PROPFIND, "files") (_handler)
+		api.route (REQUEST_METHOD_QUERY, "search") (_handler)
+		api.route (REQUEST_METHOD_MSEARCH, "devices") (_handler)
+
+		assert {
+			("PROPFIND", "/api/dav/files"), ("QUERY", "/api/dav/search"), ("M-SEARCH", "/api/dav/devices")
+		} <= _endpoints (http_cerver)

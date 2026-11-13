@@ -18,7 +18,9 @@ from cerver.http import http_compression_accepts_gzip, http_compression_is_compr
 from cerver.http import http_jwt_create, http_cerver_auth_jwt_delete
 from cerver.http import HttpPrebuiltResponses, HTTP_STATUS_NOT_FOUND
 from cerver.http import http_route_duration_buckets, HTTP_ROUTE_STATS_DURATION_BUCKETS
-from cerver.http import http_method_str, REQUEST_METHOD_PATCH
+from cerver.http import http_request_method_str, http_request_method_is_valid
+from cerver.http import REQUEST_METHOD_PATCH, REQUEST_METHOD_MSEARCH, REQUEST_METHOD_QUERY
+from cerver.http import REQUEST_METHOD_UNDEFINED, REQUEST_METHOD_SIZE
 from cerver.http import jwt_alg_str, jwt_str_alg, JWT_ALG_RS256
 from cerver.http.responses.core import http_send_response_body
 from cerver.http import HTTP_CONTENT_TYPE_JSON, HTTP_CONTENT_TYPE_HTML
@@ -105,7 +107,18 @@ class TestCompression:
 class TestNames:
 
 	def test_method (self):
-		assert http_method_str (REQUEST_METHOD_PATCH) == b"PATCH"
+		assert http_request_method_str (REQUEST_METHOD_PATCH) == b"PATCH"
+		assert http_request_method_str (REQUEST_METHOD_MSEARCH) == b"M-SEARCH"
+		assert http_request_method_str (REQUEST_METHOD_QUERY) == b"QUERY"
+		assert http_request_method_str (REQUEST_METHOD_UNDEFINED) == b"Undefined"
+
+	def test_methods_of_llhttp (self):
+		# the 34 methods of HTTP and QUERY, without PRI and the RTSP methods (34 to 45)
+		valid = [method for method in range (REQUEST_METHOD_SIZE) if http_request_method_is_valid (method)]
+		assert len (valid) == 35
+		assert valid[-1] == REQUEST_METHOD_QUERY
+		assert not any (http_request_method_is_valid (method) for method in range (34, 46))
+		assert not http_request_method_is_valid (REQUEST_METHOD_UNDEFINED)
 
 	def test_algorithm (self):
 		assert jwt_alg_str (JWT_ALG_RS256) == b"RS256"
