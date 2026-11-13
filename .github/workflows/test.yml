@@ -7,7 +7,7 @@ on:
 
 env:
   CERVER_REPOSITORY: ermiry/cerver
-  CERVER_REF: 2.0b-64
+  CERVER_REF: 2.0b-72
 
 jobs:
   suite:
@@ -60,7 +60,7 @@ jobs:
 
       - name: Compile Cerver
         env:
-          CERVER_VERSION: 2.0b-64
+          CERVER_VERSION: 2.0b-72
         run: |
           mkdir /opt/cerver && cd /opt/cerver
           wget -q --no-check-certificate https://github.com/ermiry/cerver/archive/$CERVER_VERSION.zip
