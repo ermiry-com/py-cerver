@@ -1,11 +1,12 @@
 ![Cerver Banner](https://ermiry.com/api/images/cerver/banner.png)
 
-PyCerver is a pure Python wrapper around the [cerver](https://cerver.ermiry.com) framework. It uses the built-in ctypes module to interface with cerver, and provides Python helpers for the common cerver functionality: HTTP services with groups and decorators, request values as Python text, JSON responses, validators, JWTs, thread pools, job queues, workers, and TCP / UDP cervers and clients. You can check the original project's source code [here](https://github.com/ermiry/cerver)!
+PyCerver is a pure Python wrapper around the [cerver](https://cerver.ermiry.com) framework. It uses the built-in ctypes module to interface with cerver, and provides Python helpers for the common cerver functionality: HTTP services with groups and decorators, request values as Python text, JSON responses, validators, JWTs, thread pools, job queues, workers, TCP / UDP cervers and clients with the objects of the protocol encoded as CBOR, and game cervers with their lobbies. You can check the original project's source code [here](https://github.com/ermiry/cerver)!
 
 ## Compatibility
 
 | pycerver | cerver | Python |
 |---|---|---|
+| 1.1 | 2.0b-72 or newer | 3.10 to 3.14 |
 | 1.0 | 2.0b-64 or newer | 3.10 to 3.14 |
 
 PyCerver loads `libcerver.so` at import time: from the path in the `CERVER_LIBRARY` environment variable, then from `/usr/local/lib/libcerver.so`, and then from the paths of the system linker. The breaking changes of each version are in [incompatibilities.md](incompatibilities.md).
