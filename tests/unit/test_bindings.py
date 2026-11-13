@@ -45,6 +45,8 @@ INCLUDED_HEADERS = (
 	"http/multipart.h", "http/origin.h", "http/proxy.h", "http/request.h", "http/response.h",
 	"http/route.h", "http/status.h", "http/stream.h", "http/tree.h", "http/url.h", "http/utils.h",
 	"http/validator.h", "http/jwt/alg.h",
+	"http/websockets/client.h", "http/websockets/registry.h", "http/websockets/settings.h",
+	"http/websockets/websocket.h",
 	"serializer.h", "system.h", "utils/histogram.h",
 	"game/game.h", "game/gametype.h", "game/lobby.h", "game/player.h", "game/score.h"
 )

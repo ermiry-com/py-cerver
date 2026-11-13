@@ -18,6 +18,7 @@ from cerver.core import FileSystemStats, SystemCpuSample, SystemLoad, SystemMemo
 from cerver.games import LobbyCreate, LobbyJoin, LobbyRequest
 from cerver.games import LobbyPlayerSummary, LobbySettingsSummary, LobbySummary
 from cerver.http import BytesRange, HttpOrigin, HttpProxyNetwork
+from cerver.http import HttpWebSocketDeflateOptions, HttpWebSocketHandlers, HttpWebSocketUpgrade
 from cerver.network import NetworkAddresses, SockaddrStorage, Timespec
 from cerver.threads import Job, JobQueueStats, ThpoolStats, WorkerManagerStats
 from cerver.types import String
@@ -41,6 +42,8 @@ STRUCTURES = {
 	"WorkerManagerStats": WorkerManagerStats,
 	"Histogram": Histogram, "RequestStats": RequestStats, "HandlerStats": HandlerStats,
 	"HttpOrigin": HttpOrigin, "BytesRange": BytesRange, "HttpProxyNetwork": HttpProxyNetwork,
+	"HttpWebSocketUpgrade": HttpWebSocketUpgrade, "HttpWebSocketHandlers": HttpWebSocketHandlers,
+	"HttpWebSocketDeflateOptions": HttpWebSocketDeflateOptions,
 	"FileSystemStats": FileSystemStats, "SystemMemory": SystemMemory, "SystemLoad": SystemLoad,
 	"SystemCpuSample": SystemCpuSample, "SystemProcess": SystemProcess,
 	"LobbyCreate": LobbyCreate, "LobbyJoin": LobbyJoin, "LobbyRequest": LobbyRequest,
