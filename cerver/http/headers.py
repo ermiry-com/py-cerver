@@ -134,8 +134,8 @@ http_header_description = lib_function (
 	"""
 )
 
-http_header_type_by_string = lib_function (
-	"http_header_type_by_string", [c_char_p], HttpHeaderType,
+http_header_type_with_string = lib_function (
+	"http_header_type_with_string", [c_char_p], HttpHeaderType,
 	"""Returns the type of a header by its name.
 
 	Args:

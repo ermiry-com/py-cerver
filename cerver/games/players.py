@@ -9,9 +9,9 @@ from ..network.network import Protocol
 
 __all__ = [
 	"player_new", "player_delete", "player_set_id", "player_set_data",
-	"player_comparator_by_id", "player_comparator_client_id",
+	"player_comparator_with_id", "player_comparator_client_id",
 	"player_activity_now", "player_activity_update",
-	"player_get_from_lobby", "player_get_le_from_lobby", "player_get_by_sock_fd_list",
+	"player_get_from_lobby", "player_get_le_from_lobby", "player_get_with_sock_fd_list",
 	"player_broadcast_to_all"
 ]
 
@@ -54,8 +54,8 @@ player_set_data = lib_function (
 	"""
 )
 
-player_comparator_by_id = lib_function (
-	"player_comparator_by_id", [c_void_p, c_void_p], c_int,
+player_comparator_with_id = lib_function (
+	"player_comparator_with_id", [c_void_p, c_void_p], c_int,
 	"""Compares two players by their ids.
 
 	Args:
@@ -120,8 +120,8 @@ player_get_le_from_lobby = lib_function (
 	"""
 )
 
-player_get_by_sock_fd_list = lib_function (
-	"player_get_by_sock_fd_list", [c_void_p, c_int32], c_void_p,
+player_get_with_sock_fd_list = lib_function (
+	"player_get_with_sock_fd_list", [c_void_p, c_int32], c_void_p,
 	"""Returns the player of a lobby whose client has a socket.
 
 	Args:

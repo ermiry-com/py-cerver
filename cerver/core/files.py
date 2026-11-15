@@ -26,12 +26,12 @@ __all__ = [
 	"ImageType",
 	"IMAGE_TYPE_NONE", "IMAGE_TYPE_PNG", "IMAGE_TYPE_JPEG", "IMAGE_TYPE_GIF", "IMAGE_TYPE_BMP",
 	"files_image_type_to_string", "files_image_type_extension",
-	"files_image_get_type_from_file", "files_image_get_type", "files_image_get_type_by_extension",
+	"files_image_get_type_from_file", "files_image_get_type", "files_image_get_type_with_extension",
 	"files_image_is_jpeg", "files_image_extension_is_jpeg",
 	"files_image_is_png", "files_image_extension_is_png",
 	"FileHeader", "FileHeaderPointer",
 	"file_header_is_valid", "file_header_get",
-	"file_send", "file_send_by_fd"
+	"file_send", "file_send_with_fd"
 ]
 
 DIRNAME_DEFAULT_SIZE = 1024
@@ -429,8 +429,8 @@ files_image_get_type = lib_function (
 	"""
 )
 
-files_image_get_type_by_extension = lib_function (
-	"files_image_get_type_by_extension", [c_char_p], ImageType,
+files_image_get_type_with_extension = lib_function (
+	"files_image_get_type_with_extension", [c_char_p], ImageType,
 	"""Returns the type of an image by the extension of its filename.
 
 	Args:
@@ -545,8 +545,8 @@ file_send = lib_function (
 	"""
 )
 
-file_send_by_fd = lib_function (
-	"file_send_by_fd", [c_void_p, c_void_p, c_void_p, c_int, c_char_p, c_size_t], c_ssize_t,
+file_send_with_fd = lib_function (
+	"file_send_with_fd", [c_void_p, c_void_p, c_void_p, c_int, c_char_p, c_size_t], c_ssize_t,
 	"""Sends an open file to a connection: its FileHeader in a packet, then its contents.
 
 	Args:
