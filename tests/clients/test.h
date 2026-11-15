@@ -1,8 +1,8 @@
 #ifndef _CERVER_TESTS_H_
 #define _CERVER_TESTS_H_
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define where (void) fprintf (stderr, "%s:%d -> ", __FILE__, __LINE__)
 

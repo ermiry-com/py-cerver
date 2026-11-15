@@ -11,7 +11,7 @@ from cerver.games import LOBBY_JOIN_REQUEST_SCHEMA, LOBBY_OBJECTS_VERSION, LOBBY
 from cerver.games import LobbyJoin, LobbySummary
 from cerver.games import game_score_board, game_score_delete, game_score_add_player
 from cerver.games import game_score_get, game_score_set, game_score_update, game_score_reset
-from cerver.games import player_new, player_delete, player_set_id, player_comparator_by_id
+from cerver.games import player_new, player_delete, player_set_id, player_comparator_with_id
 
 pytestmark = [pytest.mark.unit]
 
@@ -95,16 +95,16 @@ class TestLobbyObjects:
 
 class TestPlayers:
 
-	def test_comparator_by_id (self):
+	def test_comparator_with_id (self):
 		first, second = player_new (), player_new ()
 
 		try:
 			player_set_id (first, PLAYER)
 			player_set_id (second, PLAYER)
-			assert player_comparator_by_id (first, second) == 0
+			assert player_comparator_with_id (first, second) == 0
 
 			player_set_id (second, MISSING)
-			assert player_comparator_by_id (first, second) != 0
+			assert player_comparator_with_id (first, second) != 0
 
 		finally:
 			player_delete (first)

@@ -3,6 +3,21 @@
 The changes of each version that can break code built with the version before it, the newest first.
 Unlike `CHANGELOG.md`, which only has the current version, every entry stays here.
 
+## 1.1.2 (from 1.1.1)
+
+1.1.2 binds cerver 2.0b-74, the structure of the headers of the other lines: every header of cerver changes its path
+and the functions with `_by_` are named with `_with_`. 1.1.2 does not load against an older cerver (the functions
+that it binds have the new names), and 1.1.1 does not load against 2.0b-74.
+
+- The bindings with the names of cerver, also in Python: `client_remove_connection_with_sock_fd`,
+  `client_get_with_sock_fd`, `client_get_with_session_id`, `files_image_get_type_with_extension`,
+  `file_send_with_fd`, `game_type_get_with_name`, `lobby_search_with_id`, `player_comparator_with_id`,
+  `player_get_with_sock_fd_list`, `http_content_type_with_mime`, `http_content_type_with_extension`,
+  `http_content_type_mime_with_extension` and `http_header_type_with_string`; the names with `_by_` are not in the
+  package anymore
+- The C servers and clients of the tests and the probe include the headers with their new paths (the umbrellas
+  `cerver/cerver.h` and `cerver/http/http.h`, or the parts that they use)
+
 ## 1.1.1 (from 1.1)
 
 1.1.1 binds cerver 2.0b-73, with the same bindings of 1.1: cerver 2.0b-73 only has fixes, so its API and its
