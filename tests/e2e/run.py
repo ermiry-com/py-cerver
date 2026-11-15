@@ -15,7 +15,6 @@ import threading
 import time
 from ctypes import c_void_p
 
-from cerver import CERVER_HANDLER_TYPE_THREADS
 from cerver import cerver_create_web
 from cerver import cerver_run
 from cerver import cerver_set_handler_type
@@ -25,6 +24,8 @@ from cerver.http import HTTP_STATUS_OK
 from cerver.http import http_cerver_get
 from cerver.http import http_send_response
 from cerver.http.decorators import HttpGroup
+
+from handler import handler_type
 
 SERVER_NAME = b"pycerver-run"
 SERVER_THREADS = 2
@@ -42,7 +43,7 @@ RACE_SIGNALS = (signal.SIGINT, signal.SIGTERM)
 
 def _create (port: int) -> c_void_p:
 	cerver = cerver_create_web (SERVER_NAME, port, SERVER_CONNECTION_QUEUE)
-	cerver_set_handler_type (cerver, CERVER_HANDLER_TYPE_THREADS)
+	cerver_set_handler_type (cerver, handler_type ())
 	cerver_set_thpool_n_threads (cerver, SERVER_THREADS)
 	cerver_set_reusable_address_flags (cerver, True)
 

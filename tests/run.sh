@@ -24,10 +24,13 @@ PACKAGE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # the profile of hypothesis: ci (the default runs) or nightly (./run.sh fuzz)
 HYPOTHESIS_PROFILE="${HYPOTHESIS_PROFILE:-ci}"
 
+CERVER_TEST_HANDLER="${CERVER_TEST_HANDLER:-threads}"
+
 DOCKER_RUN_ARGS=(
 	--rm
 	--name "${CONTAINER_NAME}"
 	-e HYPOTHESIS_PROFILE="${HYPOTHESIS_PROFILE}"
+	-e CERVER_TEST_HANDLER="${CERVER_TEST_HANDLER}"
 	-v "${PACKAGE_ROOT}:/home/pycerver"
 )
 

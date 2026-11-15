@@ -10,7 +10,6 @@ import threading
 import time
 from ctypes import c_void_p
 
-from cerver import CERVER_HANDLER_TYPE_THREADS
 from cerver import cerver_create_web
 from cerver import cerver_run
 from cerver import cerver_set_handler_type
@@ -53,7 +52,7 @@ from cerver.http import http_response_add_content_type_header
 from cerver.http import http_response_create
 from cerver.http import http_response_delete
 from cerver.http import http_response_header_add
-from cerver.http import http_response_header_add_by_name
+from cerver.http import http_response_header_add_with_name
 from cerver.http import http_response_send
 from cerver.http import http_response_get
 from cerver.http import http_response_return
@@ -67,6 +66,8 @@ from cerver.http import http_receive_is_client_gone
 from cerver.http.decorators import HttpGroup
 
 from cerver import files_create_dir
+
+from handler import handler_type
 
 SERVER_NAME = b"pycerver-e2e"
 SERVER_THREADS = 4
@@ -153,7 +154,7 @@ def _routes (http_cerver: c_void_p):
 		response = http_response_create (HTTP_STATUS_OK, COOKIES_BODY, len (COOKIES_BODY))
 
 		http_response_header_add (response, HTTP_HEADER_SET_COOKIE, COOKIES[0])
-		http_response_header_add_by_name (response, TRACE_NAME, TRACE_VALUE)
+		http_response_header_add_with_name (response, TRACE_NAME, TRACE_VALUE)
 		http_response_header_add (response, HTTP_HEADER_SET_COOKIE, COOKIES[1])
 		http_response_add_content_type_header (response, HTTP_CONTENT_TYPE_TXT)
 		http_response_add_content_length_header (response, len (COOKIES_BODY))
@@ -255,7 +256,7 @@ def main (port: int) -> int:
 	files_create_dir (UPLOADS_PATH, UPLOADS_MODE)
 
 	cerver = cerver_create_web (SERVER_NAME, port, SERVER_CONNECTION_QUEUE)
-	cerver_set_handler_type (cerver, CERVER_HANDLER_TYPE_THREADS)
+	cerver_set_handler_type (cerver, handler_type ())
 	cerver_set_thpool_n_threads (cerver, SERVER_THREADS)
 	cerver_set_reusable_address_flags (cerver, True)
 

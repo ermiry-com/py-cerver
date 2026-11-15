@@ -11,7 +11,7 @@ NC='\033[0m'
 
 SANITIZER="${SANITIZER:-}"
 
-CERVER_DIR="${CERVER_DIR:-/Users/ermiry/Documents/cerver-http}"
+CERVER_DIR="${CERVER_DIR:-/Users/ermiry/Documents/cerver-nightly}"
 
 IMAGE_NAME="ermiry/pycerver:tests"
 if [ -n "${SANITIZER}" ]; then

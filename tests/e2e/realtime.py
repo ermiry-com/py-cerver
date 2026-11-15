@@ -17,7 +17,6 @@ import sys
 import threading
 from ctypes import cast, c_char_p, c_void_p
 
-from cerver import CERVER_HANDLER_TYPE_THREADS
 from cerver import cerver_create_web
 from cerver import cerver_run
 from cerver import cerver_set_handler_type
@@ -28,6 +27,8 @@ from cerver.http import http_cerver_get
 from cerver.http import http_cerver_group_create
 from cerver.http import http_request_get_custom_header
 from cerver.http import websockets as ws
+
+from handler import handler_type
 
 SERVER_NAME = b"pycerver-websockets"
 SERVER_THREADS = 4
@@ -178,7 +179,7 @@ def _routes (http_cerver):
 
 def main (port: int) -> int:
 	cerver = cerver_create_web (SERVER_NAME, port, SERVER_CONNECTION_QUEUE)
-	cerver_set_handler_type (cerver, CERVER_HANDLER_TYPE_THREADS)
+	cerver_set_handler_type (cerver, handler_type ())
 	cerver_set_thpool_n_threads (cerver, SERVER_THREADS)
 	cerver_set_reusable_address_flags (cerver, True)
 

@@ -9,7 +9,6 @@ Usage: statics.py <port> [send timeout in milliseconds, 0 keeps the one of the c
 import os
 import sys
 
-from cerver import CERVER_HANDLER_TYPE_THREADS
 from cerver import cerver_create_web, cerver_run, cerver_set_handler_type
 from cerver import cerver_set_reusable_address_flags, cerver_set_thpool_n_threads
 from cerver.callbacks import callback_wrap
@@ -21,6 +20,8 @@ from cerver.http import http_cerver_set_send_timeout_milliseconds
 from cerver.http import http_request_get_header_string, http_send_response
 from cerver.http import http_static_path_set_auth, http_static_path_set_authentication_handler
 from cerver.http.decorators import HttpGroup
+
+from handler import handler_type
 
 STATICS_NAME = b"pycerver-statics"
 STATICS_THREADS = 2
@@ -65,7 +66,7 @@ def main (port: int, send_timeout: int) -> int:
 	_files (PRIVATE_PATH, PRIVATE_FILES)
 
 	cerver = cerver_create_web (STATICS_NAME, port, STATICS_CONNECTION_QUEUE)
-	cerver_set_handler_type (cerver, CERVER_HANDLER_TYPE_THREADS)
+	cerver_set_handler_type (cerver, handler_type ())
 	cerver_set_thpool_n_threads (cerver, STATICS_THREADS)
 	cerver_set_reusable_address_flags (cerver, True)
 
