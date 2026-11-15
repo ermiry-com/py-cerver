@@ -46,6 +46,9 @@ __all__ = [
 	"CERVER_TYPE_WEB", "CERVER_TYPE_FILES", "CERVER_TYPE_BALANCER",
 	"CerverHandlerType",
 	"CERVER_HANDLER_TYPE_NONE", "CERVER_HANDLER_TYPE_POLL", "CERVER_HANDLER_TYPE_THREADS",
+	"CERVER_HANDLER_TYPE_EVENTS",
+	"CERVER_DEFAULT_IO_THREADS", "CERVER_DEFAULT_MAX_CONNECTIONS",
+	"cerver_set_io_threads", "cerver_set_max_connections",
 	"cerver_init", "cerver_end",
 	"cerver_type_to_string", "cerver_handler_type_to_string", "cerver_handler_type_description",
 	"cerver_set_alias", "cerver_set_welcome_msg", "cerver_info_send_info_packet",
@@ -194,6 +197,13 @@ CerverHandlerType: TypeAlias = c_int # type: ignore
 CERVER_HANDLER_TYPE_NONE = 0
 CERVER_HANDLER_TYPE_POLL = 1
 CERVER_HANDLER_TYPE_THREADS = 2
+CERVER_HANDLER_TYPE_EVENTS = 3
+
+# the I/O threads of a cerver with CERVER_HANDLER_TYPE_EVENTS
+CERVER_DEFAULT_IO_THREADS = 1
+
+# the connections that a cerver with CERVER_HANDLER_TYPE_EVENTS has at most at the same time
+CERVER_DEFAULT_MAX_CONNECTIONS = 16384
 
 # global
 cerver_init = lib_function (
@@ -507,8 +517,37 @@ cerver_set_handler_type = lib_function (
 
 	Args:
 		cerver: The cerver.
-		handler_type: CERVER_HANDLER_TYPE_POLL (a single thread with poll ()) or
-			CERVER_HANDLER_TYPE_THREADS (a thread for each connection).
+		handler_type: CERVER_HANDLER_TYPE_POLL (a single thread with poll ()),
+			CERVER_HANDLER_TYPE_THREADS (a thread for each connection) or
+			CERVER_HANDLER_TYPE_EVENTS (event loops, only for a web cerver with a thpool:
+			cerver_start () fails with another cerver).
+	"""
+)
+
+cerver_set_io_threads = lib_function (
+	"cerver_set_io_threads", [c_void_p, c_uint], None,
+	"""Sets the I/O threads of a cerver with CERVER_HANDLER_TYPE_EVENTS: each one is an event loop
+	that accepts connections and reads their requests.
+
+	With more than one, each loop listens in its own socket with SO_REUSEPORT. Call it before
+	cerver_start (); the other handler types ignore it.
+
+	Args:
+		cerver: The cerver.
+		n_threads: The threads, 0 keeps the current value, CERVER_DEFAULT_IO_THREADS by default.
+	"""
+)
+
+cerver_set_max_connections = lib_function (
+	"cerver_set_max_connections", [c_void_p, c_uint], None,
+	"""Sets the connections that a cerver with CERVER_HANDLER_TYPE_EVENTS has at most at the same time.
+
+	At the limit the cerver stops accepting and the new connections wait in the listen backlog.
+	Call it before cerver_start (); the other handler types ignore it.
+
+	Args:
+		cerver: The cerver.
+		max_connections: The limit, 0 keeps the current value, CERVER_DEFAULT_MAX_CONNECTIONS by default.
 	"""
 )
 

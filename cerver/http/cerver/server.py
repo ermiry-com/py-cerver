@@ -21,7 +21,7 @@ __all__ = [
 	"http_cerver_static_path_add", "http_receive_public_path_remove",
 	"http_cerver_get_custom_data", "http_cerver_set_custom_data",
 	"http_cerver_set_delete_custom_data", "http_cerver_set_default_delete_custom_data",
-	"http_cerver_add_responses_header", "http_cerver_add_responses_header_by_name",
+	"http_cerver_add_responses_header", "http_cerver_add_responses_header_with_name",
 	"http_cerver_all_stats_print", "http_cerver_routes_stats_print", "http_cerver_route_stats_print"
 ]
 
@@ -52,11 +52,13 @@ def http_cerver_configuration (
 	connection_queue: int = CERVER_DEFAULT_CONNECTION_QUEUE,
 	buffer_size: int = HTTP_CERVER_DEFAULT_BUFFER_SIZE,
 	n_threads: int = HTTP_CERVER_DEFAULT_THREADS,
-	reusable_address_flags: bool = True
+	reusable_address_flags: bool = True,
+	handler_type: int = CERVER_HANDLER_TYPE_THREADS
 ) -> int | None:
 	"""Creates a web cerver with the configuration of a service.
 
-	Its connections are handled by a thpool (CERVER_HANDLER_TYPE_THREADS).
+	Its requests are handled by a thpool; by default each connection takes one of its threads from its
+	accept to its response (CERVER_HANDLER_TYPE_THREADS).
 
 	Args:
 		name: The name of the service, its cerver is "<name>-service" and its alias the name.
@@ -65,6 +67,9 @@ def http_cerver_configuration (
 		buffer_size: The size of the receive buffer.
 		n_threads: The threads of the thpool, the requests that it handles at once.
 		reusable_address_flags: True to set SO_REUSEADDR.
+		handler_type: CERVER_HANDLER_TYPE_THREADS, or CERVER_HANDLER_TYPE_EVENTS for the event loops:
+			the I/O threads of cerver_set_io_threads () read the requests and the thpool only runs
+			the custom authentication and the handlers.
 
 	Returns:
 		The cerver, None on error.
@@ -75,7 +80,7 @@ def http_cerver_configuration (
 
 		cerver_set_receive_buffer_size (service, buffer_size)
 		cerver_set_thpool_n_threads (service, n_threads)
-		cerver_set_handler_type (service, CERVER_HANDLER_TYPE_THREADS)
+		cerver_set_handler_type (service, handler_type)
 		cerver_set_reusable_address_flags (service, reusable_address_flags)
 
 	return service
@@ -200,8 +205,8 @@ http_cerver_add_responses_header = lib_function (
 	"""
 )
 
-http_cerver_add_responses_header_by_name = lib_function (
-	"http_cerver_add_responses_header_by_name", [c_void_p, c_char_p, c_char_p], c_uint8,
+http_cerver_add_responses_header_with_name = lib_function (
+	"http_cerver_add_responses_header_with_name", [c_void_p, c_char_p, c_char_p], c_uint8,
 	"""Adds a header with any name to every response of an HTTP cerver that does not have it.
 
 	Args:
