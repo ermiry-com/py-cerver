@@ -3,6 +3,14 @@
 The changes of each version that can break code built with the version before it, the newest first.
 Unlike `CHANGELOG.md`, which only has the current version, every entry stays here.
 
+## 1.1.1 (from 1.1)
+
+1.1.1 binds cerver 2.0b-73, with the same bindings of 1.1: cerver 2.0b-73 only has fixes, so its API and its
+structures are the ones of 2.0b-72, and 1.1 also loads against it. What the fixes of cerver change is what some
+calls return with arguments that are not valid (their list is in the `incompatibilities.md` of cerver, «2.0b-73»):
+a `None` where cerver crashed now fails or keeps the current value, and the lengths of the truncated values of
+HTTP are the ones that were written.
+
 ## 1.1 (from 1.0)
 
 1.1 binds cerver 2.0b-72: it needs a `libcerver.so` of that version or newer, and it does not load against an older

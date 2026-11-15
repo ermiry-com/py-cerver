@@ -6,6 +6,7 @@ PyCerver is a pure Python wrapper around the [cerver](https://cerver.ermiry.com)
 
 | pycerver | cerver | Python |
 |---|---|---|
+| 1.1.1 | 2.0b-73 or newer | 3.10 to 3.14 |
 | 1.1 | 2.0b-72 or newer | 3.10 to 3.14 |
 | 1.0 | 2.0b-64 or newer | 3.10 to 3.14 |
 
