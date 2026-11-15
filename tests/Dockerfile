@@ -25,7 +25,7 @@ RUN cd /opt/cerver \
 WORKDIR /opt/pycerver
 
 COPY tests/probe tests/probe
-RUN gcc -Wall -I /usr/local/include tests/probe/probe.c -o tests/probe/probe
+RUN gcc -D _GNU_SOURCE -Wall -I /usr/local/include tests/probe/probe.c -o tests/probe/probe
 
 COPY makefile makefile
 COPY tests/clients tests/clients

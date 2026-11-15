@@ -29,6 +29,9 @@ PROTOTYPE = re.compile (r"CERVER_(EXPORT|PUBLIC|PRIVATE)\s+([^;{}]+?)\s*\b(\w+)\
 # the printf attribute after the arguments of the functions with a format, it is not part of the prototype
 PRINTF_FORMAT = re.compile (r"CERVER_PRINTF_FORMAT\s*\([^)]*\)")
 
+# a deprecated function is wrapped in DEPRECATED (...) since cerver 1.9b-2 / 2.0b-75, the wrapper is not part of it
+DEPRECATED_PROTOTYPE = re.compile (r"DEPRECATED\s*\(\s*(CERVER_(?:EXPORT|PUBLIC|PRIVATE)[^;]*?\))\s*\)\s*;", re.DOTALL)
+
 TYPEDEF_ENUM = re.compile (r"typedef\s+enum\s*\w*\s*\{[^}]*\}\s*(\w+)\s*;", re.DOTALL)
 TYPEDEF_FUNCTION = re.compile (r"typedef\s+[^;()]*\(\s*\*\s*(\w+)\s*\)\s*\(", re.DOTALL)
 TYPEDEF_INTEGER = re.compile (r"typedef\s+(u?int\d+_t|unsigned\s+char|u32|u64)\s+(\w+)\s*;")
@@ -109,6 +112,7 @@ def header_texts () -> dict:
 	for header in HEADERS.rglob ("*.h"):
 		text = re.sub (r"/\*.*?\*/", "", header.read_text (), flags=re.DOTALL)
 		text = re.sub (r"//[^\n]*", "", text)
+		text = DEPRECATED_PROTOTYPE.sub (r"\1;", text)
 		texts[str (header.relative_to (HEADERS))] = PRINTF_FORMAT.sub ("", text)
 
 	return texts

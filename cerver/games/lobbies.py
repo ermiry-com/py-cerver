@@ -35,7 +35,8 @@ __all__ = [
 	"lobby_new", "lobby_delete", "lobby_reference", "lobby_release", "lobby_comparator",
 	"lobby_set_poll_time_out", "lobby_set_handler", "lobby_set_packet_handler",
 	"lobby_set_game_settings", "lobby_set_game_data", "lobby_set_update", "lobby_is_running",
-	"lobby_get", "lobby_search_with_id", "lobby_teardown", "lobby_poll",
+	"lobby_get", "lobby_get_reference", "lobby_search_with_id", "lobby_search_with_id_reference",
+	"lobby_teardown", "lobby_poll",
 	"lobby_create", "lobby_join", "lobby_leave", "lobby_start", "lobby_player_of_client",
 	"lobby_summary_set", "lobby_summary_packet_create", "lobby_send", "lobby_send_to_players",
 	"lobby_request_send", "lobby_event_on"
@@ -294,27 +295,57 @@ lobby_is_running = lib_function (
 
 lobby_get = lib_function (
 	"lobby_get", [c_void_p, c_void_p], c_void_p,
-	"""Searches a lobby in the game cerver.
+	"""Searches a lobby in the game cerver, without a reference.
+
+	Deprecated since cerver 1.9b-2 / 2.0b-75: use lobby_get_reference ().
 
 	Args:
 		game_cerver: The GameCerver.
 		query: A Lobby with the id to search.
 
 	Returns:
-		A reference to the Lobby (lobby_release ()), None if there is none.
+		The Lobby, None if there is none; it can be released after the lock.
+	"""
+)
+
+lobby_get_reference = lib_function (
+	"lobby_get_reference", [c_void_p, c_void_p], c_void_p,
+	"""Searches a lobby in the game cerver and takes a reference to it (cerver 1.9b-2 / 2.0b-75).
+
+	Args:
+		game_cerver: The GameCerver.
+		query: A Lobby with the id to search.
+
+	Returns:
+		The Lobby with a reference that is released with lobby_release (), None if there is none.
 	"""
 )
 
 lobby_search_with_id = lib_function (
 	"lobby_search_with_id", [c_void_p, c_char_p], c_void_p,
-	"""Searches a lobby by its id, with the lock of the game cerver.
+	"""Searches a lobby by its id, with the lock of the game cerver, without a reference.
+
+	Deprecated since cerver 1.9b-2 / 2.0b-75: use lobby_search_with_id_reference ().
 
 	Args:
 		cerver: The Cerver.
 		id: The id, as bytes.
 
 	Returns:
-		The Lobby, None if there is none.
+		The Lobby, None if there is none; it can be released after the lock.
+	"""
+)
+
+lobby_search_with_id_reference = lib_function (
+	"lobby_search_with_id_reference", [c_void_p, c_char_p], c_void_p,
+	"""Searches a lobby by its id and takes a reference to it, with the lock of the game cerver (cerver 1.9b-2 / 2.0b-75).
+
+	Args:
+		cerver: The Cerver.
+		id: The id, as bytes.
+
+	Returns:
+		The Lobby with a reference that is released with lobby_release (), None if there is none.
 	"""
 )
 
