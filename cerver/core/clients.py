@@ -15,8 +15,8 @@ __all__ = [
 	"client_create_with_connection",
 	"client_disconnect", "client_got_disconnected", "client_drop",
 	"client_connection_add", "client_connection_remove", "client_connection_drop",
-	"client_remove_connection_by_sock_fd",
-	"client_get_by_sock_fd", "client_get_by_session_id", "client_broadcast_to_all_avl"
+	"client_remove_connection_with_sock_fd",
+	"client_get_with_sock_fd", "client_get_with_session_id", "client_broadcast_to_all_avl"
 ]
 
 ClientConnectionsStatus: TypeAlias = c_int # type: ignore
@@ -135,8 +135,8 @@ client_connection_drop = lib_function (
 	"""
 )
 
-client_remove_connection_by_sock_fd = lib_function (
-	"client_remove_connection_by_sock_fd", [c_void_p, c_void_p, c_int32], ClientConnectionsStatus,
+client_remove_connection_with_sock_fd = lib_function (
+	"client_remove_connection_with_sock_fd", [c_void_p, c_void_p, c_int32], ClientConnectionsStatus,
 	"""Drops the connection of a socket, and the client of the cerver if it was its last one.
 
 	Args:
@@ -149,8 +149,8 @@ client_remove_connection_by_sock_fd = lib_function (
 	"""
 )
 
-client_get_by_sock_fd = lib_function (
-	"client_get_by_sock_fd", [c_void_p, c_int32], c_void_p,
+client_get_with_sock_fd = lib_function (
+	"client_get_with_sock_fd", [c_void_p, c_int32], c_void_p,
 	"""Returns the client of a cerver that has the connection of a socket.
 
 	Args:
@@ -162,8 +162,8 @@ client_get_by_sock_fd = lib_function (
 	"""
 )
 
-client_get_by_session_id = lib_function (
-	"client_get_by_session_id", [c_void_p, c_char_p], c_void_p,
+client_get_with_session_id = lib_function (
+	"client_get_with_session_id", [c_void_p, c_char_p], c_void_p,
 	"""Returns the client of a cerver with sessions that has a session id.
 
 	Args:

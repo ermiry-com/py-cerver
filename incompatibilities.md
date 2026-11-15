@@ -3,6 +3,33 @@
 The changes of each version that can break code built with the version before it, the newest first.
 Unlike `CHANGELOG.md`, which only has the current version, every entry stays here.
 
+## 1.2b-2 (from 1.2b-1)
+
+1.2b-2 binds cerver 2.1b-15: the structure of the headers of the 2.1b-14 (every header of cerver changes its path
+and the functions with `_by_` are named with `_with_`) and the event loop of the 2.1b-15. 1.2b-2 does not load
+against an older cerver (the functions that it binds have the new names), and 1.2b-1 does not load against the
+2.1b-14 or newer.
+
+- The bindings with the names of cerver, also in Python: `client_remove_connection_with_sock_fd`,
+  `client_get_with_sock_fd`, `client_get_with_session_id`, `files_image_get_type_with_extension`,
+  `file_send_with_fd`, `game_type_get_with_name`, `lobby_search_with_id`, `player_comparator_with_id`,
+  `player_get_with_sock_fd_list`, `http_content_type_with_mime`, `http_content_type_with_extension`,
+  `http_content_type_mime_with_extension`, `http_header_type_with_string`,
+  `http_response_header_set_with_name`, `_add_with_name`, `_remove_with_name`, `_count_with_name`,
+  `_get_with_name`, `http_response_header_value_with_name` and `http_cerver_add_responses_header_with_name`; the
+  names with `_by_` are not in the package anymore
+- The C servers and clients of the tests and the probe include the headers with their new paths (the umbrellas
+  `cerver/cerver.h` and `cerver/http/http.h`, or the parts that they use)
+- New: `CERVER_HANDLER_TYPE_EVENTS`, the event loops of a web cerver, with `cerver_set_io_threads ()`
+  (`CERVER_DEFAULT_IO_THREADS`), `cerver_set_max_connections ()` (`CERVER_DEFAULT_MAX_CONNECTIONS`) and
+  `cerver_set_overload_wait_timeout ()` (`CERVER_DEFAULT_OVERLOAD_WAIT_TIMEOUT`). It is opt-in:
+  `http_cerver_configuration ()` takes `handler_type` and keeps `CERVER_HANDLER_TYPE_THREADS` by default
+- With `CERVER_HANDLER_TYPE_EVENTS` the methods that decode the data of a JWT and the uploads generators run in an
+  I/O thread of cerver: a Python method there holds the GIL and the thread reads no other connection until it
+  returns. The handlers, the middlewares and the custom authentication run in the thpool, like before
+- The web servers of the e2e tier take their handler type from `CERVER_TEST_HANDLER` (`threads` by default,
+  `events`), that `tests/run.sh` passes to the container
+
 ## 1.2b-1 (from 1.1)
 
 1.2b-1 binds the 2.1 line of cerver (`nightly`), the 2.1b-13: the parser is llhttp. It needs a `libcerver.so` of the

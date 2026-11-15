@@ -1,18 +1,11 @@
 ## General
-- Creating the tags of releases on the commit that is pushed
-- Binding cerver 2.1b-13 in the Dockerfiles, the CI & installs
-- Added the Beta 1.2b-1 changes to the incompatibilities file
+- Binding cerver 2.1b-15 in the Dockerfiles, the CIs & installs
+- Added the Beta 1.2b-2 changes to the incompatibilities file
 
 ## Bindings
-- Binding all the methods of llhttp, the QUERY one included
-- Added the lenient flags of the parser & its limits always on
-- Added the list of headers of the responses & of any name
-- Added WebSocket bindings of endpoints, rooms & clients
-
-## Examples
-- Added examples of WebSocket, methods & leaving clients
+- Renamed the bindings to the new names of cerver 2.1b-15
+- Added the events handler type, its three setters & defaults
 
 ## Tests
-- Added tests of the methods & of the lenient flags of llhttp
-- Added tests of repeated headers & of headers of any name
-- Added tests of WebSocket, with its probe & a realtime e2e
+- Using the new paths of the cerver headers in the C clients
+- Running the e2e servers with the handler type of the tests

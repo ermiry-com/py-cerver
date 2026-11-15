@@ -8,66 +8,9 @@
 
 #include <sys/socket.h>
 
-#include "cerver/types/string.h"
+#include <cerver/cerver.h>
 
-#include "cerver/auth.h"
-#include "cerver/cerver.h"
-#include "cerver/client.h"
-#include "cerver/connection.h"
-#include "cerver/errors.h"
-#include "cerver/events.h"
-#include "cerver/files.h"
-#include "cerver/handler.h"
-#include "cerver/network.h"
-#include "cerver/packets.h"
-#include "cerver/socket.h"
-#include "cerver/timer.h"
-#include "cerver/udp.h"
-
-#include "cerver/threads/jobs.h"
-#include "cerver/threads/manager.h"
-#include "cerver/threads/thpool.h"
-#include "cerver/threads/thread.h"
-#include "cerver/threads/worker.h"
-
-#include "cerver/http/auth.h"
-#include "cerver/http/compression.h"
-#include "cerver/http/conditional.h"
-#include "cerver/http/content.h"
-#include "cerver/http/date.h"
-#include "cerver/http/headers.h"
-#include "cerver/http/http.h"
-#include "cerver/http/middleware.h"
-#include "cerver/http/multipart.h"
-#include "cerver/http/origin.h"
-#include "cerver/http/proxy.h"
-#include "cerver/http/request.h"
-#include "cerver/http/response.h"
-#include "cerver/http/route.h"
-#include "cerver/http/status.h"
-#include "cerver/http/tree.h"
-#include "cerver/http/utils.h"
-
-#include "cerver/http/jwt/alg.h"
-
-#include "cerver/http/websockets/client.h"
-#include "cerver/http/websockets/deflate.h"
-#include "cerver/http/websockets/frame.h"
-#include "cerver/http/websockets/registry.h"
-#include "cerver/http/websockets/settings.h"
-#include "cerver/http/websockets/websocket.h"
-
-#include "cerver/utils/histogram.h"
-#include "cerver/utils/log.h"
-
-#include "cerver/serializer.h"
-#include "cerver/system.h"
-
-#include "cerver/game/game.h"
-#include "cerver/game/gametype.h"
-#include "cerver/game/lobby.h"
-#include "cerver/game/player.h"
-#include "cerver/game/score.h"
+#include <cerver/http/http.h>
 
 #define CONSTANT(name) printf ("constant %s %lld\n", #name, (long long) (name));
 
@@ -84,11 +27,13 @@ static void probe_constants_core (void) {
 	CONSTANT (CERVER_AUTH_ERROR_SUCCESS)
 	CONSTANT (CERVER_BIND_ADDRESS_SIZE) CONSTANT (CERVER_DEFAULT_CHECK_INACTIVE_INTERVAL)
 	CONSTANT (CERVER_DEFAULT_CONNECTION_QUEUE) CONSTANT (CERVER_DEFAULT_DRAIN_POLICY) CONSTANT (CERVER_DEFAULT_DRAIN_TIMEOUT)
+	CONSTANT (CERVER_DEFAULT_IO_THREADS) CONSTANT (CERVER_DEFAULT_MAX_CONNECTIONS)
 	CONSTANT (CERVER_DEFAULT_MAX_AUTH_TRIES) CONSTANT (CERVER_DEFAULT_MAX_BAD_PACKETS) CONSTANT (CERVER_DEFAULT_MAX_INACTIVE_TIME)
 	CONSTANT (CERVER_DEFAULT_MAX_RECEIVED_PACKET_SIZE) CONSTANT (CERVER_DEFAULT_ON_HOLD_MAX_BAD_PACKETS)
 	CONSTANT (CERVER_DEFAULT_ON_HOLD_POLL_FDS) CONSTANT (CERVER_DEFAULT_ON_HOLD_RECEIVE_BUFFER_SIZE)
 	CONSTANT (CERVER_DEFAULT_ON_HOLD_SECONDS) CONSTANT (CERVER_DEFAULT_ON_HOLD_TIMEOUT)
-	CONSTANT (CERVER_DEFAULT_OVERLOAD_POLICY) CONSTANT (CERVER_DEFAULT_POLL_FDS) CONSTANT (CERVER_DEFAULT_POLL_TIMEOUT)
+	CONSTANT (CERVER_DEFAULT_OVERLOAD_POLICY) CONSTANT (CERVER_DEFAULT_OVERLOAD_WAIT_TIMEOUT)
+	CONSTANT (CERVER_DEFAULT_POLL_FDS) CONSTANT (CERVER_DEFAULT_POLL_TIMEOUT)
 	CONSTANT (CERVER_DEFAULT_POOL_THREADS) CONSTANT (CERVER_DEFAULT_PORT) CONSTANT (CERVER_DEFAULT_PROTOCOL)
 	CONSTANT (CERVER_DEFAULT_RECEIVE_BUFFER_SIZE) CONSTANT (CERVER_DEFAULT_SEND_TIMEOUT) CONSTANT (CERVER_DEFAULT_SOCKETS_INIT)
 	CONSTANT (CERVER_DEFAULT_THPOOL_QUEUE_SIZE) CONSTANT (CERVER_DEFAULT_UPDATE_INTERVAL_SECONDS)
@@ -112,6 +57,7 @@ static void probe_constants_core (void) {
 	CONSTANT (CERVER_EVENT_ON_HOLD_DROPPED) CONSTANT (CERVER_EVENT_STARTED) CONSTANT (CERVER_EVENT_TEARDOWN)
 	CONSTANT (CERVER_EVENT_UNKNOWN)
 	CONSTANT (CERVER_HANDLER_ERROR_DROPPED) CONSTANT (CERVER_HANDLER_ERROR_NONE) CONSTANT (CERVER_HANDLER_ERROR_PACKET)
+	CONSTANT (CERVER_HANDLER_TYPE_EVENTS)
 	CONSTANT (CERVER_HANDLER_TYPE_NONE) CONSTANT (CERVER_HANDLER_TYPE_POLL) CONSTANT (CERVER_HANDLER_TYPE_THREADS)
 	CONSTANT (CERVER_INFO_ALIAS_SIZE) CONSTANT (CERVER_INFO_NAME_SIZE) CONSTANT (CERVER_INFO_WELCOME_SIZE)
 	CONSTANT (CERVER_MAX_ERRORS) CONSTANT (CERVER_MAX_EVENTS)

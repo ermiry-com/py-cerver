@@ -118,8 +118,8 @@ http_content_type_mime = lib_function (
 	"""
 )
 
-http_content_type_by_mime = lib_function (
-	"http_content_type_by_mime", [c_char_p], ContentType,
+http_content_type_with_mime = lib_function (
+	"http_content_type_with_mime", [c_char_p], ContentType,
 	"""Returns the content type of a mime.
 
 	Args:
@@ -130,8 +130,8 @@ http_content_type_by_mime = lib_function (
 	"""
 )
 
-http_content_type_by_extension = lib_function (
-	"http_content_type_by_extension", [c_char_p], ContentType,
+http_content_type_with_extension = lib_function (
+	"http_content_type_with_extension", [c_char_p], ContentType,
 	"""Returns the content type of an extension.
 
 	Args:
@@ -142,8 +142,8 @@ http_content_type_by_extension = lib_function (
 	"""
 )
 
-http_content_type_mime_by_extension = lib_function (
-	"http_content_type_mime_by_extension", [c_char_p], c_char_p,
+http_content_type_mime_with_extension = lib_function (
+	"http_content_type_mime_with_extension", [c_char_p], c_char_p,
 	"""Returns the mime of an extension.
 
 	Args:

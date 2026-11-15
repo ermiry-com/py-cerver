@@ -2,11 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <cerver/http/http.h>
-#include <cerver/http/status.h>
-#include <cerver/http/url.h>
-
+#include <cerver/http/core/http.h>
 #include <cerver/http/json/json.h>
+#include <cerver/http/requests/url.h>
+#include <cerver/http/responses/status.h>
 
 #include <cerver/utils/log.h>
 #include <cerver/utils/utils.h>

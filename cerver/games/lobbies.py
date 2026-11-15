@@ -35,7 +35,7 @@ __all__ = [
 	"lobby_new", "lobby_delete", "lobby_reference", "lobby_release", "lobby_comparator",
 	"lobby_set_poll_time_out", "lobby_set_handler", "lobby_set_packet_handler",
 	"lobby_set_game_settings", "lobby_set_game_data", "lobby_set_update", "lobby_is_running",
-	"lobby_get", "lobby_search_by_id", "lobby_teardown", "lobby_poll",
+	"lobby_get", "lobby_search_with_id", "lobby_teardown", "lobby_poll",
 	"lobby_create", "lobby_join", "lobby_leave", "lobby_start", "lobby_player_of_client",
 	"lobby_summary_set", "lobby_summary_packet_create", "lobby_send", "lobby_send_to_players",
 	"lobby_request_send", "lobby_event_on"
@@ -305,8 +305,8 @@ lobby_get = lib_function (
 	"""
 )
 
-lobby_search_by_id = lib_function (
-	"lobby_search_by_id", [c_void_p, c_char_p], c_void_p,
+lobby_search_with_id = lib_function (
+	"lobby_search_with_id", [c_void_p, c_char_p], c_void_p,
 	"""Searches a lobby by its id, with the lock of the game cerver.
 
 	Args:
