@@ -76,6 +76,8 @@ class CerverEventData (Structure):
 		delete_action_args: How the args are released.
 		owns_action_args: The event was dropped after this trigger, so
 			cerver_event_data_delete () releases the args with delete_action_args.
+		shared_args: The reference of this trigger to the args, for cerver
+			(since cerver 1.9b-2 / 2.0b-75): the last one releases them.
 	"""
 
 	_fields_ = [
@@ -88,7 +90,9 @@ class CerverEventData (Structure):
 		("action_args", c_void_p),
 		("delete_action_args", c_void_p),
 
-		("owns_action_args", c_bool)
+		("owns_action_args", c_bool),
+
+		("shared_args", c_void_p)
 	]
 
 CerverEventDataPointer: TypeAlias = POINTER (CerverEventData) # type: ignore
