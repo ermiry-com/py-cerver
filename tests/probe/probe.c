@@ -367,6 +367,7 @@ static void probe_structures_core (void) {
 	OFFSET (CerverEventData, CerverEventData, action_args)
 	OFFSET (CerverEventData, CerverEventData, delete_action_args)
 	OFFSET (CerverEventData, CerverEventData, owns_action_args)
+	OFFSET (CerverEventData, CerverEventData, shared_args)
 
 	SIZE (CerverErrorEventData, CerverErrorEventData)
 	OFFSET (CerverErrorEventData, CerverErrorEventData, cerver) OFFSET (CerverErrorEventData, CerverErrorEventData, client)
@@ -375,6 +376,7 @@ static void probe_structures_core (void) {
 	OFFSET (CerverErrorEventData, CerverErrorEventData, delete_action_args)
 	OFFSET (CerverErrorEventData, CerverErrorEventData, owns_action_args)
 	OFFSET (CerverErrorEventData, CerverErrorEventData, error_message)
+	OFFSET (CerverErrorEventData, CerverErrorEventData, shared_args)
 
 	SIZE (FileHeader, FileHeader)
 	OFFSET (FileHeader, FileHeader, filename) OFFSET (FileHeader, FileHeader, len)
