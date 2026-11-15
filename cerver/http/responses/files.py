@@ -82,7 +82,10 @@ http_response_render_text = lib_function (
 
 http_response_handle_video = lib_function (
 	"http_response_handle_video", [c_void_p, c_char_p], c_uint8,
-	"""Sends the part of a video that the Range of the request asks for.
+	"""Sends a video with the Range of the request, as RFC 9110 says (cerver 2.0b-75).
+
+	Without a valid Range the whole video goes with 200, a range inside the video
+	with 206 (bytes=N-M includes M), and one that starts after its end gets 416.
 
 	Args:
 		http_receive: The HttpReceive of the request.
