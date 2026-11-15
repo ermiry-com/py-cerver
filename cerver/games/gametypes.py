@@ -14,7 +14,7 @@ __all__ = [
 	"game_type_new", "game_type_create", "game_type_delete", "game_type_add_lobby_config",
 	"game_type_set_on_lobby_join", "game_type_set_on_lobby_leave", "game_type_set_init",
 	"game_type_set_player_timeout", "game_type_set_fps",
-	"game_type_register", "game_type_unregister", "game_type_get_by_name"
+	"game_type_register", "game_type_unregister", "game_type_get_with_name"
 ]
 
 GAME_TYPE_DEFAULT_PLAYER_TIMEOUT = 0
@@ -148,8 +148,8 @@ game_type_unregister = lib_function (
 	"""
 )
 
-game_type_get_by_name = lib_function (
-	"game_type_get_by_name", [c_void_p, c_char_p], c_void_p,
+game_type_get_with_name = lib_function (
+	"game_type_get_with_name", [c_void_p, c_char_p], c_void_p,
 	"""Returns a registered game type by its name.
 
 	Args:

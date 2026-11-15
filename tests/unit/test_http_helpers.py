@@ -31,9 +31,9 @@ from cerver.http import http_response_add_custom_header_value
 from cerver.http import http_response_header_set, http_response_header_add
 from cerver.http import http_response_header_remove, http_response_header_count
 from cerver.http import http_response_header_value
-from cerver.http import http_response_header_set_by_name, http_response_header_add_by_name
-from cerver.http import http_response_header_remove_by_name, http_response_header_count_by_name
-from cerver.http import http_response_header_value_by_name
+from cerver.http import http_response_header_set_with_name, http_response_header_add_with_name
+from cerver.http import http_response_header_remove_with_name, http_response_header_count_with_name
+from cerver.http import http_response_header_value_with_name
 
 pytestmark = [pytest.mark.unit]
 
@@ -222,28 +222,28 @@ class TestResponseHeaders:
 		assert http_response_header_count (response, HTTP_HEADER_SET_COOKIE) == 0
 		assert http_response_header_value (response, HTTP_HEADER_LOCATION) == b"/home"
 
-	def test_by_name (self, response):
-		assert http_response_header_add_by_name (response, b"X-Trace", b"one") == 0
-		assert http_response_header_add_by_name (response, b"x-trace", b"two") == 0
+	def test_with_name (self, response):
+		assert http_response_header_add_with_name (response, b"X-Trace", b"one") == 0
+		assert http_response_header_add_with_name (response, b"x-trace", b"two") == 0
 
-		assert http_response_header_count_by_name (response, b"X-TRACE") == 2
-		assert http_response_header_value_by_name (response, "x-Trace") == b"one"
-		assert http_response_header_value_by_name (response, "x-Trace", 1) == b"two"
-		assert http_response_header_value_by_name (response, "X-Other") is None
+		assert http_response_header_count_with_name (response, b"X-TRACE") == 2
+		assert http_response_header_value_with_name (response, "x-Trace") == b"one"
+		assert http_response_header_value_with_name (response, "x-Trace", 1) == b"two"
+		assert http_response_header_value_with_name (response, "X-Other") is None
 
-		assert http_response_header_set_by_name (response, b"X-Trace", b"three") == 0
-		assert http_response_header_count_by_name (response, b"x-trace") == 1
-		assert http_response_header_value_by_name (response, b"X-TRACE") == b"three"
+		assert http_response_header_set_with_name (response, b"X-Trace", b"three") == 0
+		assert http_response_header_count_with_name (response, b"x-trace") == 1
+		assert http_response_header_value_with_name (response, b"X-TRACE") == b"three"
 
-		assert http_response_header_remove_by_name (response, b"x-trace") == 1
-		assert http_response_header_count_by_name (response, b"X-Trace") == 0
+		assert http_response_header_remove_with_name (response, b"x-trace") == 1
+		assert http_response_header_count_with_name (response, b"X-Trace") == 0
 
 	def test_known_name_is_its_type (self, response):
-		assert http_response_header_add_by_name (response, b"content-type", b"text/plain") == 0
+		assert http_response_header_add_with_name (response, b"content-type", b"text/plain") == 0
 
 		assert http_response_header_count (response, HTTP_HEADER_CONTENT_TYPE) == 1
 		assert http_response_header_value (response, HTTP_HEADER_CONTENT_TYPE) == b"text/plain"
-		assert http_response_header_value_by_name (response, "Content-Type") == b"text/plain"
+		assert http_response_header_value_with_name (response, "Content-Type") == b"text/plain"
 
 	@pytest.mark.parametrize ("value", [
 		b"/home\r\nSet-Cookie: stolen=1", b"/home\nX-Other: 1", b"/home\r"
@@ -253,15 +253,15 @@ class TestResponseHeaders:
 		assert http_response_header_set (response, HTTP_HEADER_LOCATION, value) == 1
 		assert http_response_add_header (response, HTTP_HEADER_LOCATION, value) == 1
 		assert http_response_add_custom_header_value (response, HTTP_HEADER_LOCATION, value) == 1
-		assert http_response_header_add_by_name (response, b"X-Trace", value) == 1
+		assert http_response_header_add_with_name (response, b"X-Trace", value) == 1
 
 		assert http_response_header_count (response, HTTP_HEADER_LOCATION) == 0
-		assert http_response_header_count_by_name (response, b"X-Trace") == 0
+		assert http_response_header_count_with_name (response, b"X-Trace") == 0
 
 	@pytest.mark.parametrize ("name", [b"", b"X Trace", b"X-Trace:", b"X-Trace\r\n"])
 	def test_name_that_is_not_a_token_is_rejected (self, response, name):
-		assert http_response_header_add_by_name (response, name, b"one") == 1
-		assert http_response_header_set_by_name (response, name, b"one") == 1
+		assert http_response_header_add_with_name (response, name, b"one") == 1
+		assert http_response_header_set_with_name (response, name, b"one") == 1
 
 	def test_undefined_header_is_rejected (self, response):
 		assert http_response_header_add (response, HTTP_HEADER_UNDEFINED, b"one") == 1
