@@ -68,6 +68,7 @@ from cerver.http.decorators import HttpGroup
 from cerver import files_create_dir
 
 from handler import handler_type
+from handler import keep_alive_configure
 
 SERVER_NAME = b"pycerver-e2e"
 SERVER_THREADS = 4
@@ -261,6 +262,7 @@ def main (port: int) -> int:
 	cerver_set_reusable_address_flags (cerver, True)
 
 	http_cerver = http_cerver_get (cerver)
+	keep_alive_configure (http_cerver)
 	http_cerver_set_method_not_allowed (http_cerver, True)
 
 	# a route that does not match is a 404, not the catch all of cerver

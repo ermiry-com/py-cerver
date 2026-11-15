@@ -26,6 +26,7 @@ from cerver.http import http_send_response
 from cerver.http.decorators import HttpGroup
 
 from handler import handler_type
+from handler import keep_alive_configure
 
 SERVER_NAME = b"pycerver-run"
 SERVER_THREADS = 2
@@ -46,6 +47,8 @@ def _create (port: int) -> c_void_p:
 	cerver_set_handler_type (cerver, handler_type ())
 	cerver_set_thpool_n_threads (cerver, SERVER_THREADS)
 	cerver_set_reusable_address_flags (cerver, True)
+
+	keep_alive_configure (http_cerver_get (cerver))
 
 	group = HttpGroup.create (http_cerver_get (cerver), "api")
 

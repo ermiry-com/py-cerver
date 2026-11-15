@@ -22,6 +22,7 @@ from cerver.http import http_static_path_set_auth, http_static_path_set_authenti
 from cerver.http.decorators import HttpGroup
 
 from handler import handler_type
+from handler import keep_alive_configure
 
 STATICS_NAME = b"pycerver-statics"
 STATICS_THREADS = 2
@@ -71,6 +72,7 @@ def main (port: int, send_timeout: int) -> int:
 	cerver_set_reusable_address_flags (cerver, True)
 
 	http_cerver = http_cerver_get (cerver)
+	keep_alive_configure (http_cerver)
 	http_cerver_set_not_found_handler (http_cerver)
 
 	if (send_timeout):
