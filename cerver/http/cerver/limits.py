@@ -23,6 +23,10 @@ __all__ = [
 	"http_cerver_set_headers_timeout_milliseconds", "http_cerver_set_request_timeout_milliseconds",
 	"http_cerver_set_idle_timeout_milliseconds", "http_cerver_set_send_timeout_milliseconds",
 	"http_cerver_set_half_close_is_gone",
+	"HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT", "HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT_MILLISECONDS",
+	"HTTP_CERVER_DEFAULT_KEEP_ALIVE_REQUESTS",
+	"http_cerver_set_keep_alive", "http_cerver_set_keep_alive_timeout",
+	"http_cerver_set_keep_alive_timeout_milliseconds", "http_cerver_set_keep_alive_requests",
 	"HttpParserLenient",
 	"HTTP_PARSER_LENIENT_NONE", "HTTP_PARSER_LENIENT_HEADERS", "HTTP_PARSER_LENIENT_CHUNKED_LENGTH",
 	"HTTP_PARSER_LENIENT_KEEP_ALIVE", "HTTP_PARSER_LENIENT_TRANSFER_ENCODING", "HTTP_PARSER_LENIENT_VERSION",
@@ -57,6 +61,13 @@ HTTP_CERVER_DEFAULT_IDLE_TIMEOUT_MILLISECONDS = HTTP_CERVER_DEFAULT_IDLE_TIMEOUT
 
 # http_receive_is_client_gone () takes a client that closed its side as gone
 HTTP_CERVER_DEFAULT_HALF_CLOSE_IS_GONE = True
+
+# in secs, a connection that is kept and does not send its next request for longer is closed
+HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT = 1 << 7
+HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT_MILLISECONDS = HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT * HTTP_MILLISECONDS_PER_SECOND
+
+# the requests that a connection handles before it is closed
+HTTP_CERVER_DEFAULT_KEEP_ALIVE_REQUESTS = 1 << 10
 
 # the lenient flags of the parser (llhttp), all of them disabled by default (the strict mode),
 # each one can open the cerver to request smuggling or cache poisoning attacks
@@ -257,5 +268,60 @@ http_cerver_set_half_close_is_gone = lib_function (
 	Args:
 		http_cerver: The HttpCerver.
 		half_close_is_gone: True by default.
+	"""
+)
+
+http_cerver_set_keep_alive = lib_function (
+	"http_cerver_set_keep_alive", [c_void_p, c_bool], None,
+	"""Sets whether the connections of a cerver are kept between requests.
+
+	Without this call a cerver with CERVER_HANDLER_TYPE_EVENTS keeps them and one with another
+	handler type closes each connection after its response. With threads the thread that handled
+	a request stays with its connection, so a cerver keeps one idle connection for each thread
+	(a warning is logged when it starts).
+
+	A response says "Connection: close" when its connection is closed after it; a connection is
+	not kept for an HTTP/1.0 client that did not ask for it, after a request that cerver rejected,
+	after a response without its length, and when the cerver stops.
+
+	Args:
+		http_cerver: The HttpCerver.
+		keep_alive: True to keep the connections, False to close each one after its response.
+	"""
+)
+
+http_cerver_set_keep_alive_timeout = lib_function (
+	"http_cerver_set_keep_alive_timeout", [c_void_p, c_uint], None,
+	"""Sets the seconds that a connection that is kept waits for its next request, then it is closed.
+
+	Behind a proxy it has to be longer than the time that the proxy keeps its upstream connections
+	(keepalive_timeout, 60 secs in nginx), so the proxy always closes an idle connection first.
+
+	Args:
+		http_cerver: The HttpCerver.
+		keep_alive_timeout: The seconds, 0 keeps the default (HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT).
+	"""
+)
+
+http_cerver_set_keep_alive_timeout_milliseconds = lib_function (
+	"http_cerver_set_keep_alive_timeout_milliseconds", [c_void_p, c_uint], None,
+	"""Sets the milliseconds that a connection that is kept waits for its next request.
+
+	Args:
+		http_cerver: The HttpCerver.
+		keep_alive_timeout: The milliseconds, 0 keeps the default.
+	"""
+)
+
+http_cerver_set_keep_alive_requests = lib_function (
+	"http_cerver_set_keep_alive_requests", [c_void_p, c_uint], None,
+	"""Sets the requests that a connection handles: the response of the last one says "Connection: close".
+
+	Behind a proxy it has to be more than the requests that the proxy sends through an upstream
+	connection (keepalive_requests, 1000 in nginx).
+
+	Args:
+		http_cerver: The HttpCerver.
+		keep_alive_requests: The requests, 0 disables the limit.
 	"""
 )
