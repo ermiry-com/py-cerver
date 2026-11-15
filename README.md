@@ -6,7 +6,8 @@ PyCerver is a pure Python wrapper around the [cerver](https://cerver.ermiry.com)
 
 | pycerver | cerver | Python |
 |---|---|---|
-| 1.2b-2 | 2.1b-15 or newer of the nightly line | 3.10 to 3.14 |
+| 1.2b-3 | 2.1b-16 or newer of the nightly line | 3.10 to 3.14 |
+| 1.2b-2 | 2.1b-15 of the nightly line | 3.10 to 3.14 |
 | 1.2b-1 | 2.1b-13 of the nightly line | 3.10 to 3.14 |
 | 1.1 | 2.0b-72 or newer | 3.10 to 3.14 |
 | 1.0 | 2.0b-64 or newer | 3.10 to 3.14 |

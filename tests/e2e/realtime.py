@@ -29,6 +29,7 @@ from cerver.http import http_request_get_custom_header
 from cerver.http import websockets as ws
 
 from handler import handler_type
+from handler import keep_alive_configure
 
 SERVER_NAME = b"pycerver-websockets"
 SERVER_THREADS = 4
@@ -182,6 +183,8 @@ def main (port: int) -> int:
 	cerver_set_handler_type (cerver, handler_type ())
 	cerver_set_thpool_n_threads (cerver, SERVER_THREADS)
 	cerver_set_reusable_address_flags (cerver, True)
+
+	keep_alive_configure (http_cerver_get (cerver))
 
 	_routes (http_cerver_get (cerver))
 

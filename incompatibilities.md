@@ -3,6 +3,26 @@
 The changes of each version that can break code built with the version before it, the newest first.
 Unlike `CHANGELOG.md`, which only has the current version, every entry stays here.
 
+## 1.2b-3 (from 1.2b-2)
+
+1.2b-3 binds cerver 2.1b-16: keep-alive, a connection handles more than one request. It does not load against an
+older cerver (it binds the four setters of the 2.1b-16).
+
+- **A cerver with `CERVER_HANDLER_TYPE_EVENTS` keeps its connections by default:** a response only says
+  `Connection: close` when its connection is closed after it. A client that reads a response until the server
+  closes the connection waits for the time that the connection is kept (128 secs): it has to use the
+  `Content-Length` of the response or to send `Connection: close`. A service that wants the behavior of before
+  calls `http_cerver_set_keep_alive (http_cerver, False)`. With `CERVER_HANDLER_TYPE_THREADS` nothing changes:
+  each connection is closed after its response, unless the service asks to keep them
+- **Pipelined requests are answered** with event loops, one at a time and in their order; before, everything after
+  the first request of a connection was dropped
+- New: `http_cerver_set_keep_alive ()`, `http_cerver_set_keep_alive_timeout ()` and its `_milliseconds`
+  (`HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT`, 128 secs, more than the 60 that nginx keeps its upstream connections),
+  `http_cerver_set_keep_alive_requests ()` (`HTTP_CERVER_DEFAULT_KEEP_ALIVE_REQUESTS`, 1024, more than the 1000 of
+  nginx) and the metric `cerver_http_reused_connections_total`
+- The web servers of the e2e tier close each connection after its response (their clients read until the close);
+  `CERVER_TEST_KEEP_ALIVE=1` makes one keep them, `tests/e2e/test_keepalive.py` starts its own that way
+
 ## 1.2b-2 (from 1.2b-1)
 
 1.2b-2 binds cerver 2.1b-15: the structure of the headers of the 2.1b-14 (every header of cerver changes its path
