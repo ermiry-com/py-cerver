@@ -8,59 +8,9 @@
 
 #include <sys/socket.h>
 
-#include "cerver/types/string.h"
+#include <cerver/cerver.h>
 
-#include "cerver/auth.h"
-#include "cerver/cerver.h"
-#include "cerver/client.h"
-#include "cerver/connection.h"
-#include "cerver/errors.h"
-#include "cerver/events.h"
-#include "cerver/files.h"
-#include "cerver/handler.h"
-#include "cerver/network.h"
-#include "cerver/packets.h"
-#include "cerver/socket.h"
-#include "cerver/timer.h"
-#include "cerver/udp.h"
-
-#include "cerver/threads/jobs.h"
-#include "cerver/threads/manager.h"
-#include "cerver/threads/thpool.h"
-#include "cerver/threads/thread.h"
-#include "cerver/threads/worker.h"
-
-#include "cerver/http/auth.h"
-#include "cerver/http/compression.h"
-#include "cerver/http/conditional.h"
-#include "cerver/http/content.h"
-#include "cerver/http/date.h"
-#include "cerver/http/headers.h"
-#include "cerver/http/http.h"
-#include "cerver/http/middleware.h"
-#include "cerver/http/multipart.h"
-#include "cerver/http/origin.h"
-#include "cerver/http/proxy.h"
-#include "cerver/http/request.h"
-#include "cerver/http/response.h"
-#include "cerver/http/route.h"
-#include "cerver/http/status.h"
-#include "cerver/http/tree.h"
-#include "cerver/http/utils.h"
-
-#include "cerver/http/jwt/alg.h"
-
-#include "cerver/utils/histogram.h"
-#include "cerver/utils/log.h"
-
-#include "cerver/serializer.h"
-#include "cerver/system.h"
-
-#include "cerver/game/game.h"
-#include "cerver/game/gametype.h"
-#include "cerver/game/lobby.h"
-#include "cerver/game/player.h"
-#include "cerver/game/score.h"
+#include <cerver/http/http.h>
 
 #define CONSTANT(name) printf ("constant %s %lld\n", #name, (long long) (name));
 

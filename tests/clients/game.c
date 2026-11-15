@@ -1,15 +1,17 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-
 #include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <pthread.h>
 
-#include <cerver/cerver.h>
-#include <cerver/packets.h>
+#include <cerver/core/cerver.h>
+#include <cerver/core/end.h>
+#include <cerver/core/start.h>
+#include <cerver/packets/packets.h>
 
 #include <cerver/game/game.h>
-#include <cerver/game/gametype.h>
+#include <cerver/game/types.h>
 
 // the game cerver of the e2e tier: the clients of pycerver create and join the lobbies
 // of its game type, it runs until SIGINT or SIGTERM
