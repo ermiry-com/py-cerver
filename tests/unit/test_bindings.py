@@ -35,20 +35,37 @@ TYPEDEF_INTEGER = re.compile (r"typedef\s+(u?int\d+_t|unsigned\s+char|u32|u64)\s
 
 # the headers whose functions the package wraps (service + client)
 INCLUDED_HEADERS = (
-	"auth.h", "cerver.h", "client.h", "connection.h", "errors.h", "events.h", "files.h",
-	"handler.h", "network.h", "packets.h", "socket.h", "timer.h", "udp.h", "version.h",
+	"auth/auth.h", "auth/hold.h",
+	"core/cerver.h", "core/end.h", "core/handler.h", "core/info.h", "core/report.h",
+	"core/serialization.h", "core/start.h", "core/data.h", "core/types.h", "core/update.h",
+	"client/client.h", "client/connect.h", "client/events.h", "client/handler.h",
+	"client/requests.h",
+	"connection/connection.h", "connection/data.h", "connection/end.h",
+	"connection/lifecycle.h", "connection/registry.h", "connection/send.h",
+	"connection/stats.h", "connection/update.h",
+	"files/cerver.h", "files/files.h", "files/images.h", "files/receive.h", "files/send.h",
+	"handler/errors.h", "handler/events.h", "handler/handler.h",
+	"network/network.h", "network/socket.h", "network/udp.h",
+	"packets/header.h", "packets/packets.h", "packets/serializer.h",
+	"system/system.h", "system/timer.h", "version.h",
 	"threads/bsem.h", "threads/jobs.h", "threads/manager.h", "threads/thpool.h",
 	"threads/thread.h", "threads/worker.h",
-	"utils/log.h",
-	"http/auth.h", "http/compression.h", "http/conditional.h", "http/content.h", "http/date.h",
-	"http/headers.h", "http/http.h", "http/method.h", "http/metrics.h", "http/middleware.h",
-	"http/multipart.h", "http/origin.h", "http/proxy.h", "http/request.h", "http/response.h",
-	"http/route.h", "http/status.h", "http/stream.h", "http/tree.h", "http/url.h", "http/utils.h",
-	"http/validator.h", "http/jwt/alg.h",
+	"utils/histogram.h", "utils/log.h",
+	"http/core/admin.h", "http/core/handler.h", "http/core/http.h", "http/core/limits.h",
+	"http/core/metrics.h", "http/core/pairs.h", "http/core/public.h", "http/core/routes.h",
+	"http/core/settings.h", "http/core/stats.h", "http/core/uploads.h", "http/core/utils.h",
+	"http/headers/buffer.h", "http/headers/header.h", "http/headers/types.h",
+	"http/requests/content.h", "http/requests/method.h", "http/requests/multipart.h",
+	"http/requests/request.h", "http/requests/url.h",
+	"http/responses/compression.h", "http/responses/conditional.h", "http/responses/date.h",
+	"http/responses/response.h", "http/responses/status.h", "http/responses/stream.h",
+	"http/routes/middleware.h", "http/routes/route.h", "http/routes/tree.h",
+	"http/routes/validator.h",
+	"http/security/auth.h", "http/security/origin.h", "http/security/proxy.h",
+	"http/jwt/alg.h",
 	"http/websockets/client.h", "http/websockets/registry.h", "http/websockets/settings.h",
 	"http/websockets/websocket.h",
-	"serializer.h", "system.h", "utils/histogram.h",
-	"game/game.h", "game/gametype.h", "game/lobby.h", "game/player.h", "game/score.h"
+	"game/game.h", "game/lobby.h", "game/player.h", "game/score.h", "game/types.h"
 )
 
 # the functions of the included headers that are not bound, with their reason

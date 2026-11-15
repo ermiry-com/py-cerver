@@ -2,7 +2,7 @@
 
 #include <curl/curl.h>
 
-#include <cerver/http/status.h>
+#include <cerver/http/responses/status.h>
 
 #include <cerver/utils/log.h>
 
