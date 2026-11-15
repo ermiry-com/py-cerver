@@ -32,6 +32,10 @@ from cerver.http import http_cerver_set_half_close_is_gone
 from cerver.http import http_stage_string, http_stage_label, HTTP_STAGE_REQUEST_LINE
 from cerver.http import http_abort_reason_label, HTTP_ABORT_REASON_RESET
 from cerver.http import http_client_state_string, HTTP_CLIENT_STATE_CONNECTED
+from cerver.http import http_cerver_set_keep_alive, http_cerver_set_keep_alive_timeout
+from cerver.http import http_cerver_set_keep_alive_timeout_milliseconds, http_cerver_set_keep_alive_requests
+from cerver.http import HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT, HTTP_CERVER_DEFAULT_KEEP_ALIVE_REQUESTS
+from cerver.http import HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT_MILLISECONDS, HTTP_MILLISECONDS_PER_SECOND
 
 pytestmark = [pytest.mark.integration]
 
@@ -50,6 +54,11 @@ SEND_TIMEOUT_MILLISECONDS = 750
 COMPRESSION_LEVEL = 4
 COMPRESSION_MIN_SIZE = 1 << 9
 DRAIN_TIMEOUT = 2
+
+# secs, more than the 60 that a proxy keeps its connections
+KEEP_ALIVE_TIMEOUT = 75
+KEEP_ALIVE_TIMEOUT_MILLISECONDS = 2500
+KEEP_ALIVE_REQUESTS = 2048
 
 def _handler (http_receive, request):
 	return None
@@ -108,6 +117,25 @@ class TestConfiguration:
 		http_cerver_set_idle_timeout_milliseconds (http_cerver, IDLE_TIMEOUT_MILLISECONDS)
 		http_cerver_set_send_timeout_milliseconds (http_cerver, SEND_TIMEOUT_MILLISECONDS)
 		http_cerver_set_half_close_is_gone (http_cerver, False)
+
+	def test_keep_alive (self, cerver):
+		http_cerver = http_cerver_get (cerver)
+
+		assert HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT == 128
+		assert HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT_MILLISECONDS == 128 * HTTP_MILLISECONDS_PER_SECOND
+		assert HTTP_CERVER_DEFAULT_KEEP_ALIVE_REQUESTS == 1024
+
+		http_cerver_set_keep_alive (http_cerver, True)
+		http_cerver_set_keep_alive (http_cerver, False)
+		http_cerver_set_keep_alive_timeout (http_cerver, KEEP_ALIVE_TIMEOUT)
+		http_cerver_set_keep_alive_timeout_milliseconds (http_cerver, KEEP_ALIVE_TIMEOUT_MILLISECONDS)
+		http_cerver_set_keep_alive_requests (http_cerver, KEEP_ALIVE_REQUESTS)
+
+		# nothing is done without a cerver
+		http_cerver_set_keep_alive (None, True)
+		http_cerver_set_keep_alive_timeout (None, KEEP_ALIVE_TIMEOUT)
+		http_cerver_set_keep_alive_timeout_milliseconds (None, KEEP_ALIVE_TIMEOUT_MILLISECONDS)
+		http_cerver_set_keep_alive_requests (None, KEEP_ALIVE_REQUESTS)
 
 	def test_metrics (self, cerver):
 		metrics = http_cerver_metrics (http_cerver_get (cerver))
