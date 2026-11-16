@@ -7,7 +7,7 @@ on:
 
 env:
   CERVER_REPOSITORY: ermiry/cerver
-  CERVER_REF: 2.1b-18
+  CERVER_REF: 2.1b-19
 
 jobs:
   nightly:
