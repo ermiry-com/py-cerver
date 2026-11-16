@@ -13,9 +13,11 @@ from .routes import HttpHandler
 from .tree import http_cerver_group_create, http_group_create, http_group_route_add
 from .tree import http_group_root_add
 from .tree import http_group_add_before, http_group_add_after
+from .tree import http_group_set_pool
 from .tree import http_endpoint_set_modifier, http_endpoint_set_auth
 from .tree import http_endpoint_set_max_body_size, http_endpoint_set_cors
 from .tree import http_endpoint_set_etag, http_endpoint_set_compression
+from .tree import http_endpoint_set_pool
 from .tree import http_endpoint_set_authentication_with_body
 from .tree import http_endpoint_add_before, http_endpoint_add_after
 
@@ -70,6 +72,7 @@ def http_endpoint_configure (
 	max_body_size: int | None = None, cors: bool | None = None,
 	authentication_with_body: bool | None = None,
 	etag: bool | None = None, compression: bool | None = None,
+	pool: str | bytes | None = None,
 	before: tuple = (), after: tuple = ()
 ) -> None:
 	"""Sets the settings of an endpoint that were given, the others are inherited from its groups.
@@ -83,6 +86,7 @@ def http_endpoint_configure (
 		authentication_with_body: True to authenticate after the body was received.
 		etag: True to add a strong ETag.
 		compression: True to compress with gzip.
+		pool: The name of the pool of threads that handles its requests (http_cerver_pool_create ()).
 		before: Python functions that run before the handler.
 		after: Python functions that run after the handler.
 	"""
@@ -99,6 +103,9 @@ def http_endpoint_configure (
 	for value, setter in settings:
 		if (value is not None):
 			setter (endpoint, value)
+
+	if (pool is not None):
+		http_endpoint_set_pool (endpoint, lib_c_string (pool))
 
 	for middleware in before:
 		http_endpoint_add_before (endpoint, http_before_middleware (middleware))
@@ -326,6 +333,14 @@ class HttpGroup:
 		middleware = http_after_middleware (function)
 		http_group_add_after (self.group, middleware)
 		return middleware
+
+	def pool (self, name: str | bytes | None) -> None:
+		"""Sets the pool of threads that handles the requests of the endpoints of the group.
+
+		Args:
+			name: The name of a pool of the cerver (http_cerver_pool_create ()), None for its thpool.
+		"""
+		http_group_set_pool (self.group, lib_c_string (name))
 
 def http_group (
 	http_cerver: int, prefix: str | None = None,

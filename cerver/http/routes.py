@@ -23,6 +23,7 @@ __all__ = [
 	"http_route_child_add", "http_route_set_modifier", "http_route_set_auth",
 	"http_route_set_decode_data", "http_route_set_decode_data_into_json",
 	"http_route_set_authentication_handler", "http_route_set_authentication_with_body",
+	"http_route_set_pool",
 	"http_route_get_custom_data", "http_route_set_custom_data", "http_route_set_delete_custom_data",
 	"http_route_print", "http_route_methods_string",
 	"http_route_duration_buckets"
@@ -226,6 +227,19 @@ http_route_set_authentication_with_body = lib_function (
 	Args:
 		route: The HttpRoute.
 		authentication_with_body: True when the authentication handler needs the body.
+	"""
+)
+
+http_route_set_pool = lib_function (
+	"http_route_set_pool", [c_void_p, c_char_p], None,
+	"""Sets the pool of threads that handles the requests of a route (http_cerver_pool_create ()), with
+	CERVER_HANDLER_TYPE_EVENTS; its children do not inherit it.
+
+	A name that no pool of the cerver has is an error of the routes and the cerver does not start.
+
+	Args:
+		route: The HttpRoute.
+		name: The name of the pool as bytes; None or b"default" for the thpool of the cerver.
 	"""
 )
 

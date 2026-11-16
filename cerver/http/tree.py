@@ -12,7 +12,7 @@ from .requests.methods import RequestMethod
 from .routes import HttpRouteModifier, HttpRouteAuthType
 
 __all__ = [
-	"HTTP_TREE_DEFAULT_MAX_PARAMS", "HTTP_TREE_ERROR_SIZE",
+	"HTTP_TREE_DEFAULT_MAX_PARAMS", "HTTP_TREE_ERROR_SIZE", "HTTP_POOL_NAME_SIZE",
 	"HttpTrailingSlash",
 	"HTTP_TRAILING_SLASH_NONE", "HTTP_TRAILING_SLASH_TOLERANT",
 	"HTTP_TRAILING_SLASH_STRICT", "HTTP_TRAILING_SLASH_REDIRECT",
@@ -24,13 +24,13 @@ __all__ = [
 	"http_group_set_decode_data_into_json", "http_group_set_authentication_handler",
 	"http_group_set_authentication_with_body", "http_group_set_custom_data",
 	"http_group_set_max_body_size", "http_group_set_cors", "http_group_set_etag",
-	"http_group_set_compression", "http_group_add_before", "http_group_add_after",
+	"http_group_set_compression", "http_group_set_pool", "http_group_add_before", "http_group_add_after",
 	"http_endpoint_get_path", "http_endpoint_get_method",
 	"http_endpoint_set_modifier", "http_endpoint_set_auth", "http_endpoint_set_decode_data",
 	"http_endpoint_set_decode_data_into_json", "http_endpoint_set_authentication_handler",
 	"http_endpoint_set_authentication_with_body", "http_endpoint_set_custom_data",
 	"http_endpoint_get_custom_data", "http_endpoint_set_max_body_size", "http_endpoint_set_cors",
-	"http_endpoint_set_etag", "http_endpoint_set_compression",
+	"http_endpoint_set_etag", "http_endpoint_set_compression", "http_endpoint_set_pool",
 	"http_endpoint_add_before", "http_endpoint_add_after",
 	"http_tree_path_validate", "http_tree_print", "http_tree_get_n_endpoints",
 	"http_tree_path_error"
@@ -38,6 +38,9 @@ __all__ = [
 
 HTTP_TREE_DEFAULT_MAX_PARAMS = 16
 HTTP_TREE_ERROR_SIZE = 256
+
+# the size of the name of a pool of threads, with its end
+HTTP_POOL_NAME_SIZE = 32
 
 HttpTrailingSlash: TypeAlias = c_int # type: ignore
 
@@ -324,6 +327,19 @@ http_group_set_compression = lib_function (
 	"""
 )
 
+http_group_set_pool = lib_function (
+	"http_group_set_pool", [c_void_p, c_char_p], None,
+	"""Sets the pool of threads that handles the requests of the endpoints of a group (http_cerver_pool_create ()),
+	with CERVER_HANDLER_TYPE_EVENTS.
+
+	A name that no pool of the cerver has is an error of the routes and the cerver does not start.
+
+	Args:
+		group: The HttpGroup.
+		name: The name of the pool as bytes; None or b"default" for the thpool of the cerver.
+	"""
+)
+
 http_group_add_before = lib_function (
 	"http_group_add_before", [c_void_p, c_void_p], c_uint8,
 	"""Adds a middleware that runs before the handlers of the endpoints of a group.
@@ -497,6 +513,19 @@ http_endpoint_set_compression = lib_function (
 	Args:
 		endpoint: The HttpEndpoint.
 		compression: True to compress them.
+	"""
+)
+
+http_endpoint_set_pool = lib_function (
+	"http_endpoint_set_pool", [c_void_p, c_char_p], None,
+	"""Sets the pool of threads that handles the requests of an endpoint (http_cerver_pool_create ()), with
+	CERVER_HANDLER_TYPE_EVENTS: its handler, its middlewares and its custom authentication run there.
+
+	A name that no pool of the cerver has is an error of the routes and the cerver does not start.
+
+	Args:
+		endpoint: The HttpEndpoint.
+		name: The name of the pool as bytes; None or b"default" for the thpool of the cerver.
 	"""
 )
 
