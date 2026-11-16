@@ -62,6 +62,8 @@ class CerverErrorEventData (Structure):
 		owns_action_args: The error was dropped after this trigger, so
 			cerver_error_event_data_delete () releases the args with delete_action_args.
 		error_message: The message of the error, a StringPointer.
+		shared_args: The reference of this trigger to the args, for cerver
+			(since cerver 1.9b-2 / 2.0b-75): the last one releases them.
 	"""
 
 	_fields_ = [
@@ -74,7 +76,9 @@ class CerverErrorEventData (Structure):
 		("delete_action_args", c_void_p),
 		("owns_action_args", c_bool),
 
-		("error_message", StringPointer)
+		("error_message", StringPointer),
+
+		("shared_args", c_void_p)
 	]
 
 CerverErrorEventDataPointer: TypeAlias = POINTER (CerverErrorEventData) # type: ignore
