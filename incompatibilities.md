@@ -3,6 +3,22 @@
 The changes of each version that can break code built with the version before it, the newest first.
 Unlike `CHANGELOG.md`, which only has the current version, every entry stays here.
 
+## 1.2b-6 (from 1.2b-5)
+
+1.2b-6 binds cerver 2.1b-19, the whole form of keep-alive (its list is in the `incompatibilities.md` of cerver,
+«2.1b-19»). 1.2b-6 does not load against the 2.1b-18 (it binds `http_cerver_set_keep_alive_pool_read`).
+
+- What cerver changes reaches the Python code: with `CERVER_HANDLER_TYPE_EVENTS` the threads of the pools read and
+  handle the next request of a connection that is kept, without the event loop (the handlers run in those threads as
+  before); `http_cerver_set_keep_alive_pool_read (http_cerver, False)` gives back the reads of the 2.1b-18
+  (`HTTP_CERVER_DEFAULT_KEEP_ALIVE_POOL_READ` is True)
+- `http_request_get_query_params` and `http_request_get_body_values` create their lists the first time that they are
+  called (a copy of each pair), and `http_request_query_params_get_value` and `http_request_body_get_value` read the
+  pairs without allocating: the values are the same
+- The authentication before the body of the next request of a kept connection runs in the thread that reads it, so a
+  custom authentication handler runs in a thread of the pool of its route like before, but not always the same one
+  as the request before it
+
 ## 1.2b-5 (from 1.2b-4)
 
 1.2b-5 binds cerver 2.1b-18, the fixes of the audit of the code that the other lines of cerver made (its list is in
