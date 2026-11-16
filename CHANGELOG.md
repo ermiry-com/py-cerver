@@ -1,10 +1,10 @@
 ## General
-- Binding cerver 2.1b-16 in the Dockerfiles, the CIs & installs
-- Added the Beta 1.2b-3 changes to the incompatibilities file
+- Binding cerver 2.1b-17 in the Dockerfiles, the CIs & installs
+- Added the Beta 1.2b-4 changes to the incompatibilities file
 
 ## Bindings
-- Added the keep-alive setters of the cerver & their defaults
+- Added the pools of a cerver with the health & ready routes
+- Bound the follow of a kept connection & the queue of jobs
 
 ## Tests
-- Closing the connection of the e2e servers after a response
-- Added keep-alive tests to the e2e & to the integration tiers
+- Added the pools tests to the integration & to the e2e tests
