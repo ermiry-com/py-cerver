@@ -67,12 +67,27 @@ from cerver.http.decorators import HttpGroup
 
 from cerver import files_create_dir
 
+from cerver.http import http_cerver_pool
+from cerver.http import http_cerver_set_health_route
+from cerver.http import http_cerver_set_ready_route
+
 from handler import handler_type
 from handler import keep_alive_configure
+from handler import pools
 
 SERVER_NAME = b"pycerver-e2e"
 SERVER_THREADS = 4
 SERVER_CONNECTION_QUEUE = 16
+
+# the pool of the routes that take long, with CERVER_TEST_POOLS=1
+POOL_NAME = "slow"
+POOL_THREADS = 2
+
+HEALTH_ROUTE = b"/health"
+READY_ROUTE = b"/ready"
+
+# the name that the system has for the thread that runs: cerver names the threads of a thpool after it
+THREAD_NAME_PATH = "/proc/thread-self/comm"
 
 UPLOADS_PATH = b"/tmp/pycerver-e2e-uploads"
 UPLOADS_MODE = 0o755
@@ -253,6 +268,27 @@ def _features_routes (http_cerver: c_void_p):
 			"ip": http_request_get_client_ip (request).decode ("utf-8")
 		})
 
+def _thread_name () -> str:
+	with open (THREAD_NAME_PATH, encoding="utf-8") as file:
+		return file.read ().strip ()
+
+def _pools (http_cerver: c_void_p):
+	"""A named pool with a route in it, a route in the thpool of the cerver and the routes that cerver answers."""
+	http_cerver_pool (http_cerver, POOL_NAME, POOL_THREADS)
+
+	http_cerver_set_health_route (http_cerver, HEALTH_ROUTE)
+	http_cerver_set_ready_route (http_cerver, READY_ROUTE)
+
+	group = HttpGroup.create (http_cerver, "api/pools")
+
+	@group.get ("fast")
+	def fast_handler (http_receive, request):
+		http_send_response (http_receive, HTTP_STATUS_OK, {"thread": _thread_name ()})
+
+	@group.get ("slow", pool=POOL_NAME)
+	def slow_handler (http_receive, request):
+		http_send_response (http_receive, HTTP_STATUS_OK, {"thread": _thread_name ()})
+
 def main (port: int) -> int:
 	files_create_dir (UPLOADS_PATH, UPLOADS_MODE)
 
@@ -277,6 +313,9 @@ def main (port: int) -> int:
 	http_cerver_add_origin_to_whitelist (http_cerver, ALLOWED_ORIGIN)
 
 	_routes (http_cerver)
+
+	if (pools ()):
+		_pools (http_cerver)
 
 	return cerver_run (cerver)
 

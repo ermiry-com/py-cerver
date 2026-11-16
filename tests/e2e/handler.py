@@ -20,6 +20,10 @@ HANDLER_EVENTS = "events"
 KEEP_ALIVE_VARIABLE = "CERVER_TEST_KEEP_ALIVE"
 KEEP_ALIVE_ENABLED = "1"
 
+# CERVER_TEST_POOLS=1 gives a server a named pool of threads with its routes, and the health and ready routes
+POOLS_VARIABLE = "CERVER_TEST_POOLS"
+POOLS_ENABLED = "1"
+
 def handler_type () -> int:
 	"""Returns the handler type that the run of the suite asked for."""
 	events = (os.environ.get (HANDLER_VARIABLE) == HANDLER_EVENTS)
@@ -33,3 +37,7 @@ def keep_alive () -> bool:
 def keep_alive_configure (http_cerver) -> None:
 	"""Sets what the HttpCerver of a server of the tier does with its connections."""
 	http_cerver_set_keep_alive (http_cerver, keep_alive ())
+
+def pools () -> bool:
+	"""Returns whether the server has a named pool of threads and the routes that cerver answers."""
+	return os.environ.get (POOLS_VARIABLE) == POOLS_ENABLED
