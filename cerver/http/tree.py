@@ -279,6 +279,8 @@ http_group_set_custom_data = lib_function (
 	"http_group_set_custom_data", [c_void_p, c_void_p, c_void_p], None,
 	"""Sets the custom data that the endpoints of a group inherit, the group owns it.
 
+	A different custom data releases the one that the group had (cerver 2.1b-18).
+
 	Args:
 		group: The HttpGroup.
 		custom_data: The data.
@@ -455,6 +457,8 @@ http_endpoint_set_authentication_with_body = lib_function (
 http_endpoint_set_custom_data = lib_function (
 	"http_endpoint_set_custom_data", [c_void_p, c_void_p, c_void_p], None,
 	"""Sets the custom data of an endpoint, the endpoint owns it.
+
+	A different custom data releases the one that the endpoint had (cerver 2.1b-18).
 
 	Args:
 		endpoint: The HttpEndpoint.

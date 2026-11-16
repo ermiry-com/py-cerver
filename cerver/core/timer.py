@@ -11,6 +11,7 @@ __all__ = [
 	"timespec_delete", "timer_get_timespec", "timer_elapsed_time",
 	"timer_sleep_for_seconds", "timer_get_current_time",
 	"timer_get_gmt_time", "timer_get_local_time",
+	"timer_get_gmt_time_r", "timer_get_local_time_r",
 	"timer_time_to_string_actual", "timer_time_to_string",
 	"timer_date_to_string_actual", "timer_date_to_string",
 	"timer_date_and_time_to_string_actual", "timer_date_and_time_to_string",
@@ -70,7 +71,9 @@ timer_get_current_time = lib_function (
 
 timer_get_gmt_time = lib_function (
 	"timer_get_gmt_time", [], c_void_p,
-	"""Returns the current UTC time as a struct tm of the thread.
+	"""Returns the current UTC time as the struct tm of gmtime ().
+
+	Deprecated since cerver 1.9b-2 / 2.0b-75 (it is not reentrant): use timer_get_gmt_time_r ().
 
 	Returns:
 		The struct tm, it must not be released.
@@ -79,10 +82,36 @@ timer_get_gmt_time = lib_function (
 
 timer_get_local_time = lib_function (
 	"timer_get_local_time", [], c_void_p,
-	"""Returns the current local time as a struct tm of the thread.
+	"""Returns the current local time as the struct tm of localtime ().
+
+	Deprecated since cerver 1.9b-2 / 2.0b-75 (it is not reentrant): use timer_get_local_time_r ().
 
 	Returns:
 		The struct tm, it must not be released.
+	"""
+)
+
+timer_get_gmt_time_r = lib_function (
+	"timer_get_gmt_time_r", [c_void_p], c_void_p,
+	"""Writes the current UTC time in a struct tm of the caller (cerver 1.9b-2 / 2.0b-75).
+
+	Args:
+		result: The struct tm.
+
+	Returns:
+		result, None for a None result or on error.
+	"""
+)
+
+timer_get_local_time_r = lib_function (
+	"timer_get_local_time_r", [c_void_p], c_void_p,
+	"""Writes the current local time in a struct tm of the caller (cerver 1.9b-2 / 2.0b-75).
+
+	Args:
+		result: The struct tm.
+
+	Returns:
+		result, None for a None result or on error.
 	"""
 )
 

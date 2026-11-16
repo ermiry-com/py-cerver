@@ -3,6 +3,25 @@
 The changes of each version that can break code built with the version before it, the newest first.
 Unlike `CHANGELOG.md`, which only has the current version, every entry stays here.
 
+## 1.2b-5 (from 1.2b-4)
+
+1.2b-5 binds cerver 2.1b-18, the fixes of the audit of the code that the other lines of cerver made (its list is in
+the `incompatibilities.md` of cerver, «2.1b-18»; the same of pycerver 1.1.3 for the 2.0 line). `CerverEventData` and
+`CerverErrorEventData` have the new field `shared_args` at their end, so 1.2b-5 reads them with the size of the
+2.1b-18; 1.2b-4 still reads the fields that it had against the 2.1b-18, and 1.2b-5 does not load against the 2.1b-17
+(it binds `timer_get_gmt_time_r` and `timer_get_local_time_r`).
+
+- What cerver changes reaches the Python code: a setter of the handlers, of the custom data of an endpoint or a group,
+  or `connection_set_received_data` releases what it replaces when it is another pointer (keep only the last one); a
+  second admin is rejected by default (`admin_cerver_set_max_admins`); `http_response_handle_video` answers 200
+  without a Range and 416 after the end of the video; a stream of WebSocket belongs to the thread that began it
+- A C program built against cerver 2.1b-18 needs `-D _GNU_SOURCE` (the probe of the tests has it)
+- `timer_get_gmt_time` and `timer_get_local_time` are deprecated in cerver: `timer_get_gmt_time_r` and
+  `timer_get_local_time_r` write in a struct of the caller
+- `lobby_get` and `lobby_search_with_id` are deprecated in cerver, and they never took a reference (the docstring of
+  `lobby_get` said they did): `lobby_get_reference` and `lobby_search_with_id_reference` take it, released with
+  `lobby_release`
+
 ## 1.2b-4 (from 1.2b-3)
 
 1.2b-4 binds cerver 2.1b-17: the named pools of threads of an HTTP cerver, and its health and ready routes. It
