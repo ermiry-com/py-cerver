@@ -29,6 +29,7 @@ __all__ = [
 	"http_cerver_set_keep_alive_timeout_milliseconds", "http_cerver_set_keep_alive_requests",
 	"HTTP_CERVER_DEFAULT_KEEP_ALIVE_FOLLOW", "HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT",
 	"http_cerver_set_keep_alive_follow",
+	"HTTP_CERVER_DEFAULT_KEEP_ALIVE_POOL_READ", "http_cerver_set_keep_alive_pool_read",
 	"HttpParserLenient",
 	"HTTP_PARSER_LENIENT_NONE", "HTTP_PARSER_LENIENT_HEADERS", "HTTP_PARSER_LENIENT_CHUNKED_LENGTH",
 	"HTTP_PARSER_LENIENT_KEEP_ALIVE", "HTTP_PARSER_LENIENT_TRANSFER_ENCODING", "HTTP_PARSER_LENIENT_VERSION",
@@ -75,6 +76,9 @@ HTTP_CERVER_DEFAULT_KEEP_ALIVE_REQUESTS = 1 << 10
 # of its connection: none by default, and a time to start with
 HTTP_CERVER_DEFAULT_KEEP_ALIVE_FOLLOW = 0
 HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT = 1 << 6
+
+# the threads of the pools read the next request of a connection that is kept, without its event loop
+HTTP_CERVER_DEFAULT_KEEP_ALIVE_POOL_READ = True
 
 # the lenient flags of the parser (llhttp), all of them disabled by default (the strict mode),
 # each one can open the cerver to request smuggling or cache poisoning attacks
@@ -345,5 +349,21 @@ http_cerver_set_keep_alive_follow = lib_function (
 	Args:
 		http_cerver: The HttpCerver.
 		microseconds: The time (HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT to start with), 0 disables it: the default.
+	"""
+)
+
+http_cerver_set_keep_alive_pool_read = lib_function (
+	"http_cerver_set_keep_alive_pool_read", [c_void_p, c_bool], None,
+	"""Sets whether the threads of the pools read the next request of a connection that is kept (only with
+	event loops).
+
+	With it a thread of the pool of the request before it reads, parses and handles the next request of an idle
+	connection, without its event loop; the loop still reads it when that pool has no place for it or the cerver
+	rejects its requests.
+
+	Args:
+		http_cerver: The HttpCerver.
+		pool_read: True for the threads of the pools to read it (HTTP_CERVER_DEFAULT_KEEP_ALIVE_POOL_READ),
+			False for the event loop to read every request.
 	"""
 )

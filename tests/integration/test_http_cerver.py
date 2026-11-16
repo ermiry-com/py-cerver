@@ -38,6 +38,7 @@ from cerver.http import HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT, HTTP_CERVER_DEFA
 from cerver.http import HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT_MILLISECONDS, HTTP_MILLISECONDS_PER_SECOND
 from cerver.http import http_cerver_set_keep_alive_follow
 from cerver.http import HTTP_CERVER_DEFAULT_KEEP_ALIVE_FOLLOW, HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT
+from cerver.http import http_cerver_set_keep_alive_pool_read, HTTP_CERVER_DEFAULT_KEEP_ALIVE_POOL_READ
 
 pytestmark = [pytest.mark.integration]
 
@@ -140,6 +141,13 @@ class TestConfiguration:
 		http_cerver_set_keep_alive_follow (http_cerver, HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT)
 		http_cerver_set_keep_alive_follow (http_cerver, HTTP_CERVER_DEFAULT_KEEP_ALIVE_FOLLOW)
 		http_cerver_set_keep_alive_follow (None, HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT)
+
+		# the threads of the pools read the next request of an idle connection unless the cerver says no
+		assert HTTP_CERVER_DEFAULT_KEEP_ALIVE_POOL_READ is True
+
+		http_cerver_set_keep_alive_pool_read (http_cerver, False)
+		http_cerver_set_keep_alive_pool_read (http_cerver, HTTP_CERVER_DEFAULT_KEEP_ALIVE_POOL_READ)
+		http_cerver_set_keep_alive_pool_read (None, False)
 
 		# nothing is done without a cerver
 		http_cerver_set_keep_alive (None, True)
