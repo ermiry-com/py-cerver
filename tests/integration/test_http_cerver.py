@@ -36,6 +36,8 @@ from cerver.http import http_cerver_set_keep_alive, http_cerver_set_keep_alive_t
 from cerver.http import http_cerver_set_keep_alive_timeout_milliseconds, http_cerver_set_keep_alive_requests
 from cerver.http import HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT, HTTP_CERVER_DEFAULT_KEEP_ALIVE_REQUESTS
 from cerver.http import HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT_MILLISECONDS, HTTP_MILLISECONDS_PER_SECOND
+from cerver.http import http_cerver_set_keep_alive_follow
+from cerver.http import HTTP_CERVER_DEFAULT_KEEP_ALIVE_FOLLOW, HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT
 
 pytestmark = [pytest.mark.integration]
 
@@ -130,6 +132,14 @@ class TestConfiguration:
 		http_cerver_set_keep_alive_timeout (http_cerver, KEEP_ALIVE_TIMEOUT)
 		http_cerver_set_keep_alive_timeout_milliseconds (http_cerver, KEEP_ALIVE_TIMEOUT_MILLISECONDS)
 		http_cerver_set_keep_alive_requests (http_cerver, KEEP_ALIVE_REQUESTS)
+
+		# a thread does not look for the next request of its connection until the cerver asks for it
+		assert HTTP_CERVER_DEFAULT_KEEP_ALIVE_FOLLOW == 0
+		assert HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT == 64
+
+		http_cerver_set_keep_alive_follow (http_cerver, HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT)
+		http_cerver_set_keep_alive_follow (http_cerver, HTTP_CERVER_DEFAULT_KEEP_ALIVE_FOLLOW)
+		http_cerver_set_keep_alive_follow (None, HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT)
 
 		# nothing is done without a cerver
 		http_cerver_set_keep_alive (None, True)

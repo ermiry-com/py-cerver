@@ -14,7 +14,7 @@ __all__ = [
 	"ThpoolWork", "ThpoolStats", "ThpoolStatsPointer",
 	"thpool_create", "thpool_set_queue_size", "thpool_init", "thpool_set_name",
 	"thpool_get_num_threads_alive", "thpool_get_num_threads_working",
-	"thpool_get_queued", "thpool_get_queue_size",
+	"thpool_get_queued", "thpool_has_queued", "thpool_get_queue_size",
 	"thpool_get_stats", "thpool_histogram_bucket", "thpool_stats_print",
 	"thpool_is_empty", "thpool_is_full",
 	"thpool_add_work", "thpool_add_work_with_reject", "thpool_add_work_wait",
@@ -152,6 +152,18 @@ thpool_get_queued = lib_function (
 
 	Returns:
 		The number of jobs.
+	"""
+)
+
+thpool_has_queued = lib_function (
+	"thpool_has_queued", [c_void_p], c_bool,
+	"""Returns whether a job waits in the queue, without the mutex of the thpool.
+
+	Args:
+		thpool: The thpool.
+
+	Returns:
+		True when the queue had a job the last time that it changed, False without a thpool.
 	"""
 )
 
