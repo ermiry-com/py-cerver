@@ -12,7 +12,7 @@ import pytest
 
 from cerver.threads import ThpoolWork, thpool_create, thpool_init, thpool_add_work, thpool_wait
 from cerver.threads import thpool_destroy, thpool_stats, thpool_get_queue_size, thpool_set_queue_size
-from cerver.threads import thpool_histogram_bucket, THPOOL_HISTOGRAM_BUCKETS
+from cerver.threads import thpool_histogram_bucket, THPOOL_HISTOGRAM_BUCKETS, thpool_has_queued
 from cerver.threads import JobMethod, Job, job_create, job_delete
 from cerver.threads import job_queue_create_with_priorities, job_queue_delete, job_queue_push_job_priority
 from cerver.threads import job_queue_pull, job_queue_pull_timeout, job_queue_size, job_queue_stats
@@ -58,6 +58,10 @@ class TestThpool:
 			assert (stats["total_jobs"], stats["completed_jobs"]) == (JOBS, JOBS)
 			assert len (stats["wait_histogram"]) == THPOOL_HISTOGRAM_BUCKETS
 			assert thpool_get_queue_size (thpool) == QUEUE_SIZE
+
+			# every job ran: none waits in the queue
+			assert thpool_has_queued (thpool) is False
+			assert thpool_has_queued (None) is False
 
 		finally:
 			thpool_destroy (thpool)

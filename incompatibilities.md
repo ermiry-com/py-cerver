@@ -3,6 +3,16 @@
 The changes of each version that can break code built with the version before it, the newest first.
 Unlike `CHANGELOG.md`, which only has the current version, every entry stays here.
 
+## 1.1.4 (from 1.1.3)
+
+1.1.4 binds cerver 2.0b-76 (its list is in the `incompatibilities.md` of cerver, «2.0b-76»). `Thpool` has the new
+field `queue_awaited` at its end, but pycerver only takes a pointer to it, so nothing that it reads changes; 1.1.3
+still works against 2.0b-76, and 1.1.4 does not load against 2.0b-75 (it binds `thpool_has_queued`).
+
+- **New:** `thpool_has_queued`, whether a job waits in the queue, without the mutex of the thpool
+- What cerver changes reaches the Python code only in its names: the parameters of the JSON functions of cerver have
+  full words (pycerver binds them by position)
+
 ## 1.1.3 (from 1.1.2)
 
 1.1.3 binds cerver 2.0b-75, the fixes of the audit of its code (its list is in the `incompatibilities.md` of cerver,
