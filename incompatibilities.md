@@ -3,6 +3,30 @@
 The changes of each version that can break code built with the version before it, the newest first.
 Unlike `CHANGELOG.md`, which only has the current version, every entry stays here.
 
+## 1.2b-4 (from 1.2b-3)
+
+1.2b-4 binds cerver 2.1b-17: the named pools of threads of an HTTP cerver, and its health and ready routes. It
+does not load against an older cerver (it binds the functions of `cerver/http/core/pool.h`). Nothing changes for a
+service that creates no pool and sets none of the routes.
+
+- New, in `cerver.http`: `http_cerver_pool_create ()`, `http_cerver_pool_get_with_name ()`, `http_pool_get_name ()`,
+  `http_pool_set_queue_size ()`, `http_pool_set_overload_policy ()`, `http_pool_set_wait_timeout ()`, the helper
+  `http_cerver_pool ()` (a pool with its settings), `HTTP_CERVER_POOLS_SIZE`, `HTTP_POOL_DEFAULT_NAME` and
+  `HTTP_POOL_NAME_SIZE`; `http_group_set_pool ()`, `http_endpoint_set_pool ()`, `http_route_set_pool ()`, the
+  setting `pool=` of the endpoints of an `HttpGroup` and its method `pool ()`
+- **Only a cerver with `CERVER_HANDLER_TYPE_EVENTS` starts its named pools:** with threads a warning is logged and
+  every request is handled by the thread of its connection, like before
+- **A route with a pool that the cerver does not have stops the cerver when it starts** (an error of its routes,
+  `http_cerver_routes_error ()`): the pools are created before the routes are compiled
+- New: `http_cerver_set_health_route ()`, `http_cerver_set_ready_route ()` and `http_cerver_is_ready ()`. A GET or a
+  HEAD of a path that is set as one of them is answered by cerver, before the routes: an endpoint with that path
+  and method is not reached. With event loops they are answered also when every thread is busy; the ready route
+  answers 503 with `Retry-After` when a pool has no place for a request, without closing the connection
+- The metrics have new series: `cerver_http_pool_*` with the label `pool`, `cerver_http_connections*` with event
+  loops, and the counters of the health and ready routes
+- `tests/e2e/server.py` takes `CERVER_TEST_POOLS=1` (a pool named `slow` with a route in it, and the two routes of
+  cerver), `tests/e2e/test_pools.py` starts its own that way
+
 ## 1.2b-3 (from 1.2b-2)
 
 1.2b-3 binds cerver 2.1b-16: keep-alive, a connection handles more than one request. It does not load against an
