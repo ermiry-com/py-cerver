@@ -52,7 +52,7 @@ INCLUDED_HEADERS = (
 	"threads/thread.h", "threads/worker.h",
 	"utils/histogram.h", "utils/log.h",
 	"http/core/admin.h", "http/core/handler.h", "http/core/http.h", "http/core/limits.h",
-	"http/core/metrics.h", "http/core/pairs.h", "http/core/public.h", "http/core/routes.h",
+	"http/core/metrics.h", "http/core/pairs.h", "http/core/pool.h", "http/core/public.h", "http/core/routes.h",
 	"http/core/settings.h", "http/core/stats.h", "http/core/uploads.h", "http/core/utils.h",
 	"http/headers/buffer.h", "http/headers/header.h", "http/headers/types.h",
 	"http/requests/content.h", "http/requests/method.h", "http/requests/multipart.h",

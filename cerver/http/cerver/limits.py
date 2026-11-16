@@ -27,6 +27,8 @@ __all__ = [
 	"HTTP_CERVER_DEFAULT_KEEP_ALIVE_REQUESTS",
 	"http_cerver_set_keep_alive", "http_cerver_set_keep_alive_timeout",
 	"http_cerver_set_keep_alive_timeout_milliseconds", "http_cerver_set_keep_alive_requests",
+	"HTTP_CERVER_DEFAULT_KEEP_ALIVE_FOLLOW", "HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT",
+	"http_cerver_set_keep_alive_follow",
 	"HttpParserLenient",
 	"HTTP_PARSER_LENIENT_NONE", "HTTP_PARSER_LENIENT_HEADERS", "HTTP_PARSER_LENIENT_CHUNKED_LENGTH",
 	"HTTP_PARSER_LENIENT_KEEP_ALIVE", "HTTP_PARSER_LENIENT_TRANSFER_ENCODING", "HTTP_PARSER_LENIENT_VERSION",
@@ -68,6 +70,11 @@ HTTP_CERVER_DEFAULT_KEEP_ALIVE_TIMEOUT_MILLISECONDS = HTTP_CERVER_DEFAULT_KEEP_A
 
 # the requests that a connection handles before it is closed
 HTTP_CERVER_DEFAULT_KEEP_ALIVE_REQUESTS = 1 << 10
+
+# in microseconds, the time that the thread of a pool that answered a request looks for the next one
+# of its connection: none by default, and a time to start with
+HTTP_CERVER_DEFAULT_KEEP_ALIVE_FOLLOW = 0
+HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT = 1 << 6
 
 # the lenient flags of the parser (llhttp), all of them disabled by default (the strict mode),
 # each one can open the cerver to request smuggling or cache poisoning attacks
@@ -323,5 +330,20 @@ http_cerver_set_keep_alive_requests = lib_function (
 	Args:
 		http_cerver: The HttpCerver.
 		keep_alive_requests: The requests, 0 disables the limit.
+	"""
+)
+
+http_cerver_set_keep_alive_follow = lib_function (
+	"http_cerver_set_keep_alive_follow", [c_void_p, c_uint], None,
+	"""Sets the microseconds that the thread of a pool that answered a request of a connection that is kept
+	looks for its next request, to handle it by itself (only with event loops).
+
+	The thread looks for it without sleeping, and never while another request waits for a thread of its
+	pool: it pays when the clients send their next request at once and the cerver has threads and
+	processors without work.
+
+	Args:
+		http_cerver: The HttpCerver.
+		microseconds: The time (HTTP_CERVER_KEEP_ALIVE_FOLLOW_SHORT to start with), 0 disables it: the default.
 	"""
 )
