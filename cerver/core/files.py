@@ -160,14 +160,14 @@ files_sanitize_complete_filename = lib_function (
 
 files_create_dir = lib_function (
 	"files_create_dir", [c_char_p, c_uint], c_uint,
-	"""Creates a directory if it does not exist.
+	"""Creates a directory if it does not exist; one that already exists is a success.
 
 	Args:
 		dir_path: The path, as bytes.
 		mode: Its permissions, like 0o755.
 
 	Returns:
-		0 on success, 1 on error.
+		0 if it was created or already existed, 1 for a path that is not a directory or on error.
 	"""
 )
 

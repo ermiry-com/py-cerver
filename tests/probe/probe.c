@@ -412,12 +412,14 @@ static void probe_structures_client (void) {
 	OFFSET (ClientEventData, ClientEventData, owns_response_data)
 	OFFSET (ClientEventData, ClientEventData, action_args) OFFSET (ClientEventData, ClientEventData, delete_action_args)
 	OFFSET (ClientEventData, ClientEventData, owns_action_args)
+	OFFSET (ClientEventData, ClientEventData, shared_args) OFFSET (ClientEventData, ClientEventData, shared_response)
 
 	SIZE (ClientErrorData, ClientErrorData)
 	OFFSET (ClientErrorData, ClientErrorData, client) OFFSET (ClientErrorData, ClientErrorData, connection)
 	OFFSET (ClientErrorData, ClientErrorData, action_args)
 	OFFSET (ClientErrorData, ClientErrorData, delete_action_args) OFFSET (ClientErrorData, ClientErrorData, owns_action_args)
 	OFFSET (ClientErrorData, ClientErrorData, error_message)
+	OFFSET (ClientErrorData, ClientErrorData, shared_args)
 
 }
 

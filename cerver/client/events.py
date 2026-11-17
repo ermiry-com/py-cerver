@@ -62,9 +62,12 @@ class ClientEventData (Structure):
 		owns_response_data: client_event_data_delete () releases the response of this event only,
 			like the LobbySummary of the lobby events.
 		action_args: The work args that were registered.
-		delete_action_args: How the args are released.
-		owns_action_args: The event was dropped after this trigger, so
-			client_event_data_delete () releases the args with delete_action_args.
+		delete_action_args: How the args are released, once the event and every trigger are done with them.
+		owns_action_args: The event was dropped after this trigger: the reference of this data is the last
+			one to the args, so client_event_data_delete () releases them.
+		shared_args: The reference of this trigger to the args, for cerver (since 1.1.5).
+		shared_response: The reference of this trigger to the response data of the event, for cerver
+			(since 1.1.5).
 	"""
 
 	_fields_ = [
@@ -79,7 +82,10 @@ class ClientEventData (Structure):
 		("action_args", c_void_p),
 		("delete_action_args", c_void_p),
 
-		("owns_action_args", c_bool)
+		("owns_action_args", c_bool),
+
+		("shared_args", c_void_p),
+		("shared_response", c_void_p)
 	]
 
 ClientEventDataPointer: TypeAlias = POINTER (ClientEventData) # type: ignore
