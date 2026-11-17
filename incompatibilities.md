@@ -3,6 +3,18 @@
 The changes of each version that can break code built with the version before it, the newest first.
 Unlike `CHANGELOG.md`, which only has the current version, every entry stays here.
 
+## 1.1.5 (from 1.1.4)
+
+1.1.5 binds cerver 2.0b-77 (its list is in the `incompatibilities.md` of cerver, «2.0b-77»). `ClientEventData` has
+the new fields `shared_args` and `shared_response` at its end, and `ClientErrorData` the new `shared_args`, so 1.1.5
+reads them with the size of 2.0b-77; 1.1.4 still reads the fields that it had against 2.0b-77.
+
+- What cerver changes reaches the Python code: a send that times out ends its connection (a peer that does not read
+  in all the send timeout); `files_create_dir` of a directory that exists returns 0; the arguments and the response
+  of a client event, and the arguments of a client error, live until every trigger that still runs is done with
+  them; the JSON rejects a NUL byte after a number or a literal; `http_cerver_static_path_add` returns None without
+  memory
+
 ## 1.1.4 (from 1.1.3)
 
 1.1.4 binds cerver 2.0b-76 (its list is in the `incompatibilities.md` of cerver, «2.0b-76»). `Thpool` has the new
