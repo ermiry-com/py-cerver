@@ -53,10 +53,11 @@ class ClientErrorData (Structure):
 		client: The client.
 		connection: The connection of the error.
 		action_args: The work args that were registered.
-		delete_action_args: How the args are released.
-		owns_action_args: The error was dropped after this trigger, so
-			client_error_data_delete () releases the args with delete_action_args.
+		delete_action_args: How the args are released, once the error and every trigger are done with them.
+		owns_action_args: The error was dropped after this trigger: the reference of this data is the last
+			one to the args, so client_error_data_delete () releases them.
 		error_message: The message of the error, a StringPointer.
+		shared_args: The reference of this trigger to the args, for cerver (since 1.1.5).
 	"""
 
 	_fields_ = [
@@ -68,7 +69,9 @@ class ClientErrorData (Structure):
 		("delete_action_args", c_void_p),
 		("owns_action_args", c_bool),
 
-		("error_message", StringPointer)
+		("error_message", StringPointer),
+
+		("shared_args", c_void_p)
 	]
 
 ClientErrorDataPointer: TypeAlias = POINTER (ClientErrorData) # type: ignore
